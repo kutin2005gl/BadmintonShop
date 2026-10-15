@@ -12,8 +12,10 @@ AFTER INSERT AS
 BEGIN
     SET NOCOUNT ON;
 
-    UPDATE sp SET sp.SoLuongTon = sp.SoLuongTon + i.SoLuong
-    FROM SanPham sp JOIN inserted i ON sp.MaSP = i.MaSP;
+    -- Gop theo MaSP: 1 lenh INSERT nhieu dong cung MaSP (nhieu phieu) phai cong du tat ca
+    UPDATE sp SET sp.SoLuongTon = sp.SoLuongTon + x.SL
+    FROM SanPham sp
+    JOIN (SELECT MaSP, SUM(SoLuong) AS SL FROM inserted GROUP BY MaSP) x ON x.MaSP = sp.MaSP;
 
     UPDATE pn SET pn.TongTien = (SELECT ISNULL(SUM(ThanhTien), 0)
                                  FROM ChiTietPhieuNhap WHERE MaPN = pn.MaPN)
@@ -27,16 +29,19 @@ AFTER INSERT AS
 BEGIN
     SET NOCOUNT ON;
 
-    IF EXISTS (SELECT 1 FROM inserted i JOIN SanPham sp ON sp.MaSP = i.MaSP
-               WHERE sp.SoLuongTon < i.SoLuong)
+    -- Gop theo MaSP: 1 lenh INSERT nhieu dong cung MaSP (nhieu hoa don) phai tru du tat ca
+    IF EXISTS (SELECT 1 FROM (SELECT MaSP, SUM(SoLuong) AS SL FROM inserted GROUP BY MaSP) x
+               JOIN SanPham sp ON sp.MaSP = x.MaSP
+               WHERE sp.SoLuongTon < x.SL)
     BEGIN
         RAISERROR (N'San pham khong du ton kho.', 16, 1);
         ROLLBACK TRANSACTION;
         RETURN;
     END
 
-    UPDATE sp SET sp.SoLuongTon = sp.SoLuongTon - i.SoLuong
-    FROM SanPham sp JOIN inserted i ON sp.MaSP = i.MaSP;
+    UPDATE sp SET sp.SoLuongTon = sp.SoLuongTon - x.SL
+    FROM SanPham sp
+    JOIN (SELECT MaSP, SUM(SoLuong) AS SL FROM inserted GROUP BY MaSP) x ON x.MaSP = sp.MaSP;
 
     UPDATE hd SET hd.TongTien =
         CASE WHEN x.Tong - hd.TienGiamGia < 0 THEN 0 ELSE x.Tong - hd.TienGiamGia END
