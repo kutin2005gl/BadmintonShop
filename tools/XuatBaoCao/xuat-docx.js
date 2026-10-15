@@ -1,5 +1,5 @@
 // TV1: chuyen 1 file Markdown cua bao cao (docs/bao-cao/*.md) sang .docx de ghep vao bao cao Word.
-// Ho tro: #/##/### tieu de, doan van, danh sach "- ", bang "|", hinh "![chu thich](duong-dan.png)",
+// Ho tro: #/##/### tieu de, doan van, danh sach "- ", bang "|", khoi ma ```, hinh "![chu thich](duong-dan.png)",
 // in dam **x**, in nghieng _x_, `ma`, gach chan <ins>x</ins> (khoa chinh trong luoc do quan he).
 // Dong bat dau bang ">" la ghi chu cho repo, khong dua vao Word.
 // Cach chay (tu thu muc goc repo):  node tools/XuatBaoCao/xuat-docx.js docs/bao-cao/chuong-kien-truc.md
@@ -102,7 +102,17 @@ function chuyenDoi(fileMd) {
     const l = dong[i];
     if (!l.trim() || l.startsWith(">")) continue;
     let m;
-    if ((m = l.match(/^(#{1,3}) (.*)$/))) {
+    if (l.startsWith("```")) {
+      // khoi ma: font Consolas, nen xam nhat, giu nguyen khoang trang dau dong
+      const ma = [];
+      while (++i < dong.length && !dong[i].startsWith("```")) ma.push(dong[i]);
+      ma.forEach((dm, k) => kq.push(new Paragraph({
+        shading: { type: ShadingType.CLEAR, color: "auto", fill: "F2F2F2" },
+        spacing: { before: k === 0 ? 60 : 0, after: k === ma.length - 1 ? 160 : 0, line: 240 },
+        indent: { left: 284 }, keepLines: true, keepNext: k < ma.length - 1,
+        children: [new TextRun({ text: dm.length ? dm : " ", font: "Consolas", size: 19 })],
+      })));
+    } else if ((m = l.match(/^(#{1,3}) (.*)$/))) {
       const muc = [HeadingLevel.HEADING_1, HeadingLevel.HEADING_2, HeadingLevel.HEADING_3][m[1].length - 1];
       kq.push(new Paragraph({ heading: muc, children: tachInline(m[2]) }));
     } else if ((m = l.match(/^!\[(.*)\]\((.*)\)$/))) {

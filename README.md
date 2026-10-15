@@ -6,7 +6,7 @@
 - **BadmintonShop.Web** – ASP.NET Core MVC cho khách hàng (SV2, SV3)
 - **BadmintonShop.Desktop** – WinForms cho nhân viên / quản lý (SV1, SV4)
 - **database/** – `01_CreateDatabase.sql` → `02_Triggers.sql` → `03_SampleData.sql`
-- **docs/** – ERD, phân công, hướng dẫn cài đặt
+- **docs/** – ERD, phân công; **[hướng dẫn cài đặt](docs/bao-cao/huong-dan-cai-dat.md)** (bản mới nhất), các chương báo cáo trong `docs/bao-cao/`
 
 ## Chạy nhanh
 
