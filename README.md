@@ -44,6 +44,33 @@ Tài khoản test: `admin / Admin@123`, `quanly / Quanly@123`, `nhanvien / Nhanv
 - `FrmMain` đã có đủ menu (ẩn/hiện theo vai trò). Làm xong form của mình: trong `FrmMain.Designer.cs` đổi
   `mnuXxx.Click += mnuChuaCo_Click;` thành handler mở form, vd `MoForm<FrmSanPham>();`. SV4 chỉnh giao diện `FrmMain` thoải mái, giữ hàm `ApDungPhanQuyen()`.
 
+## Đăng nhập Web khách hàng (SV1 làm cơ chế – SV2 làm giao diện)
+
+Cookie Authentication đã bật trong `Program.cs`. Chưa đăng nhập mà vào trang `[Authorize]` → tự chuyển về `/TaiKhoan/DangNhap?ReturnUrl=...`.
+Khách bị khóa (`TrangThai = 0`) không đăng nhập được, đang đăng nhập mà bị khóa thì bị đăng xuất ở request kế tiếp.
+
+- **Core:** `KhachHangRepository` – `EmailDaTonTai`, `DangKy(kh, matKhauTho)` (tự băm MK), `DangNhap(email, mk, out kh)` → `KetQuaDangNhap.ThanhCong / SaiThongTin / BiKhoa`, `DatMatKhau`. SV2 thêm hàm hồ sơ vào chính file này.
+- **Web:** `Infrastructure/XacThucKhachHang.cs` – `HttpContext.DangNhapKhachHangAsync(kh, ghiNho)`, `HttpContext.DangXuatKhachHangAsync()`, `User.LayMaKH()`, `User.LayHoTen()`, `User.LayEmail()`.
+
+**SV2** – `TaiKhoanController` (tên controller/action phải đúng `TaiKhoan/DangNhap`, `TaiKhoan/DangXuat`):
+```csharp
+[HttpPost, ValidateAntiForgeryToken]
+public async Task<IActionResult> DangNhap(string email, string matKhau, bool ghiNho, string? returnUrl)
+{
+    switch (new KhachHangRepository().DangNhap(email, matKhau, out var kh))
+    {
+        case KetQuaDangNhap.BiKhoa:    ModelState.AddModelError("", "Tài khoản đã bị khóa."); return View();
+        case KetQuaDangNhap.SaiThongTin: ModelState.AddModelError("", "Sai email hoặc mật khẩu."); return View();
+    }
+    await HttpContext.DangNhapKhachHangAsync(kh!, ghiNho);
+    return Url.IsLocalUrl(returnUrl) ? LocalRedirect(returnUrl) : RedirectToAction("Index", "Home");
+}
+```
+Đăng ký: kiểm `EmailDaTonTai` + `MatKhauHelper.LaMatKhauManh` trước, rồi `DangKy(...)` và (tuỳ) đăng nhập luôn.
+
+**SV2/SV3** – trang cần đăng nhập (giỏ hàng, đặt hàng, hồ sơ, lịch sử đơn): thêm `[Authorize]` lên controller/action, lấy khách bằng `var maKH = User.LayMaKH()!.Value;`.
+Trong View/Layout: `@if (User.Identity!.IsAuthenticated) { <span>Xin chào @User.LayHoTen()</span> }`.
+
 ## Chuỗi kết nối trên máy mình
 
 Không muốn sửa file config? Đặt biến môi trường **User** `ConnectionStrings__BadmintonShop`

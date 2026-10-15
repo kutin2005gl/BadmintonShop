@@ -1,13 +1,5 @@
 namespace BadmintonShop.Core.Services;
 
-/// <summary>Ket qua tra ve cua TaiKhoanRepository.DangNhap.</summary>
-public enum KetQuaDangNhap
-{
-    ThanhCong,
-    SaiThongTin,  // sai ten dang nhap hoac mat khau (khong noi ro sai cai nao)
-    BiKhoa,       // dung mat khau nhung TaiKhoan.TrangThai = 0
-}
-
 /// <summary>
 /// Phien dang nhap Desktop (static, 1 nguoi dung / 1 lan chay app).
 /// Cac form lay nguoi dang dang nhap qua day, vd. PhieuNhap.MaNV = PhienDangNhap.MaNV.

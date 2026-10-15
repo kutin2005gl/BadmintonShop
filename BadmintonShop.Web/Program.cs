@@ -1,4 +1,5 @@
 using BadmintonShop.Core.DataAccess;
+using BadmintonShop.Web.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,9 @@ DbHelper.ConnectionString = builder.Configuration.GetConnectionString("Badminton
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Dang nhap khach hang bang cookie (SV1) - xem Infrastructure/XacThucKhachHang.cs
+builder.Services.AddXacThucKhachHang();
 
 var app = builder.Build();
 
@@ -23,6 +27,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();   // phai dung TRUOC UseAuthorization
 app.UseAuthorization();
 
 app.MapControllerRoute(
