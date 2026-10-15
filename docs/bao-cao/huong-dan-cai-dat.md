@@ -72,6 +72,7 @@ BadmintonShop\
 ├── BadmintonShop.Desktop\    Desktop quản lý – WinForms (SV1, SV4)
 │   └── App.config            chuỗi kết nối của desktop
 ├── database\
+│   ├── BadmintonShop.sql     file tổng = 01 + 02 + 03, chạy 1 lần là xong
 │   ├── 01_CreateDatabase.sql tạo CSDL, 15 bảng, khóa, ràng buộc, chỉ mục
 │   ├── 02_Triggers.sql       trigger tồn kho, tổng tiền + thủ tục
 │   └── 03_SampleData.sql     dữ liệu mẫu + tài khoản test
@@ -83,17 +84,23 @@ BadmintonShop\
 
 ## 4. Tạo cơ sở dữ liệu
 
-Chạy lần lượt 3 file trong thư mục `database\` **theo đúng thứ tự**: `01_CreateDatabase.sql` → `02_Triggers.sql` → `03_SampleData.sql`.
+Cách nhanh nhất: chạy **một file duy nhất** `database\BadmintonShop.sql` – bản nối sẵn của `01_CreateDatabase.sql` → `02_Triggers.sql` → `03_SampleData.sql`, chạy được trên máy chưa có CSDL. Muốn chạy từng phần thì chạy lần lượt 3 file trên **theo đúng thứ tự**.
 
-Chú ý: file 01 **xóa và tạo lại** CSDL `BadmintonShop` nếu đã có. Nếu đang có dữ liệu cần giữ, hãy sao lưu trước (mục 7).
+Chú ý: file tổng (và file 01) **xóa và tạo lại** CSDL `BadmintonShop` nếu đã có. Nếu đang có dữ liệu cần giữ, hãy sao lưu trước (mục 7).
 
 ### 4.1. Cách 1 – bằng SSMS
 
-Mở SSMS, kết nối tới server, mở từng file (File → Open → File…) và bấm Execute (F5), lần lượt 3 file.
+Mở SSMS, kết nối tới server, mở file `database\BadmintonShop.sql` (File → Open → File…) và bấm Execute (F5). Nếu chạy từng phần thì mở và Execute lần lượt 3 file 01, 02, 03.
 
 ### 4.2. Cách 2 – bằng dòng lệnh sqlcmd
 
 Mở Command Prompt tại thư mục `BadmintonShop`, thay `<server>` bằng tên server của máy (ví dụ `localhost`, `.\SQLEXPRESS`, `(localdb)\MSSQLLocalDB`):
+
+```
+sqlcmd -S "<server>" -E -I -b -f 65001 -i database\BadmintonShop.sql
+```
+
+Hoặc chạy từng phần:
 
 ```
 sqlcmd -S "<server>" -E -I -b -f 65001 -i database\01_CreateDatabase.sql

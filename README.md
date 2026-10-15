@@ -5,12 +5,14 @@
 - **BadmintonShop.Core** – Class Library dùng chung: Models, DataAccess (ADO.NET), Services (SV1)
 - **BadmintonShop.Web** – ASP.NET Core MVC cho khách hàng (SV2, SV3)
 - **BadmintonShop.Desktop** – WinForms cho nhân viên / quản lý (SV1, SV4)
-- **database/** – `01_CreateDatabase.sql` → `02_Triggers.sql` → `03_SampleData.sql`
+- **database/** – `BadmintonShop.sql` (file bàn giao, chạy 1 lần trên máy trống) = nối `01_CreateDatabase.sql` → `02_Triggers.sql` → `03_SampleData.sql`
 - **docs/** – ERD, phân công; **[hướng dẫn cài đặt](docs/bao-cao/huong-dan-cai-dat.md)** (bản mới nhất), các chương báo cáo trong `docs/bao-cao/`
 
 ## Chạy nhanh
 
-1. SSMS: chạy lần lượt 3 file trong `database/`.
+1. SSMS: mở và chạy `database/BadmintonShop.sql` (hoặc chạy lần lượt 3 file 01 → 02 → 03).
+   Ai sửa 01/02/03 thì ghép lại file tổng (Git Bash): `cd database && { cat 01_CreateDatabase.sql; sed '1s/^\xEF\xBB\xBF//' 02_Triggers.sql; sed '1s/^\xEF\xBB\xBF//' 03_SampleData.sql; } > BadmintonShop.sql`
+   (hoặc nhắn SV1 ghép).
 2. Sửa `Server=` trong `BadmintonShop.Web/appsettings.json` và `BadmintonShop.Desktop/App.config` cho khớp máy mình (`localhost` hoặc `.\SQLEXPRESS`). **Không commit** phần sửa này nếu có mật khẩu.
 3. Mở `BadmintonShop.sln` → Build → chạy Web hoặc Desktop.
 
@@ -87,4 +89,4 @@ Trong View/Layout: `@if (User.Identity!.IsAuthenticated) { <span>Xin chào @User
 Không muốn sửa file config? Đặt biến môi trường **User** `ConnectionStrings__BadmintonShop`
 (vd `Server=(localdb)\MSSQLLocalDB;Database=BadmintonShop;Trusted_Connection=True;TrustServerCertificate=True;`),
 mở lại Visual Studio – cả Web và Desktop đều ưu tiên biến này.
-Chạy script bằng `sqlcmd` nhớ thêm `-I` (bật QUOTED_IDENTIFIER), vd `sqlcmd -S . -E -I -f 65001 -i database\01_CreateDatabase.sql`.
+Chạy script bằng `sqlcmd` nhớ thêm `-I` (bật QUOTED_IDENTIFIER), vd `sqlcmd -S . -E -I -f 65001 -i database\BadmintonShop.sql`.
