@@ -124,11 +124,11 @@ CREATE TABLE KM_TheoSP (            -- giam gia theo tung san pham
     CONSTRAINT FK_KMSP_SP   FOREIGN KEY (MaSP)   REFERENCES SanPham(MaSP)
 );
 
-CREATE TABLE KM_TheoHD (            -- giam theo muc tien hoa don (ERD: TongTienToiThieu)
-    MaCTKM      INT NOT NULL,
-    MucTienHD   DECIMAL(18,0) NOT NULL CHECK (MucTienHD >= 0),
-    PhanTramGG  DECIMAL(5,2) NOT NULL CHECK (PhanTramGG BETWEEN 0 AND 100),
-    CONSTRAINT PK_KMHD PRIMARY KEY (MaCTKM, MucTienHD),
+CREATE TABLE KM_TheoHD (            -- giam theo tong tien hoa don; 1 CTKM co the nhieu bac muc tien
+    MaCTKM           INT NOT NULL,
+    TongTienToiThieu DECIMAL(18,0) NOT NULL CHECK (TongTienToiThieu >= 0),
+    PhanTramGG       DECIMAL(5,2) NOT NULL CHECK (PhanTramGG BETWEEN 0 AND 100),
+    CONSTRAINT PK_KMHD PRIMARY KEY (MaCTKM, TongTienToiThieu),
     CONSTRAINT FK_KMHD_CTKM FOREIGN KEY (MaCTKM) REFERENCES CTKM(MaCTKM) ON DELETE CASCADE
 );
 
