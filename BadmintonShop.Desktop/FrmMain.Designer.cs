@@ -71,7 +71,7 @@ partial class FrmMain
         //
         mnuSaoLuu.Name = "mnuSaoLuu";
         mnuSaoLuu.Text = "Sao lưu - phục hồi CSDL";
-        mnuSaoLuu.Click += mnuChuaCo_Click;
+        mnuSaoLuu.Click += mnuSaoLuu_Click;
         //
         // mnuDangXuat
         //

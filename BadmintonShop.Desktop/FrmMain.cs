@@ -68,6 +68,17 @@ public partial class FrmMain : Form
         Close();
     }
 
+    // TV1: mo form sao luu - phuc hoi CSDL (chi ADMIN thay menu)
+    private void mnuSaoLuu_Click(object? sender, EventArgs e) => MoForm<FrmSaoLuu>();
+
+    // TV1: dang xuat khong hoi lai (vd. sau khi phuc hoi CSDL, tai khoan co the da thay doi)
+    public void DangXuatBatBuoc()
+    {
+        YeuCauDangXuat = true;
+        PhienDangNhap.DangXuat();
+        Close();
+    }
+
     // TV1: thoat ung dung
     private void mnuThoat_Click(object? sender, EventArgs e) => Close();
 
