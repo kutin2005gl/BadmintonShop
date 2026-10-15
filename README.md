@@ -36,6 +36,14 @@ Tài khoản test: `admin / Admin@123`, `quanly / Quanly@123`, `nhanvien / Nhanv
 - Mỗi hàm có **1 dòng comment ghi người làm + chức năng**, ví dụ: `// TV2: lay san pham theo thuong hieu`.
 - Cần DataGridView có cột tên (JOIN)? Viết thêm hàm `LayDanhSachHienThi()` trả `DataTable`, giữ Model đúng 1–1 với bảng.
 
+## Đăng nhập & phân quyền Desktop (SV1)
+
+- Chạy app → `FrmDangNhap` → `FrmMain`. Đăng xuất quay lại `FrmDangNhap`. (`nhanvien2` là tài khoản bị khóa để demo.)
+- Người đang đăng nhập: `PhienDangNhap.MaNV`, `.HoTen`, `.VaiTro` (vd. phiếu nhập/hóa đơn lấy `MaNV` từ đây).
+- Kiểm quyền: `PhienDangNhap.CoQuyen(ChucNang.Xxx)` – bảng quyền nằm trong `Core/Services/PhanQuyen.cs`, không so chuỗi vai trò tay.
+- `FrmMain` đã có đủ menu (ẩn/hiện theo vai trò). Làm xong form của mình: trong `FrmMain.Designer.cs` đổi
+  `mnuXxx.Click += mnuChuaCo_Click;` thành handler mở form, vd `MoForm<FrmSanPham>();`. SV4 chỉnh giao diện `FrmMain` thoải mái, giữ hàm `ApDungPhanQuyen()`.
+
 ## Chuỗi kết nối trên máy mình
 
 Không muốn sửa file config? Đặt biến môi trường **User** `ConnectionStrings__BadmintonShop`

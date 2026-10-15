@@ -8,7 +8,7 @@ namespace BadmintonShop.Core.DataAccess;
 /// <summary>
 /// Truy xuat bang TaiKhoan (tai khoan nhan vien dang nhap Desktop) - SV1.
 /// Mat khau luon bam bang MatKhauHelper truoc khi luu, KHONG luu mat khau tho.
-/// Ham DangNhap se them o tuan 2 (nhanh feature/sv1-auth-desktop).
+/// DangNhap: kiem mat khau BCrypt + chan TK bi khoa, thanh cong thi luu vao PhienDangNhap.
 /// </summary>
 public class TaiKhoanRepository
 {
@@ -72,6 +72,34 @@ public class TaiKhoanRepository
         => DbHelper.ExecuteNonQuery("UPDATE TaiKhoan SET MatKhau = @mk WHERE MaTK = @ma",
                                     new SqlParameter("@mk", MatKhauHelper.BamMatKhau(matKhauMoiTho)),
                                     new SqlParameter("@ma", maTK)) > 0;
+
+    // TV1: dang nhap Desktop - kiem tra ten DN + mat khau BCrypt, chan TK bi khoa, thanh cong thi mo PhienDangNhap
+    public KetQuaDangNhap DangNhap(string tenDangNhap, string matKhau)
+    {
+        var dt = DbHelper.ExecuteQuery(
+            @"SELECT tk.MaTK, tk.TenDangNhap, tk.MatKhau, tk.VaiTro, tk.MaNV, tk.TrangThai, nv.HoTen
+              FROM TaiKhoan tk JOIN NhanVien nv ON nv.MaNV = tk.MaNV
+              WHERE tk.TenDangNhap = @ten",
+            new SqlParameter("@ten", tenDangNhap.Trim()));
+        if (dt.Rows.Count == 0) return KetQuaDangNhap.SaiThongTin;
+
+        var r  = dt.Rows[0];
+        var tk = Map(r);
+        // kiem mat khau truoc, de nguoi sai mat khau khong biet duoc TK co bi khoa hay khong
+        if (!MatKhauHelper.KiemTra(matKhau, tk.MatKhau)) return KetQuaDangNhap.SaiThongTin;
+        if (!tk.TrangThai) return KetQuaDangNhap.BiKhoa;
+
+        PhienDangNhap.BatDau(tk.MaTK, tk.MaNV, tk.TenDangNhap, r.Field<string>("HoTen")!, tk.VaiTro);
+        return KetQuaDangNhap.ThanhCong;
+    }
+
+    // TV1: doi mat khau cua chinh minh - phai nhap dung mat khau cu moi cho dat mat khau moi
+    public bool DoiMatKhau(int maTK, string matKhauCu, string matKhauMoi)
+    {
+        var tk = LayTheoMa(maTK);
+        if (tk == null || !MatKhauHelper.KiemTra(matKhauCu, tk.MatKhau)) return false;
+        return DatMatKhau(maTK, matKhauMoi);
+    }
 
     // TV1: chay cau SELECT tra ve toi da 1 tai khoan theo 1 tham so @gt
     private static TaiKhoan? LayMot(string sql, object giaTri)
