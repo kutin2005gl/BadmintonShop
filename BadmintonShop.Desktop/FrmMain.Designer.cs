@@ -95,7 +95,7 @@ partial class FrmMain
         //
         mnuNhanVien.Name = "mnuNhanVien";
         mnuNhanVien.Text = "Nhân viên && tài khoản";
-        mnuNhanVien.Click += mnuChuaCo_Click;
+        mnuNhanVien.Click += mnuNhanVien_Click;
         //
         // mnuNhapHang
         //
