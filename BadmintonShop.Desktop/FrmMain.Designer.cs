@@ -113,7 +113,7 @@ partial class FrmMain
         //
         mnuPhieuNhap.Name = "mnuPhieuNhap";
         mnuPhieuNhap.Text = "Phiếu nhập";
-        mnuPhieuNhap.Click += mnuChuaCo_Click;
+        mnuPhieuNhap.Click += mnuPhieuNhap_Click;
         //
         // mnuSanPham
         //

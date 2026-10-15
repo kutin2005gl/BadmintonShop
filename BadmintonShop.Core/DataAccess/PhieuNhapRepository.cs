@@ -68,6 +68,16 @@ public class PhieuNhapRepository
                                    WHERE ct.MaPN = @ma ORDER BY sp.TenSP",
                                  new SqlParameter("@ma", maPN));
 
+    // TV1: lay don gia nhap lan gan nhat cua 1 san pham (goi y khi lap phieu), chua nhap lan nao tra ve null
+    public decimal? LayDonGiaNhapGanNhat(int maSP)
+    {
+        var kq = DbHelper.ExecuteScalar(@"SELECT TOP 1 ct.DonGia
+                                          FROM ChiTietPhieuNhap ct JOIN PhieuNhap pn ON pn.MaPN = ct.MaPN
+                                          WHERE ct.MaSP = @sp ORDER BY pn.NgayNhap DESC, pn.MaPN DESC",
+                                        new SqlParameter("@sp", maSP));
+        return kq is decimal d ? d : null;
+    }
+
     // TV1: luu phieu nhap + chi tiet trong 1 transaction (loi la rollback het), tra ve MaPN moi
     public int Them(PhieuNhap pn, IReadOnlyList<ChiTietPhieuNhap> chiTiet)
     {
