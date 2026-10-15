@@ -110,7 +110,7 @@ Giao diện đăng ký/đăng nhập trên web do SV2 làm; SV1 làm phần cơ 
 
 - 3a. Chưa chọn nhà cung cấp hoặc phiếu chưa có sản phẩm nào: không cho lưu, báo lỗi.
 - 4a. Thêm sản phẩm đã có trong phiếu: gộp vào dòng cũ (cộng số lượng, lấy đơn giá mới).
-- 5a. Sửa trực tiếp số lượng (phải > 0) hoặc đơn giá (phải ≥ 0) trên lưới; giá trị sai thì không cho rời ô.
+- 5a. Sửa trực tiếp số lượng (phải > 0) hoặc đơn giá (phải > 0) trên lưới; giá trị sai thì không cho rời ô. Thêm dòng có đơn giá bằng 0 cũng bị chặn: "Đơn giá nhập phải lớn hơn 0."
 - 6a. Lỗi CSDL trong lúc lưu: hoàn tác toàn bộ, không có phiếu nào được lưu, tồn kho giữ nguyên, báo lỗi.
 - 7a. Đóng form khi phiếu chưa lưu: hệ thống hỏi lại trước khi bỏ phiếu.
 

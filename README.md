@@ -32,7 +32,8 @@ Tài khoản test: `admin / Admin@123`, `quanly / Quanly@123`, `nhanvien / Nhanv
   và phần **đọc** dùng chung `SanPhamRepository.LayTatCa/LayTheoMa`, `DanhMucRepository.LayTatCa/LayTheoMa`.
   SV2/SV4 **thêm hàm ghi** (Them/Sua/Xoa) vào chính 2 file này, không tạo file trùng.
 - Ghi nhiều bảng cùng lúc (HoaDon + ChiTietHoaDon) → dùng `DbHelper.ExecuteTransaction`, xem mẫu `PhieuNhapRepository.Them`.
-- Tồn kho và `TongTien` do **trigger** cập nhật – code không tự cộng/trừ. Không đủ tồn → trigger ném lỗi, bắt `SqlException` để báo người dùng.
+- Tồn kho và `TongTien` do **trigger** cập nhật – code không tự cộng/trừ. Không đủ tồn → trigger ném lỗi, bắt `SqlException` rồi hiện
+  `LoiCsdl.ThongBao(ex)` (Core/Services) → ra câu tiếng Việt dễ hiểu ("Sản phẩm không đủ tồn kho...", trùng dữ liệu, mất kết nối...).
 - Mỗi hàm có **1 dòng comment ghi người làm + chức năng**, ví dụ: `// TV2: lay san pham theo thuong hieu`.
 - Cần DataGridView có cột tên (JOIN)? Viết thêm hàm `LayDanhSachHienThi()` trả `DataTable`, giữ Model đúng 1–1 với bảng.
 
@@ -42,7 +43,17 @@ Tài khoản test: `admin / Admin@123`, `quanly / Quanly@123`, `nhanvien / Nhanv
 - Người đang đăng nhập: `PhienDangNhap.MaNV`, `.HoTen`, `.VaiTro` (vd. phiếu nhập/hóa đơn lấy `MaNV` từ đây).
 - Kiểm quyền: `PhienDangNhap.CoQuyen(ChucNang.Xxx)` – bảng quyền nằm trong `Core/Services/PhanQuyen.cs`, không so chuỗi vai trò tay.
 - `FrmMain` đã có đủ menu (ẩn/hiện theo vai trò). Làm xong form của mình: trong `FrmMain.Designer.cs` đổi
-  `mnuXxx.Click += mnuChuaCo_Click;` thành handler mở form, vd `MoForm<FrmSanPham>();`. SV4 chỉnh giao diện `FrmMain` thoải mái, giữ hàm `ApDungPhanQuyen()`.
+  `mnuXxx.Click += mnuChuaCo_Click;` thành handler mở form, vd `MoForm<FrmSanPham>(ChucNang.SanPhamDanhMucKhuyenMai);`
+  (MoForm tự chặn nếu không đủ quyền). SV4 chỉnh giao diện `FrmMain` thoải mái, giữ hàm `ApDungPhanQuyen()`.
+- Quy tắc Form (để VS Designer mở được): constructor chỉ gọi `InitializeComponent()`, **nạp dữ liệu trong `OnLoad`**, mẫu:
+  ```csharp
+  protected override void OnLoad(EventArgs e)
+  {
+      base.OnLoad(e);
+      if (DesignMode || !QuyenForm.KiemTraKhiMo(this, ChucNang.SanPhamDanhMucKhuyenMai)) return;
+      NapLuoi();
+  }
+  ```
 
 ## Đăng nhập Web khách hàng (SV1 làm cơ chế – SV2 làm giao diện)
 
