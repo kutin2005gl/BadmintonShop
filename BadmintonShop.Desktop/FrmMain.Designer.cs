@@ -107,7 +107,7 @@ partial class FrmMain
         //
         mnuNhaCungCap.Name = "mnuNhaCungCap";
         mnuNhaCungCap.Text = "Nhà cung cấp";
-        mnuNhaCungCap.Click += mnuChuaCo_Click;
+        mnuNhaCungCap.Click += mnuNhaCungCap_Click;
         //
         // mnuPhieuNhap
         //
