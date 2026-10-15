@@ -42,6 +42,9 @@ public partial class FrmMain : Form
         frm.Show(this);
     }
 
+    // TV1: mo form quan ly nha cung cap
+    private void mnuNhaCungCap_Click(object? sender, EventArgs e) => MoForm<FrmNhaCungCap>();
+
     // TV1: mo form doi mat khau cua chinh minh
     private void mnuDoiMatKhau_Click(object? sender, EventArgs e)
     {
