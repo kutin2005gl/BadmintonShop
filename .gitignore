@@ -1,0 +1,26 @@
+# Build
+bin/
+obj/
+packages/
+publish_web/
+publish_desktop/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.rsuser
+
+# Du lieu, backup, cau hinh rieng tung may
+*.bak
+*.mdf
+*.ldf
+appsettings.Local.json
+App.Local.config
+
+# He dieu hanh / Office
+Thumbs.db
+.DS_Store
+~$*

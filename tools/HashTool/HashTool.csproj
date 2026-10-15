@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Cong cu nho cua SV1: tao chuoi bam BCrypt cho du lieu mau. Khong nam trong .sln. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\BadmintonShop.Core\BadmintonShop.Core.csproj" />
+  </ItemGroup>
+</Project>
