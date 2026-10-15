@@ -1,125 +1,142 @@
 Đồ án · Hệ thống bán đồ cầu lông
 
-# ERD vẽ lại + phần Khuyến mãi
+# ERD – bản chốt (khớp `database/01_CreateDatabase.sql`)
 
-Giữ nguyên các entity, thuộc tính và quan hệ trong bản vẽ tay. Phần mới là CTKM và 3 bảng con, nối vào SANPHAM và HOADON.
+> **Chốt ngày 15/10/2026.** Từ giờ lược đồ **chỉ được THÊM bảng/cột**, **không đổi tên, không xóa cột**.
+> Muốn thêm → báo SV1 (nhóm trưởng) để sửa `01_CreateDatabase.sql` + Model tương ứng trong cùng 1 PR.
+> Nguồn sự thật là script SQL; file này phải luôn khớp script.
 
-**||--o{** 1 – nhiều (0..n) **||--|{** 1 – nhiều (1..n) **||--o|** 1 – 0..1 **|o--o{** 0..1 – nhiều
+**||--o{** 1 – nhiều (0..n) · **||--|{** 1 – nhiều (1..n) · **||--o|** 1 – 0..1 · **|o--o{** 0..1 – nhiều (FK cho phép NULL)
 
 ```mermaid
 erDiagram
     TAIKHOAN {
-        string MaTK PK
-        string TenDangNhap
-        string MatKhau
-        string VaiTro
-        string MaNV FK
+        int MaTK PK "identity"
+        varchar TenDangNhap UK
+        varchar MatKhau "bam BCrypt"
+        varchar VaiTro "ADMIN / QUANLY / NHANVIEN"
+        int MaNV FK,UK "1 NV toi da 1 TK"
+        bit TrangThai "0 = bi khoa"
     }
     NHANVIEN {
-        string MaNV PK
-        string HoTen
-        string SDT
-        string Email
-        string DiaChi
-        string ChucVu
-        decimal Luong
+        int MaNV PK "identity"
+        nvarchar HoTen
+        varchar SDT
+        varchar Email
+        nvarchar DiaChi
+        nvarchar ChucVu
+        decimal Luong ">= 0"
         date NgayVaoLam
     }
     NHACUNGCAP {
-        string MaNCC PK
-        string TenNCC
-        string DiaChi
-        string SDT
-        string Email
+        int MaNCC PK "identity"
+        nvarchar TenNCC
+        nvarchar DiaChi
+        varchar SDT
+        varchar Email
     }
     DANHMUC {
-        string MaDM PK
-        string TenDanhMuc
+        int MaDM PK "identity"
+        nvarchar TenDanhMuc UK
+        nvarchar MoTa
     }
     KHACHHANG {
-        string MaKH PK
-        string HoTen
-        string SDT
-        string Email
-        string MatKhau
-        string DiaChi
-        date NgayDangKy
-        string TrangThai
+        int MaKH PK "identity"
+        nvarchar HoTen
+        varchar SDT
+        varchar Email UK "dung de dang nhap web"
+        varchar MatKhau "bam BCrypt"
+        nvarchar DiaChi
+        datetime NgayDangKy
+        bit TrangThai "0 = bi khoa"
     }
     SANPHAM {
-        string MaSP PK
-        string TenSP
-        string MaDM FK "LoaiSP"
-        decimal DonGia
-        int SoLuongTon
-        string HinhAnh
-        string TrangThai
+        int MaSP PK "identity"
+        nvarchar TenSP
+        int MaDM FK "Loai SP"
+        nvarchar ThuongHieu
+        decimal DonGiaBan ">= 0"
+        int SoLuongTon ">= 0, trigger cap nhat"
+        nvarchar DonViTinh
+        nvarchar HinhAnh
+        nvarchar MoTa
+        nvarchar TrangThai "Dang ban / ..."
     }
     PHIEUNHAP {
-        string MaPN PK
-        date NgayNhap
-        string MaNCC FK
-        string MaNV FK
-        decimal TongTien
+        int MaPN PK "identity"
+        datetime NgayNhap
+        int MaNCC FK
+        int MaNV FK
+        decimal TongTien "trigger tu tinh"
     }
     CHITIETPHIEUNHAP {
-        string MaPN PK, FK
-        string MaSP PK, FK
-        int SoLuong
-        decimal DonGia
+        int MaPN PK,FK
+        int MaSP PK,FK
+        int SoLuong "> 0"
+        decimal DonGia ">= 0"
+        decimal ThanhTien "cot tinh = SoLuong * DonGia"
     }
     HOADON {
-        string MaHD PK
-        string MaKH FK
-        string MaNV FK
-        date NgayLap
-        decimal TongTien
-        decimal TienGiamGia "moi"
-        string MaCTKM FK "moi, null"
-        string TrangThai
+        int MaHD PK "identity"
+        int MaKH FK "NULL = khach vang lai"
+        int MaNV FK "NULL = khach tu dat web"
+        datetime NgayLap
+        nvarchar LoaiBan "Online / Tai quay"
+        nvarchar HinhThucTT "COD / Online / Tien mat"
+        nvarchar DiaChiGiao
+        int MaCTKM FK "NULL, KM theo HD / voucher"
+        decimal TienGiamGia "giam cap hoa don"
+        decimal TongTien "trigger = tong ThanhTien - TienGiamGia"
+        nvarchar TrangThai "5 trang thai"
     }
     CHITIETHOADON {
-        string MaHD PK, FK
-        string MaSP PK, FK
-        int SoLuong
-        decimal DonGia
-        decimal ThanhTien "sau giam gia"
+        int MaHD PK,FK
+        int MaSP PK,FK
+        int SoLuong "> 0"
+        decimal DonGia ">= 0"
+        decimal GiamGia "% giam theo SP"
+        decimal ThanhTien "cot tinh, sau giam gia"
     }
     PHANHOI {
-        string MaPH PK
-        string MaKH FK
-        string MaSP FK
-        string NoiDung
-        date NgayGui
+        int MaPH PK "identity"
+        int MaKH FK
+        int MaSP FK
+        tinyint SoSao "1..5"
+        nvarchar NoiDung
+        datetime NgayGui
+        nvarchar TrangThai "Hien thi / An"
     }
     CTKM {
-        string MaCTKM PK
-        string TenCTKM
+        int MaCTKM PK "identity"
+        nvarchar TenCTKM
         date NgayBatDau
-        date NgayKetThuc
-        string TrangThai
+        date NgayKetThuc ">= NgayBatDau"
+        varchar LoaiKM "SANPHAM / HOADON / VOUCHER"
+        bit TrangThai
     }
-    KM_THEO_SP {
-        string MaCTKM PK, FK
-        string MaSP PK, FK
-        float PhanTramGG
+    KM_THEOSP {
+        int MaCTKM PK,FK
+        int MaSP PK,FK
+        decimal PhanTramGG "0..100"
     }
-    KM_THEO_HD {
-        string MaCTKM PK, FK
-        decimal TongTienToiThieu
-        float PhanTramGG
+    KM_THEOHD {
+        int MaCTKM PK,FK
+        decimal TongTienToiThieu PK "nhieu bac / 1 CTKM"
+        decimal PhanTramGG "0..100"
     }
-    KM_THEO_VOUCHER {
-        string MaVoucher PK
-        string MaCTKM FK
-        float PhanTramGG
+    KM_THEOVOUCHER {
+        varchar MaVoucher PK
+        int MaCTKM FK
+        decimal PhanTramGG "0..100"
+        int SoLuong ">= 0"
+        int DaDung "0..SoLuong"
     }
 
     NHANVIEN   ||--o| TAIKHOAN : "co"
     NHANVIEN   ||--o{ PHIEUNHAP : "lap"
     NHACUNGCAP ||--o{ PHIEUNHAP : "cung cap"
-    NHANVIEN   ||--o{ HOADON : "lap"
-    KHACHHANG  ||--o{ HOADON : "dat"
+    NHANVIEN   |o--o{ HOADON : "lap"
+    KHACHHANG  |o--o{ HOADON : "dat"
     DANHMUC    ||--o{ SANPHAM : "phan loai"
     KHACHHANG  ||--o{ PHANHOI : "gui"
     SANPHAM    ||--o{ PHANHOI : "nhan ve"
@@ -128,17 +145,35 @@ erDiagram
     HOADON     ||--|{ CHITIETHOADON : "gom"
     SANPHAM    ||--o{ CHITIETHOADON : "co trong"
 
-    CTKM       ||--o{ KM_THEO_SP : "giam theo SP"
-    SANPHAM    ||--o{ KM_THEO_SP : "duoc giam"
-    CTKM       ||--o| KM_THEO_HD : "giam theo HD"
-    CTKM       ||--o{ KM_THEO_VOUCHER : "phat hanh"
+    CTKM       ||--o{ KM_THEOSP : "giam theo SP"
+    SANPHAM    ||--o{ KM_THEOSP : "duoc giam"
+    CTKM       ||--o{ KM_THEOHD : "cac bac muc tien"
+    CTKM       ||--o{ KM_THEOVOUCHER : "phat hanh"
     CTKM       |o--o{ HOADON : "ap dung"
 ```
 
-## Phần khuyến mãi nối vào như thế nào
+## Những điểm đã chốt so với ERD vẽ tay
 
-- **CTKM** là bảng cha (tên, ngày bắt đầu, ngày kết thúc). 3 bảng con đều có `MaCTKM` trỏ về nó, đúng như mũi tên đỏ bạn vẽ.
-- **KM_THEO_SP** nối với **SANPHAM** qua `MaSP`. Khi bán, giá trong CHITIETHOADON được trừ % này, nên mình thêm `ThanhTien` (đúng chỗ bạn ghi "thành tiền gg").
-- **KM_THEO_HD**: chỗ bạn khoanh `MaHD` và ghi "Tổng", mình hiểu là điều kiện hóa đơn đạt tổng tiền tối thiểu, nên đổi thành `TongTienToiThieu`.
-- **HOADON** thêm `MaCTKM` (cho phép null) để biết hóa đơn dùng CTKM theo HĐ hoặc voucher nào, và `TienGiamGia` (chỗ bạn ghi "gg").
-- Ghi chú đỏ "Loại SP" ở SANPHAM: mình giữ `MaDM`, chỉ ghi chú là loại SP. Cột "Chi tiết ĐG" mình đọc là `DonGia`.
+| Chỗ khác | ERD vẽ tay | Bản chốt (script) | Lý do |
+|---|---|---|---|
+| Khóa chính | `string` | `INT IDENTITY` | đơn giản, tự tăng, join nhanh |
+| KM_TheoHD – tên cột | `TongTienToiThieu` | `TongTienToiThieu` | giữ tên ERD (script đã đổi từ `MucTienHD`) |
+| KM_TheoHD – số bậc | 1 CTKM – 0..1 dòng | 1 CTKM – nhiều bậc, PK `(MaCTKM, TongTienToiThieu)` | vd ≥1tr giảm 5%, ≥3tr giảm 10% |
+| CTKM | không có loại | thêm `LoaiKM` (SANPHAM / HOADON / VOUCHER) | SV3 lọc theo loại |
+| KM_TheoVoucher | chỉ `PhanTramGG` | thêm `SoLuong`, `DaDung` | giới hạn lượt dùng voucher |
+| SanPham | `DonGia` | `DonGiaBan` + `ThuongHieu`, `MoTa`, `DonViTinh` | SV2 lọc thương hiệu, trang chi tiết |
+| DanhMuc | `TenDanhMuc` | thêm `MoTa` | hiển thị trên web |
+| HoaDon | `TienGiamGia`, `MaCTKM` | giữ + thêm `LoaiBan`, `HinhThucTT`, `DiaChiGiao`; `MaKH`, `MaNV` cho phép NULL | bán tại quầy (SV4) và đặt online (SV3) chung 1 bảng |
+| HoaDon – trạng thái | tự do | CHECK 5 giá trị: `Chờ xác nhận → Đã xác nhận → Đang giao → Hoàn thành / Đã hủy` | trigger hủy đơn trả kho dựa vào đây |
+| CTHD | `ThanhTien` | thêm `GiamGia` (%), `ThanhTien` là **cột tính** | không lệch số liệu |
+| CTPN | không có | thêm `ThanhTien` là **cột tính** | |
+| PhanHoi | không có sao | thêm `SoSao` (1–5), `TrangThai` | SV2 đánh giá sao, SV4 duyệt bình luận |
+| TaiKhoan | không có trạng thái | thêm `TrangThai` (khóa TK), `MaNV` UNIQUE | khóa tài khoản, 1 NV – 1 TK |
+| KhachHang | `TrangThai` string | `TrangThai` BIT, `Email` UNIQUE | đăng nhập web bằng email |
+
+## Ràng buộc nghiệp vụ do trigger đảm bảo (`02_Triggers.sql`)
+
+- Thêm `ChiTietPhieuNhap` → tăng `SanPham.SoLuongTon` và tính lại `PhieuNhap.TongTien` (chỉ AFTER INSERT – phiếu nhập đã lưu thì không sửa chi tiết).
+- Thêm `ChiTietHoaDon` → trừ tồn; **không đủ tồn thì báo lỗi và rollback** (bắt `SqlException` để hiện thông báo).
+- Hóa đơn chuyển sang `Đã hủy` → trả hàng về kho; đơn đã hủy **không được mở lại**.
+- `HoaDon.TongTien` = tổng `ThanhTien` − `TienGiamGia`.

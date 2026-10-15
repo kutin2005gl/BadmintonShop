@@ -4,6 +4,6 @@ namespace BadmintonShop.Core.Models;
 public class KMTheoHD
 {
     public int MaCTKM { get; set; }
-    public decimal MucTienHD { get; set; }
+    public decimal TongTienToiThieu { get; set; }
     public decimal PhanTramGG { get; set; }
 }
