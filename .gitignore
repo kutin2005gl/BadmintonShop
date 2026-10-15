@@ -24,3 +24,6 @@ App.Local.config
 Thumbs.db
 .DS_Store
 ~$*
+
+# Node (tools/XuatBaoCao)
+node_modules/
