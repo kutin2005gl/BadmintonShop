@@ -25,8 +25,10 @@ if exist BadmintonShop.sln (
 
 echo.
 echo === 1/4 Tao solution va 3 project ===
-dotnet new sln -n BadmintonShop
-if errorlevel 1 goto loi
+REM .NET 9.0.200+ / .NET 10 mac dinh tao .slnx -> ep dung dinh dang .sln de VS 2022 mo duoc
+dotnet new sln -n BadmintonShop --format sln
+if not exist BadmintonShop.sln dotnet new sln -n BadmintonShop
+if not exist BadmintonShop.sln goto loi
 dotnet new classlib -n BadmintonShop.Core -o BadmintonShop.Core -f net8.0
 if errorlevel 1 goto loi
 if exist BadmintonShop.Core\Class1.cs del /q BadmintonShop.Core\Class1.cs

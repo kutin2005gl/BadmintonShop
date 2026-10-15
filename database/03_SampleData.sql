@@ -42,9 +42,9 @@ INSERT INTO NhanVien (HoTen, SDT, Email, DiaChi, ChucVu, Luong, NgayVaoLam) VALU
      admin    / Admin@123
      quanly   / Quanly@123
      nhanvien / Nhanvien@123                                                   */
-DECLARE @HashAdmin    VARCHAR(255) = '<HASH_Admin@123>';
-DECLARE @HashQuanLy   VARCHAR(255) = '<HASH_Quanly@123>';
-DECLARE @HashNhanVien VARCHAR(255) = '<HASH_Nhanvien@123>';
+DECLARE @HashAdmin    VARCHAR(255) = '$2a$11$rqyt7g0mbAXFJe3EguhF.eXDov6ABDcdRjdfWtG19Qoyf8cC.EGBy';
+DECLARE @HashQuanLy   VARCHAR(255) = '$2a$11$Lcck6fMwKmmglip/bgzkzOJkpRLNCCyCvssvpaZIHPKwbTP6QSPMy';
+DECLARE @HashNhanVien VARCHAR(255) = '$2a$11$7f3ZzY2JhUj9sbPzPIlNvO4OKwQSJOoouBb.h405mGOp6Y/Ac5IUy';
 
 INSERT INTO TaiKhoan (TenDangNhap, MatKhau, VaiTro, MaNV, TrangThai) VALUES
  ('admin',     @HashAdmin,    'ADMIN',    1, 1),
