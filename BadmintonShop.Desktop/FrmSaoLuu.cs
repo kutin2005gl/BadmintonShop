@@ -1,4 +1,5 @@
 using BadmintonShop.Core.DataAccess;
+using BadmintonShop.Core.Services;
 
 namespace BadmintonShop.Desktop;
 
@@ -7,10 +8,17 @@ public partial class FrmSaoLuu : Form
 {
     private readonly SaoLuuRepository _repo = new();
 
-    // TV1: khoi tao form, goi y thu muc sao luu mac dinh cua SQL Server
+    // TV1: khoi tao form (chi giao dien, KHONG truy cap CSDL de VS Designer mo duoc)
     public FrmSaoLuu()
     {
         InitializeComponent();
+    }
+
+    // TV1: khi form hien len - kiem tra quyen (chi ADMIN), goi y thu muc sao luu mac dinh cua SQL Server
+    protected override void OnLoad(EventArgs e)
+    {
+        base.OnLoad(e);
+        if (DesignMode || !QuyenForm.KiemTraKhiMo(this, ChucNang.SaoLuuPhucHoi)) return;
         lblCSDL.Text = $"CSDL đang dùng: {_repo.TenCSDL}";
         txtThuMuc.Text = _repo.LayThuMucMacDinh() ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
     }

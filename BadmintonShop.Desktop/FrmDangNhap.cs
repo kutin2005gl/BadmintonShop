@@ -35,6 +35,11 @@ public partial class FrmDangNhap : Form
         Cursor = Cursors.WaitCursor;
         KetQuaDangNhap ketQua;
         try { ketQua = _taiKhoanRepo.DangNhap(tenDN, matKhau); }
+        catch (Exception ex)
+        {
+            MessageBox.Show(LoiCsdl.ThongBao(ex), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
         finally { Cursor = Cursors.Default; }
 
         switch (ketQua)

@@ -1,6 +1,7 @@
 using System.Data;
 using BadmintonShop.Core.DataAccess;
 using BadmintonShop.Core.Models;
+using BadmintonShop.Core.Services;
 
 namespace BadmintonShop.Desktop;
 
@@ -9,10 +10,17 @@ public partial class FrmDanhSachPhieuNhap : Form
 {
     private readonly PhieuNhapRepository _pnRepo = new();
 
-    // TV1: khoi tao form, mac dinh loc 30 ngay gan nhat
+    // TV1: khoi tao form (chi giao dien, KHONG truy cap CSDL de VS Designer mo duoc)
     public FrmDanhSachPhieuNhap()
     {
         InitializeComponent();
+    }
+
+    // TV1: khi form hien len - kiem tra quyen, mac dinh khong loc ngay, nap NCC + danh sach phieu
+    protected override void OnLoad(EventArgs e)
+    {
+        base.OnLoad(e);
+        if (DesignMode || !QuyenForm.KiemTraKhiMo(this, ChucNang.NhaCungCapPhieuNhap)) return;
         dtpTuNgay.Value = DateTime.Today.AddDays(-30);
         dtpDenNgay.Value = DateTime.Today;
         dtpTuNgay.Checked = false;   // bo tick = khong loc theo ngay -> lan dau thay het phieu
@@ -106,6 +114,6 @@ public partial class FrmDanhSachPhieuNhap : Form
 
     // TV1: bao loi he thong (mat ket noi CSDL, ...)
     private static void BaoLoiHeThong(Exception ex)
-        => MessageBox.Show("Có lỗi khi làm việc với CSDL:\n" + ex.Message, "Lỗi",
+        => MessageBox.Show(LoiCsdl.ThongBao(ex), "Lỗi",
                            MessageBoxButtons.OK, MessageBoxIcon.Error);
 }

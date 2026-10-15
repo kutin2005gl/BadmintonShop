@@ -32,9 +32,10 @@ public partial class FrmMain : Form
         mnuSaoLuu.Visible   = PhienDangNhap.CoQuyen(ChucNang.SaoLuuPhucHoi);
     }
 
-    // TV1: mo form con dang hop thoai, form da mo thi chi dua len truoc
-    private void MoForm<T>() where T : Form, new()
+    // TV1: mo form con (khong chan form chinh) neu du quyen, form da mo thi chi dua len truoc
+    private void MoForm<T>(ChucNang chucNang) where T : Form, new()
     {
+        if (!QuyenForm.DuQuyen(chucNang)) return;
         var daMo = OwnedForms.OfType<T>().FirstOrDefault();
         if (daMo != null) { daMo.Activate(); return; }
         var frm = new T { Owner = this, StartPosition = FormStartPosition.CenterParent };
@@ -43,13 +44,13 @@ public partial class FrmMain : Form
     }
 
     // TV1: mo form quan ly nhan vien va tai khoan (chi ADMIN thay menu)
-    private void mnuNhanVien_Click(object? sender, EventArgs e) => MoForm<FrmNhanVien>();
+    private void mnuNhanVien_Click(object? sender, EventArgs e) => MoForm<FrmNhanVien>(ChucNang.NhanVienTaiKhoan);
 
     // TV1: mo form quan ly nha cung cap
-    private void mnuNhaCungCap_Click(object? sender, EventArgs e) => MoForm<FrmNhaCungCap>();
+    private void mnuNhaCungCap_Click(object? sender, EventArgs e) => MoForm<FrmNhaCungCap>(ChucNang.NhaCungCapPhieuNhap);
 
     // TV1: mo form danh sach phieu nhap (tu day lap phieu moi)
-    private void mnuPhieuNhap_Click(object? sender, EventArgs e) => MoForm<FrmDanhSachPhieuNhap>();
+    private void mnuPhieuNhap_Click(object? sender, EventArgs e) => MoForm<FrmDanhSachPhieuNhap>(ChucNang.NhaCungCapPhieuNhap);
 
     // TV1: mo form doi mat khau cua chinh minh
     private void mnuDoiMatKhau_Click(object? sender, EventArgs e)
@@ -69,7 +70,7 @@ public partial class FrmMain : Form
     }
 
     // TV1: mo form sao luu - phuc hoi CSDL (chi ADMIN thay menu)
-    private void mnuSaoLuu_Click(object? sender, EventArgs e) => MoForm<FrmSaoLuu>();
+    private void mnuSaoLuu_Click(object? sender, EventArgs e) => MoForm<FrmSaoLuu>(ChucNang.SaoLuuPhucHoi);
 
     // TV1: dang xuat khong hoi lai (vd. sau khi phuc hoi CSDL, tai khoan co the da thay doi)
     public void DangXuatBatBuoc()

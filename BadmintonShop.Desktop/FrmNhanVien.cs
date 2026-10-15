@@ -18,7 +18,7 @@ public partial class FrmNhanVien : Form
     private int _maNVDangChon;   // 0 = che do them moi
     private int _maTKDangChon;   // 0 = chua chon tai khoan
 
-    // TV1: khoi tao form, nap goi y chuc vu / vai tro va du lieu 2 tab
+    // TV1: khoi tao form, nap goi y chuc vu / vai tro (KHONG truy cap CSDL de VS Designer mo duoc)
     public FrmNhanVien()
     {
         InitializeComponent();
@@ -26,6 +26,13 @@ public partial class FrmNhanVien : Form
         cboVaiTroCap.Items.AddRange(DanhSachVaiTro);
         cboVaiTroDoi.Items.AddRange(DanhSachVaiTro);
         cboVaiTroCap.SelectedIndex = 2;
+    }
+
+    // TV1: khi form hien len - kiem tra quyen (chi ADMIN) roi nap du lieu 2 tab
+    protected override void OnLoad(EventArgs e)
+    {
+        base.OnLoad(e);
+        if (DesignMode || !QuyenForm.KiemTraKhiMo(this, ChucNang.NhanVienTaiKhoan)) return;
         NapLuoiNhanVien();
         LamMoiNhanVien();
         NapLuoiTaiKhoan();
@@ -338,6 +345,6 @@ public partial class FrmNhanVien : Form
 
     // TV1: bao loi he thong (mat ket noi CSDL, ...)
     private static void BaoLoiHeThong(Exception ex)
-        => MessageBox.Show("Có lỗi khi làm việc với CSDL:\n" + ex.Message, "Lỗi",
+        => MessageBox.Show(LoiCsdl.ThongBao(ex), "Lỗi",
                            MessageBoxButtons.OK, MessageBoxIcon.Error);
 }

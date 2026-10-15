@@ -30,10 +30,17 @@ public partial class FrmPhieuNhap : Form
     /// <summary>Ma phieu vua luu (0 = chua luu) - FrmDanhSachPhieuNhap dung de chon lai dong moi.</summary>
     public int MaPNVuaLuu { get; private set; }
 
-    // TV1: khoi tao form, nguoi lap = nhan vien dang dang nhap, nap NCC + san pham
+    // TV1: khoi tao form (chi giao dien, KHONG truy cap CSDL de VS Designer mo duoc)
     public FrmPhieuNhap()
     {
         InitializeComponent();
+    }
+
+    // TV1: khi form hien len - kiem tra quyen, nguoi lap = nhan vien dang dang nhap, nap NCC + san pham
+    protected override void OnLoad(EventArgs e)
+    {
+        base.OnLoad(e);
+        if (DesignMode || !QuyenForm.KiemTraKhiMo(this, ChucNang.NhaCungCapPhieuNhap)) return;
         lblNguoiLap.Text = $"Người lập: {PhienDangNhap.HoTen}";
         dtpNgayNhap.Value = DateTime.Now;
         dgvChiTiet.DataSource = _dong;
@@ -101,6 +108,7 @@ public partial class FrmPhieuNhap : Form
         var soLuong = (int)numSoLuong.Value;
         var donGia = numDonGia.Value;
         if (soLuong <= 0) { BaoLoi("Số lượng phải lớn hơn 0.", numSoLuong); return; }
+        if (donGia <= 0) { BaoLoi("Đơn giá nhập phải lớn hơn 0.", numDonGia); return; }
 
         var dangCo = _dong.FirstOrDefault(d => d.MaSP == maSP);
         if (dangCo != null)
@@ -136,8 +144,8 @@ public partial class FrmPhieuNhap : Form
         var s = e.FormattedValue?.ToString()?.Replace(",", "").Replace(".", "").Trim() ?? "";
         if (cot == nameof(DongNhap.SoLuong) && (!int.TryParse(s, out var sl) || sl <= 0))
         { e.Cancel = true; dgvChiTiet.Rows[e.RowIndex].ErrorText = "Số lượng phải là số nguyên > 0"; }
-        else if (cot == nameof(DongNhap.DonGia) && (!decimal.TryParse(s, out var g) || g < 0))
-        { e.Cancel = true; dgvChiTiet.Rows[e.RowIndex].ErrorText = "Đơn giá phải là số ≥ 0"; }
+        else if (cot == nameof(DongNhap.DonGia) && (!decimal.TryParse(s, out var g) || g <= 0))
+        { e.Cancel = true; dgvChiTiet.Rows[e.RowIndex].ErrorText = "Đơn giá phải là số > 0"; }
         else dgvChiTiet.Rows[e.RowIndex].ErrorText = "";
     }
 
@@ -197,8 +205,8 @@ public partial class FrmPhieuNhap : Form
     // TV1: bao loi he thong (mat ket noi CSDL, vi pham rang buoc...)
     private static void BaoLoiHeThong(Exception ex)
     {
-        var s = ex is SqlException ? "Không lưu được phiếu nhập, dữ liệu chưa thay đổi.\n" + ex.Message
-                                   : "Có lỗi khi làm việc với CSDL:\n" + ex.Message;
+        var s = ex is SqlException ? "Không lưu được phiếu nhập, dữ liệu chưa thay đổi.\n" + LoiCsdl.ThongBao(ex)
+                                   : LoiCsdl.ThongBao(ex);
         MessageBox.Show(s, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
     }
 }

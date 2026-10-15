@@ -10,10 +10,17 @@ public partial class FrmNhaCungCap : Form
     private readonly NhaCungCapRepository _repo = new();
     private int _maDangChon;   // 0 = dang o che do them moi
 
-    // TV1: khoi tao form va nap danh sach nha cung cap
+    // TV1: khoi tao form (chi giao dien, KHONG truy cap CSDL de VS Designer mo duoc)
     public FrmNhaCungCap()
     {
         InitializeComponent();
+    }
+
+    // TV1: khi form hien len - kiem tra quyen roi nap danh sach nha cung cap
+    protected override void OnLoad(EventArgs e)
+    {
+        base.OnLoad(e);
+        if (DesignMode || !QuyenForm.KiemTraKhiMo(this, ChucNang.NhaCungCapPhieuNhap)) return;
         NapLuoi();
         LamMoiForm();
     }
@@ -155,6 +162,6 @@ public partial class FrmNhaCungCap : Form
 
     // TV1: bao loi he thong (mat ket noi CSDL, ...)
     private static void BaoLoiHeThong(Exception ex)
-        => MessageBox.Show("Có lỗi khi làm việc với CSDL:\n" + ex.Message, "Lỗi",
+        => MessageBox.Show(LoiCsdl.ThongBao(ex), "Lỗi",
                            MessageBoxButtons.OK, MessageBoxIcon.Error);
 }
