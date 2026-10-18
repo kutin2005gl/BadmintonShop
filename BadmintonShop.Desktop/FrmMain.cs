@@ -8,6 +8,12 @@ namespace BadmintonShop.Desktop;
 /// </summary>
 public partial class FrmMain : Form
 {
+    // SV4: tích hợp đúng nhóm quyền; form con kiểm tra lại trong OnLoad và khi thao tác.
+    private void mnuDsSanPham_Click(object? s,EventArgs e)=>MoForm<FrmSanPham>(ChucNang.SanPhamDanhMucKhuyenMai);
+    private void mnuDanhMuc_Click(object? s,EventArgs e)=>MoForm<FrmDanhMuc>(ChucNang.SanPhamDanhMucKhuyenMai);
+    private void mnuPOS_Click(object? s,EventArgs e)=>MoForm<FrmPOS>(ChucNang.DonHangPOS);
+    private void mnuDonHang_Click(object? s,EventArgs e)=>MoForm<FrmDonHang>(ChucNang.DonHangPOS);
+    private void mnuThongKe_Click(object? s,EventArgs e)=>MoForm<FrmThongKe>(ChucNang.ThongKeBinhLuan);
     /// <summary>true = nguoi dung bam Dang xuat -> Program.cs hien lai FrmDangNhap.</summary>
     public bool YeuCauDangXuat { get; private set; }
 

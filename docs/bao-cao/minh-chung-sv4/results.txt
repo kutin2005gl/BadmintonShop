@@ -1,0 +1,37 @@
+PASS U01 required name / trim / length
+PASS U02 money range and whole dong
+PASS U03 all 25 state pairs
+PASS U04 role matrix and session
+PASS U05 relative image safety
+PASS U06 allocation rounding tie and zero
+PASS U07 allocation 1000 random and large money
+PASS U08 report complete only / counts / quantities / category sum
+PASS U09 empty report
+PASS U10 constructors safe without DB or login
+PASS U11 XLSX roundtrip and OpenXML schema
+PASS U12 PDF report / invoice / empty / multipage reopen
+PASS U13 image decode / reencode / bad / missing / size limit
+Isolated test database: BadmintonShop_SV4_Test_20261018212348_1953608f
+PASS I01 migration repeat / new stock always zero
+PASS I02 category CRUD / duplicate / used delete
+PASS I03 invalid products / imports / edits preserve stock
+PASS I04 POS success / trigger / cash / walk-in / retry
+PASS I05 POS invalid/price/inactive/insufficient leaves no partial rows
+PASS I06 trigger rollback after header and first valid line
+PASS I07 cancel reason / once / stale / no reopen
+PASS I08 online sequence / stale update / no cancel after shipping
+PASS I09 concurrent identical POS only once
+PASS I10 competing orders for final stock
+PASS I11 order date/state/type/search filters
+PASS I12 independent SV4 demo / rerun / monthly data / filters
+PASS I13 simultaneous cancel returns stock once
+PASS I14 date inclusive end / empty date / product read compatibility
+PASS I15 customer name/phone/email filters and saved receipt
+PASS I16 product and invoice discounts applied once in SQL/report
+PASS GUI render FrmDanhMuc
+PASS GUI render FrmSanPham
+PASS GUI render FrmSanPhamSua
+PASS GUI render FrmDonHang
+PASS GUI render FrmPOS
+PASS GUI render FrmThongKe
+RESULT: 35 passed, 0 failed. Output: %TEMP%/BadmintonShop-SV4-Checks/20261018-212346

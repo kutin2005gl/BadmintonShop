@@ -61,11 +61,12 @@ public static class DbHelper
     /// Chay nhieu lenh trong MOT transaction (vd. luu PhieuNhap + ChiTietPhieuNhap,
     /// HoaDon + ChiTietHoaDon). Loi o bat ky buoc nao -> rollback toan bo.
     /// </summary>
-    public static T ExecuteTransaction<T>(Func<SqlConnection, SqlTransaction, T> congViec)
+    public static T ExecuteTransaction<T>(Func<SqlConnection, SqlTransaction, T> congViec,
+        IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
     {
         using var conn = TaoKetNoi();
         conn.Open();
-        using var tran = conn.BeginTransaction();
+        using var tran = conn.BeginTransaction(isolationLevel);
         try
         {
             var kq = congViec(conn, tran);

@@ -125,13 +125,13 @@ partial class FrmMain
         //
         mnuDsSanPham.Name = "mnuDsSanPham";
         mnuDsSanPham.Text = "Sản phẩm";
-        mnuDsSanPham.Click += mnuChuaCo_Click;
+        mnuDsSanPham.Click += mnuDsSanPham_Click;
         //
         // mnuDanhMuc
         //
         mnuDanhMuc.Name = "mnuDanhMuc";
         mnuDanhMuc.Text = "Danh mục";
-        mnuDanhMuc.Click += mnuChuaCo_Click;
+        mnuDanhMuc.Click += mnuDanhMuc_Click;
         //
         // mnuKhuyenMai
         //
@@ -149,13 +149,13 @@ partial class FrmMain
         //
         mnuPOS.Name = "mnuPOS";
         mnuPOS.Text = "Bán hàng tại quầy (POS)";
-        mnuPOS.Click += mnuChuaCo_Click;
+        mnuPOS.Click += mnuPOS_Click;
         //
         // mnuDonHang
         //
         mnuDonHang.Name = "mnuDonHang";
         mnuDonHang.Text = "Đơn hàng";
-        mnuDonHang.Click += mnuChuaCo_Click;
+        mnuDonHang.Click += mnuDonHang_Click;
         //
         // mnuBaoCao
         //
@@ -167,7 +167,7 @@ partial class FrmMain
         //
         mnuThongKe.Name = "mnuThongKe";
         mnuThongKe.Text = "Thống kê - báo cáo";
-        mnuThongKe.Click += mnuChuaCo_Click;
+        mnuThongKe.Click += mnuThongKe_Click;
         //
         // mnuDuyetBinhLuan
         //
