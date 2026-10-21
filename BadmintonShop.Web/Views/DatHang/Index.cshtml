@@ -1,0 +1,52 @@
+@model DatHangViewModel
+@{ ViewData["Title"] = "Đặt hàng"; var g = Model.Gio; }
+
+<h2 class="mb-3">Xác nhận đơn hàng</h2>
+
+@if (Model.Loi != null) { <div class="alert alert-danger">@Model.Loi</div> }
+
+<div class="row g-4">
+    <div class="col-md-7">
+        <form asp-action="XacNhan" method="post">
+            <div class="mb-3">
+                <label class="form-label">Người nhận</label>
+                <input type="text" class="form-control" value="@Model.HoTen" disabled />
+            </div>
+            <div class="mb-3">
+                <label for="diaChi" class="form-label">Địa chỉ giao hàng</label>
+                <textarea id="diaChi" name="diaChi" class="form-control" rows="3" maxlength="255" required>@Model.DiaChi</textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label d-block">Hình thức thanh toán</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="hinhThucTT" id="tt-cod" value="COD" checked="@(Model.HinhThucTT == "COD")" />
+                    <label class="form-check-label" for="tt-cod">Thanh toán khi nhận hàng (COD)</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="hinhThucTT" id="tt-online" value="Online" checked="@(Model.HinhThucTT == "Online")" />
+                    <label class="form-check-label" for="tt-online">Thanh toán online (giả lập)</label>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg">Đặt hàng</button>
+            <a asp-controller="GioHang" asp-action="Index" class="btn btn-link">Quay lại giỏ hàng</a>
+        </form>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">Đơn hàng của bạn</h6>
+                @foreach (var d in g.Dong)
+                {
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span>@d.TenSP × @d.SoLuong</span><span>@d.ThanhTien.Dong()</span>
+                    </div>
+                }
+                <hr />
+                <div class="d-flex justify-content-between"><span>Tạm tính</span><span>@g.TongTienHang.Dong()</span></div>
+                <div class="d-flex justify-content-between text-success"><span>Giảm giá</span><span>-@g.TienGiamHoaDon.Dong()</span></div>
+                <div class="d-flex justify-content-between fw-bold fs-5 mt-2"><span>Tổng cộng</span><span>@g.TongThanhToan.Dong()</span></div>
+            </div>
+        </div>
+    </div>
+</div>

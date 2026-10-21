@@ -1,0 +1,19 @@
+@model BadmintonShop.Core.Models.HoaDon
+@{ ViewData["Title"] = "Thanh toán online"; }
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body text-center">
+                <h4 class="card-title">Cổng thanh toán (giả lập)</h4>
+                <p class="text-muted">Đây là màn hình mô phỏng, không có giao dịch thật.</p>
+                <p class="mb-1">Đơn hàng <strong>#@Model.MaHD</strong></p>
+                <p class="fs-3 fw-bold">@Model.TongTien.Dong()</p>
+                <form asp-action="ThanhToanOnline" asp-route-id="@Model.MaHD" method="post" class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success btn-lg">Xác nhận đã thanh toán</button>
+                    <a asp-controller="DonHang" asp-action="ChiTiet" asp-route-id="@Model.MaHD" class="btn btn-link">Thanh toán sau</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

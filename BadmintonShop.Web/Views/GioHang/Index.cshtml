@@ -1,0 +1,113 @@
+@model KetQuaGioHang
+@using BadmintonShop.Core.Models
+@{ ViewData["Title"] = "Giỏ hàng"; }
+
+<h2 class="mb-3">Giỏ hàng</h2>
+
+@if (TempData["ThongBao"] is string tb) { <div class="alert alert-success">@tb</div> }
+@if (TempData["Loi"] is string loi) { <div class="alert alert-danger">@loi</div> }
+@foreach (var cb in Model.CanhBao) { <div class="alert alert-warning">@cb</div> }
+
+@if (Model.Dong.Count == 0)
+{
+    <div class="text-center py-5">
+        <p class="lead">Giỏ hàng của bạn đang trống.</p>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Tiếp tục mua sắm</a>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th class="text-end">Đơn giá</th>
+                    <th style="width:170px">Số lượng</th>
+                    <th class="text-end">Thành tiền</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var d in Model.Dong)
+            {
+                <tr>
+                    <td>
+                        @d.TenSP
+                        @if (!d.DuHang) { <span class="badge bg-danger ms-1">Chỉ còn @d.TonKho</span> }
+                    </td>
+                    <td class="text-end">
+                        @if (d.PhanTramGiam > 0)
+                        {
+                            <div><span class="badge bg-danger">-@d.PhanTramGiam.ToString("0.##")%</span></div>
+                            <div class="text-muted text-decoration-line-through small">@d.DonGia.Dong()</div>
+                        }
+                        <div>@d.DonGiaSauGiam.Dong()</div>
+                    </td>
+                    <td>
+                        <form asp-action="CapNhat" method="post" class="d-flex gap-1">
+                            <input type="hidden" name="maSP" value="@d.MaSP" />
+                            <input type="number" name="soLuong" value="@d.SoLuong" min="0" max="99" class="form-control form-control-sm" />
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">Cập nhật</button>
+                        </form>
+                    </td>
+                    <td class="text-end fw-semibold">@d.ThanhTien.Dong()</td>
+                    <td class="text-end">
+                        <form asp-action="Xoa" method="post">
+                            <input type="hidden" name="maSP" value="@d.MaSP" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Mã giảm giá</h6>
+                    @if (Model.LoiVoucher != null) { <div class="alert alert-danger py-2">@Model.LoiVoucher</div> }
+                    @if (Model.MaVoucher != null)
+                    {
+                        <p class="mb-2">Đang áp dụng mã <strong>@Model.MaVoucher</strong>.</p>
+                        <form asp-action="BoVoucher" method="post">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">Bỏ mã</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="ApDungVoucher" method="post" class="d-flex gap-2">
+                            <input type="text" name="maVoucher" class="form-control" placeholder="Nhập mã giảm giá" maxlength="30" />
+                            <button type="submit" class="btn btn-outline-primary">Áp dụng</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between"><span>Tạm tính (@Model.TongSoLuong sản phẩm)</span><span>@Model.TongTienHang.Dong()</span></div>
+                    <div class="d-flex justify-content-between text-success">
+                        <span>Giảm giá đơn hàng</span><span>-@Model.TienGiamHoaDon.Dong()</span>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between fs-5 fw-bold"><span>Tổng thanh toán</span><span>@Model.TongThanhToan.Dong()</span></div>
+                    <div class="d-grid mt-3">
+                        @if (Model.CoTheDatHang)
+                        {
+                            <a asp-controller="DatHang" asp-action="Index" class="btn btn-primary btn-lg">Tiến hành đặt hàng</a>
+                        }
+                        else
+                        {
+                            <button class="btn btn-secondary btn-lg" disabled>Vui lòng chỉnh số lượng</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

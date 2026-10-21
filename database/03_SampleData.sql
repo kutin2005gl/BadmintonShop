@@ -96,7 +96,172 @@ GO
    PHAN SV3: CTKM (>= 3: 1 SANPHAM, 1 HOADON, 1 VOUCHER), KM_TheoSP, KM_TheoHD,
              KM_TheoVoucher, HoaDon + ChiTietHoaDon online (>= 20, du cac trang thai)
    --------------------------------------------------------------------- */
--- TODO SV3
+-- ===== SV3: CTKM + khuyen mai =====
+SET NOCOUNT ON;
+DECLARE @ctSP INT, @ctHD INT, @ctVC INT, @ctVCHet INT;
+
+-- 1) Giam theo SAN PHAM: tat ca san pham Yonex giam 10% (con hieu luc)
+INSERT INTO CTKM (TenCTKM, NgayBatDau, NgayKetThuc, LoaiKM, TrangThai)
+VALUES (N'Giảm giá sản phẩm Yonex tháng 10', '20261001', '20261231', 'SANPHAM', 1);
+SET @ctSP = SCOPE_IDENTITY();
+INSERT INTO KM_TheoSP (MaCTKM, MaSP, PhanTramGG)
+SELECT @ctSP, MaSP, 10 FROM SanPham WHERE ThuongHieu = N'Yonex';
+
+-- 2) Giam theo HOA DON: 3 bac muc (bac cao nhat dat duoc se duoc ap)
+INSERT INTO CTKM (TenCTKM, NgayBatDau, NgayKetThuc, LoaiKM, TrangThai)
+VALUES (N'Mua nhiều giảm nhiều 2026', '20260101', '20261231', 'HOADON', 1);
+SET @ctHD = SCOPE_IDENTITY();
+INSERT INTO KM_TheoHD (MaCTKM, TongTienToiThieu, PhanTramGG) VALUES
+ (@ctHD, 2000000, 3), (@ctHD, 5000000, 5), (@ctHD, 10000000, 8);
+
+-- 3) VOUCHER: con han (WELCOME10, BADMINTON20, HETLUOT da het luot) + 1 CTKM da het han (HE2026)
+INSERT INTO CTKM (TenCTKM, NgayBatDau, NgayKetThuc, LoaiKM, TrangThai)
+VALUES (N'Voucher chào khách mới', '20261001', '20261231', 'VOUCHER', 1);
+SET @ctVC = SCOPE_IDENTITY();
+INSERT INTO KM_TheoVoucher (MaCTKM, MaVoucher, PhanTramGG, SoLuong, DaDung) VALUES
+ (@ctVC, 'WELCOME10',   10, 100, 0),
+ (@ctVC, 'BADMINTON20', 20,   5, 0),
+ (@ctVC, 'HETLUOT',     15,   3, 3);
+
+INSERT INTO CTKM (TenCTKM, NgayBatDau, NgayKetThuc, LoaiKM, TrangThai)
+VALUES (N'Voucher hè 2026 (đã hết hạn)', '20260601', '20260831', 'VOUCHER', 1);
+SET @ctVCHet = SCOPE_IDENTITY();
+INSERT INTO KM_TheoVoucher (MaCTKM, MaVoucher, PhanTramGG, SoLuong, DaDung) VALUES
+ (@ctVCHet, 'HE2026', 10, 50, 0);
+
+-- ===== SV3: khach hang cho don mau =====
+-- Dung 5 khach dang hoat dong dau tien (SV2 them o tren); neu chua co thi tao khach thu (khong dang nhap duoc)
+IF (SELECT COUNT(*) FROM KhachHang WHERE TrangThai = 1) < 5
+    INSERT INTO KhachHang (HoTen, SDT, Email, MatKhau, DiaChi)
+    SELECT v.HoTen, v.SDT, v.Email, 'KHONG_DANG_NHAP', v.DiaChi
+    FROM (VALUES
+        (N'Khách thử 1', '0900000001', 'sv3.test1@example.com', N'12 Nguyễn Văn Cừ, Q.5, TP.HCM'),
+        (N'Khách thử 2', '0900000002', 'sv3.test2@example.com', N'45 Lê Lợi, Q.1, TP.HCM'),
+        (N'Khách thử 3', '0900000003', 'sv3.test3@example.com', N'78 Cách Mạng Tháng 8, Q.3, TP.HCM'),
+        (N'Khách thử 4', '0900000004', 'sv3.test4@example.com', N'9 Phạm Văn Đồng, Thủ Đức, TP.HCM'),
+        (N'Khách thử 5', '0900000005', 'sv3.test5@example.com', N'33 Quang Trung, Gò Vấp, TP.HCM')
+    ) v(HoTen, SDT, Email, DiaChi)
+    WHERE NOT EXISTS (SELECT 1 FROM KhachHang k WHERE k.Email = v.Email);
+
+CREATE TABLE #kh (idx INT, MaKH INT, DiaChi NVARCHAR(255));
+INSERT INTO #kh (idx, MaKH, DiaChi)
+SELECT x.idx, x.MaKH, ISNULL(x.DiaChi, N'123 Đường Mẫu, TP.HCM')
+FROM (SELECT ROW_NUMBER() OVER (ORDER BY MaKH) AS idx, MaKH, DiaChi
+      FROM KhachHang WHERE TrangThai = 1) x
+WHERE x.idx <= 5;
+
+-- ===== SV3: 24 don online, du 5 trang thai (ngay tinh lui tu 20/10/2026) =====
+CREATE TABLE #don (stt INT, idx INT, ngay INT, tt NVARCHAR(20), trangThai NVARCHAR(30));
+INSERT INTO #don (stt, idx, ngay, tt, trangThai) VALUES
+ ( 1, 1, 120, N'COD',    N'Hoàn thành'),
+ ( 2, 2, 110, N'Online', N'Hoàn thành'),
+ ( 3, 3, 100, N'COD',    N'Hoàn thành'),
+ ( 4, 4,  90, N'Online', N'Hoàn thành'),
+ ( 5, 5,  80, N'COD',    N'Hoàn thành'),
+ ( 6, 1,  70, N'COD',    N'Hoàn thành'),
+ ( 7, 2,  60, N'Online', N'Hoàn thành'),
+ ( 8, 3,  55, N'COD',    N'Hoàn thành'),
+ ( 9, 4,  45, N'Online', N'Hoàn thành'),
+ (10, 5,  40, N'COD',    N'Hoàn thành'),
+ (11, 1,  30, N'COD',    N'Đã hủy'),
+ (12, 2,  25, N'Online', N'Đã hủy'),
+ (13, 3,  20, N'COD',    N'Đã hủy'),
+ (14, 4,  15, N'COD',    N'Hoàn thành'),
+ (15, 5,  12, N'Online', N'Đang giao'),
+ (16, 1,  10, N'COD',    N'Đang giao'),
+ (17, 2,   8, N'Online', N'Đang giao'),
+ (18, 3,   6, N'COD',    N'Đã xác nhận'),
+ (19, 4,   5, N'Online', N'Đã xác nhận'),
+ (20, 5,   4, N'COD',    N'Đã xác nhận'),
+ (21, 1,   3, N'COD',    N'Chờ xác nhận'),
+ (22, 2,   2, N'Online', N'Chờ xác nhận'),   -- don nay dung voucher WELCOME10
+ (23, 3,   1, N'COD',    N'Chờ xác nhận'),
+ (24, 4,   0, N'COD',    N'Chờ xác nhận');
+
+CREATE TABLE #ct (stt INT, MaSP INT, SL INT);
+INSERT INTO #ct (stt, MaSP, SL) VALUES
+ ( 1,5,2),( 1,6,1),
+ ( 2,1,1),( 2,12,2),
+ ( 3,9,2),( 3,10,1),
+ ( 4,7,1),( 4,11,2),
+ ( 5,3,1),
+ ( 6,2,1),( 6,5,1),
+ ( 7,8,1),( 7,12,3),
+ ( 8,4,1),( 8,9,1),
+ ( 9,6,3),( 9,11,3),
+ (10,1,1),(10,7,1),
+ (11,2,1),(11,10,2),
+ (12,3,1),(12,5,1),
+ (13,9,3),
+ (14,5,2),(14,12,2),
+ (15,1,1),(15,6,2),
+ (16,8,1),(16,10,1),
+ (17,4,1),
+ (18,2,1),(18,9,2),
+ (19,7,1),(19,11,1),
+ (20,5,1),(20,6,1),(20,12,1),
+ (21,1,1),(21,9,1),
+ (22,10,2),(22,11,2),(22,12,2),
+ (23,3,1),(23,5,1),
+ (24,6,1),(24,12,1);
+
+CREATE TABLE #map (stt INT, MaHD INT);
+DECLARE @stt INT = 1, @maHD INT, @max INT = (SELECT MAX(stt) FROM #don);
+WHILE @stt <= @max
+BEGIN
+    INSERT INTO HoaDon (MaKH, NgayLap, LoaiBan, HinhThucTT, DiaChiGiao)
+    SELECT k.MaKH,
+           DATEADD(HOUR, 9 + d.stt % 8, DATEADD(DAY, -d.ngay, CAST('20261020' AS DATETIME))),
+           N'Online', d.tt, k.DiaChi
+    FROM #don d JOIN #kh k ON k.idx = d.idx
+    WHERE d.stt = @stt;
+    SET @maHD = SCOPE_IDENTITY();
+
+    -- trigger tru ton kho + tinh TongTien; giam theo SP (Yonex 10%) chi tu 01/10/2026 khi CTKM bat dau
+    INSERT INTO ChiTietHoaDon (MaHD, MaSP, SoLuong, DonGia, GiamGia)
+    SELECT @maHD, c.MaSP, c.SL, sp.DonGiaBan,
+           CASE WHEN sp.ThuongHieu = N'Yonex' AND h.NgayLap >= '20261001' THEN 10 ELSE 0 END
+    FROM #ct c
+    JOIN SanPham sp ON sp.MaSP = c.MaSP
+    JOIN HoaDon h ON h.MaHD = @maHD
+    WHERE c.stt = @stt;
+
+    INSERT INTO #map (stt, MaHD) VALUES (@stt, @maHD);
+    SET @stt += 1;
+END
+
+-- Giam theo bac hoa don (tru don 22 dung voucher); trigger tu tinh lai TongTien
+UPDATE h
+SET h.MaCTKM = b.MaCTKM,
+    h.TienGiamGia = CAST(ROUND(h.TongTien * b.PhanTramGG / 100.0, 0) AS DECIMAL(18,0))
+FROM HoaDon h
+JOIN #map m ON m.MaHD = h.MaHD
+CROSS APPLY (SELECT TOP 1 t.MaCTKM, t.PhanTramGG
+             FROM KM_TheoHD t
+             WHERE t.MaCTKM = @ctHD AND t.TongTienToiThieu <= h.TongTien
+             ORDER BY t.TongTienToiThieu DESC) b
+WHERE m.stt <> 22;
+
+-- Don 22 dung voucher WELCOME10 (giam 10%), tang so luot da dung
+UPDATE h
+SET h.MaCTKM = @ctVC,
+    h.TienGiamGia = CAST(ROUND(h.TongTien * 10 / 100.0, 0) AS DECIMAL(18,0))
+FROM HoaDon h JOIN #map m ON m.MaHD = h.MaHD
+WHERE m.stt = 22;
+UPDATE KM_TheoVoucher SET DaDung = 1 WHERE MaVoucher = 'WELCOME10';
+
+-- Chuyen sang trang thai cuoi (don "Đã hủy" duoc trigger hoan ton kho)
+UPDATE h SET h.TrangThai = d.trangThai
+FROM HoaDon h
+JOIN #map m ON m.MaHD = h.MaHD
+JOIN #don d ON d.stt = m.stt
+WHERE d.trangThai <> N'Chờ xác nhận';
+
+DROP TABLE #map; DROP TABLE #ct; DROP TABLE #don; DROP TABLE #kh;
+
+SELECT TrangThai, COUNT(*) AS SoDon FROM HoaDon WHERE LoaiBan = N'Online' GROUP BY TrangThai;
+SELECT MaCTKM, TenCTKM, LoaiKM, NgayBatDau, NgayKetThuc FROM CTKM;
+GO
 
 /* ---------------------------------------------------------------------
    PHAN SV4: HoaDon tai quay (LoaiBan = N'Tại quầy') trai deu 6-12 thang cho bieu do
