@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using System.Text;
 using System.Text.RegularExpressions;
 using BadmintonShop.Core.DataAccess;
@@ -12,7 +12,7 @@ using Microsoft.Data.SqlClient;
 using PdfSharp.Pdf.IO;
 
 // SV4: bộ kiểm tra chạy thật, không gọi vào CSDL BadmintonShop; integration luôn tạo CSDL tên riêng mới.
-internal static class Program
+internal static partial class Program
 {
     private static int passed,failed;private static string root="",output="";private static int nv,ncc,sp1,sp2,dm1,dm2;
     private static readonly List<string> log=[];
@@ -20,10 +20,14 @@ internal static class Program
     private static int Main(string[] args)
     {
         Console.OutputEncoding=Encoding.UTF8;
+        System.Globalization.CultureInfo.DefaultThreadCurrentCulture=System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
+        System.Globalization.CultureInfo.DefaultThreadCurrentUICulture=System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
         root=Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,"../../../../../"));
+        if (!File.Exists(Path.Combine(root,"BadmintonShop.sln")) && File.Exists(Path.Combine(Environment.CurrentDirectory,"BadmintonShop.sln"))) root=Environment.CurrentDirectory;
         output=Path.Combine(Path.GetTempPath(),"BadmintonShop-SV4-Checks",DateTime.Now.ToString("yyyyMMdd-HHmmss"));Directory.CreateDirectory(output);
         Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);
         Unit();
+        if(args.Contains("--ui-readonly")) UiReadOnly();
         if(args.Contains("--integration"))
         {
             int index=Array.IndexOf(args,"--server");

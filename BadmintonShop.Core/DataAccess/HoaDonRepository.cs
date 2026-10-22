@@ -8,13 +8,20 @@ namespace BadmintonShop.Core.DataAccess;
 // SV4: nguồn truy cập hóa đơn dùng chung cho SV3; trigger chịu trách nhiệm tồn kho/tổng tiền.
 public class HoaDonRepository
 {
+    public bool HoTroPOS() => Convert.ToInt32(DbHelper.ExecuteScalar(@"SELECT CASE WHEN
+        COL_LENGTH('dbo.HoaDon','MaYeuCauPOS') IS NOT NULL AND COL_LENGTH('dbo.HoaDon','TienKhachDua') IS NOT NULL
+        THEN 1 ELSE 0 END")) == 1;
     // SV4: danh sách tìm mã đơn/tên/điện thoại/email khách, ngày cuối bao gồm trọn ngày.
     public DataTable LayDanhSachHienThi(DateTime tu, DateTime den, string? trangThai = null, string? loaiBan = null, string? tuKhoa = null)
     {
         if (tu.Date > den.Date) throw new ArgumentException("Ngày bắt đầu phải trước ngày kết thúc.");
-        return DbHelper.ExecuteQuery(@"
+        // Older group databases can still be viewed without running a schema migration.
+        // Never discard a cancellation reason on writes: ChuyenTrangThai keeps its original requirements.
+        var hasReason = Convert.ToInt32(DbHelper.ExecuteScalar("SELECT CASE WHEN COL_LENGTH('dbo.HoaDon','LyDoHuy') IS NULL THEN 0 ELSE 1 END")) == 1;
+        var reasonColumn = hasReason ? "h.LyDoHuy" : "CAST(NULL AS nvarchar(500)) AS LyDoHuy";
+        var result = DbHelper.ExecuteQuery($@"
             SELECT h.MaHD,h.NgayLap,COALESCE(k.HoTen,N'Khách vãng lai') AS KhachHang,k.SDT,k.Email,
-                   h.LoaiBan,h.HinhThucTT,h.TienGiamGia,h.TongTien,h.TrangThai,h.LyDoHuy
+                   h.LoaiBan,h.HinhThucTT,h.TienGiamGia,h.TongTien,h.TrangThai,{reasonColumn}
             FROM HoaDon h LEFT JOIN KhachHang k ON h.MaKH=k.MaKH
             WHERE h.NgayLap>=@tu AND h.NgayLap<DATEADD(day,1,@den)
               AND (@tt IS NULL OR h.TrangThai=@tt) AND (@loai IS NULL OR h.LoaiBan=@loai)
@@ -24,6 +31,8 @@ public class HoaDonRepository
             new SqlParameter("@tu",tu.Date),new SqlParameter("@den",den.Date),
             new SqlParameter("@tt",DbHelper.GiaTriHoacNull(trangThai)),new SqlParameter("@loai",DbHelper.GiaTriHoacNull(loaiBan)),
             new SqlParameter("@tk",DbHelper.GiaTriHoacNull(string.IsNullOrWhiteSpace(tuKhoa)?null:tuKhoa.Trim())));
+        result.ExtendedProperties["HoTroLyDoHuy"] = hasReason;
+        return result;
     }
 
     // SV4: hóa đơn đã lưu để xem/xuất lại; MaKH null luôn hợp lệ.
@@ -35,8 +44,8 @@ public class HoaDonRepository
         return new HoaDon { MaHD=ma,MaKH=r.Field<int?>("MaKH"),MaNV=r.Field<int?>("MaNV"),
             NgayLap=r.Field<DateTime>("NgayLap"),LoaiBan=r.Field<string>("LoaiBan")!,HinhThucTT=r.Field<string>("HinhThucTT")!,
             DiaChiGiao=r.Field<string?>("DiaChiGiao"),MaCTKM=r.Field<int?>("MaCTKM"),TienGiamGia=r.Field<decimal>("TienGiamGia"),
-            TongTien=r.Field<decimal>("TongTien"),TrangThai=r.Field<string>("TrangThai")!,LyDoHuy=r.Field<string?>("LyDoHuy"),
-            MaYeuCauPOS=r.Field<Guid?>("MaYeuCauPOS"),TienKhachDua=r.Field<decimal?>("TienKhachDua") };
+            TongTien=r.Field<decimal>("TongTien"),TrangThai=r.Field<string>("TrangThai")!,LyDoHuy=dt.Columns.Contains("LyDoHuy")?r.Field<string?>("LyDoHuy"):null,
+            MaYeuCauPOS=dt.Columns.Contains("MaYeuCauPOS")?r.Field<Guid?>("MaYeuCauPOS"):null,TienKhachDua=dt.Columns.Contains("TienKhachDua")?r.Field<decimal?>("TienKhachDua"):null };
     }
 
     // SV4: giá/giảm giá lấy từ chi tiết lịch sử, không dùng giá bán hiện tại.
