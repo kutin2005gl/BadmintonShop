@@ -1,5 +1,15 @@
 # BadmintonShop – Hệ thống bán đồ thể thao cầu lông
 
+## Phần SV4 (desktop)
+
+Sau khi có CSDL nền, áp dụng **`database/04_SV4_Migration.sql`** (bổ sung, chạy lại được); tùy chọn `database/05_SV4_Demo.sql` cho demo riêng 12 tháng. Không chạy lại script 01/file tổng trên CSDL cần giữ.
+
+- [Hướng dẫn chạy và sử dụng SV4](docs/bao-cao/huong-dan-su-dung-sv4.md)
+- [Đặc tả](docs/bao-cao/dac-ta-sv4.md), [quy ước tích hợp](docs/bao-cao/tich-hop-sv4.md), [sơ đồ lớp](docs/diagrams/06-lop-core-sv4.md)
+- [Kế hoạch/test case](docs/bao-cao/kiem-thu-sv4.md), [kết quả thực tế](docs/bao-cao/ket-qua-kiem-thu-sv4.md), [tổng kết nháp](docs/bao-cao/tong-ket-sv4.md)
+
+POS hiện giá thường vì service khuyến mãi SV3 chưa triển khai. Ảnh cần cấu hình `BadmintonShop__MediaRoot` dùng chung cho web/desktop; CSDL chỉ lưu `products/<uuid>.jpg`.
+
 Đồ án môn Công nghệ phần mềm – ĐH Sài Gòn, HK1 2026–2027 (nhóm 4 người).
 
 - **BadmintonShop.Core** – Class Library dùng chung: Models, DataAccess (ADO.NET), Services (SV1)

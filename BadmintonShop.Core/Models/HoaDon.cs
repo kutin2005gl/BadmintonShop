@@ -14,4 +14,7 @@ public class HoaDon
     public decimal TienGiamGia { get; set; }
     public decimal TongTien { get; set; }  // trigger tu tinh
     public string TrangThai { get; set; } = "";
+    public string? LyDoHuy { get; set; }
+    public Guid? MaYeuCauPOS { get; set; }
+    public decimal? TienKhachDua { get; set; }
 }
