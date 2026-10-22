@@ -1,0 +1,95 @@
+using BadmintonShop.Core.DataAccess;
+using BadmintonShop.Core.Services;
+using BadmintonShop.Web.Infrastructure;
+using BadmintonShop.Web.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+
+namespace BadmintonShop.Web.Controllers;
+
+/// <summary>Dat hang online: nhap dia chi, chon COD / thanh toan online gia lap (SV3). Bat buoc dang nhap.</summary>
+[Authorize]
+public class DatHangController : Controller
+{
+    private readonly GioHangService _gioHang = new();
+    private readonly DonHangOnlineRepository _donHang = new();
+    private readonly KhachHangRepository _khachHang = new();
+
+    private int MaKH => User.LayMaKH() ?? 0;
+
+    // TV3: trang xac nhan don, dien san dia chi trong ho so
+    [HttpGet]
+    public IActionResult Index()
+    {
+        var gio = _gioHang.TinhTuSession(HttpContext.Session);
+        if (gio.Dong.Count == 0) return RedirectToAction("Index", "GioHang");
+        var kh = _khachHang.LayTheoMa(MaKH);
+        return View(new DatHangViewModel { Gio = gio, HoTen = kh?.HoTen ?? "", DiaChi = kh?.DiaChi ?? "" });
+    }
+
+    // TV3: bam "Dat hang" -> tao don trong 1 transaction
+    [HttpPost, ValidateAntiForgeryToken]
+    public IActionResult XacNhan(string? diaChi, string? hinhThucTT)
+    {
+        var gio = _gioHang.TinhTuSession(HttpContext.Session);
+        if (gio.Dong.Count == 0) return RedirectToAction("Index", "GioHang");
+
+        var tt = DonHangOnlineRepository.HinhThucHopLe.Contains(hinhThucTT ?? "") ? hinhThucTT! : "COD";
+        var vm = new DatHangViewModel
+        {
+            Gio = gio,
+            HoTen = User.LayHoTen() ?? "",
+            DiaChi = diaChi ?? "",
+            HinhThucTT = tt,
+        };
+
+        try
+        {
+            var maHD = _donHang.TaoDon(MaKH, vm.DiaChi, tt, gio);
+            HttpContext.Session.XoaGio();
+            // TODO SV3: gui email xac nhan don (buoc EmailService)
+            return tt == "Online"
+                ? RedirectToAction(nameof(ThanhToanOnline), new { id = maHD })
+                : RedirectToAction(nameof(ThanhCong), new { id = maHD });
+        }
+        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
+        {
+            vm.Loi = ex.Message;
+        }
+        catch (SqlException ex)
+        {
+            vm.Loi = LoiCsdl.ThongBao(ex);
+        }
+        return View("Index", vm);
+    }
+
+    // TV3: man hinh thanh toan online GIA LAP (khong goi cong thanh toan that)
+    [HttpGet]
+    public IActionResult ThanhToanOnline(int id)
+    {
+        var hd = _donHang.LayDonCuaKhach(id, MaKH);
+        if (hd == null) return NotFound();
+        if (hd.HinhThucTT != "Online" || hd.TrangThai != "Chờ xác nhận")
+            return RedirectToAction(nameof(ThanhCong), new { id });
+        return View(hd);
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public IActionResult ThanhToanOnline(int id, bool xacNhan = true)
+    {
+        var hd = _donHang.LayDonCuaKhach(id, MaKH);
+        if (hd == null) return NotFound();
+        TempData["ThongBao"] = "Thanh toán online (giả lập) thành công.";
+        return RedirectToAction(nameof(ThanhCong), new { id });
+    }
+
+    // TV3: dat hang xong
+    [HttpGet]
+    public IActionResult ThanhCong(int id)
+    {
+        var hd = _donHang.LayDonCuaKhach(id, MaKH);
+        if (hd == null) return NotFound();
+        return View(new ChiTietDonViewModel { Don = hd, Dong = _donHang.LayChiTietHienThi(id) });
+    }
+}

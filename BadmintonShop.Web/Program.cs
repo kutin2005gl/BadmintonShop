@@ -12,6 +12,15 @@ builder.Services.AddControllersWithViews();
 // Dang nhap khach hang bang cookie (SV1) - xem Infrastructure/XacThucKhachHang.cs
 builder.Services.AddXacThucKhachHang();
 
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(o =>
+{
+    o.IdleTimeout = TimeSpan.FromHours(2);
+    o.Cookie.Name = "BadmintonShop.Session";
+    o.Cookie.HttpOnly = true;
+    o.Cookie.IsEssential = true;
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -26,6 +35,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseSession();
 
 app.UseAuthentication();   // phai dung TRUOC UseAuthorization
 app.UseAuthorization();

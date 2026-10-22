@@ -1,0 +1,35 @@
+@model System.Data.DataTable
+@using System.Data
+@{ ViewData["Title"] = "Đơn hàng của tôi"; }
+
+<h2 class="mb-3">Đơn hàng của tôi</h2>
+
+@if (Model.Rows.Count == 0)
+{
+    <p class="lead">Bạn chưa có đơn hàng nào.</p>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Mua sắm ngay</a>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr><th>Mã đơn</th><th>Ngày đặt</th><th>Thanh toán</th><th class="text-end">Tổng tiền</th><th>Trạng thái</th><th></th></tr>
+            </thead>
+            <tbody>
+            @foreach (DataRow r in Model.Rows)
+            {
+                var tt = (string)r["TrangThai"];
+                <tr>
+                    <td>#@r["MaHD"]</td>
+                    <td>@(((DateTime)r["NgayLap"]).ToString("dd/MM/yyyy HH:mm"))</td>
+                    <td>@r["HinhThucTT"]</td>
+                    <td class="text-end">@(((decimal)r["TongTien"]).Dong())</td>
+                    <td><span class="badge @DinhDang.MauTrangThai(tt)">@tt</span></td>
+                    <td class="text-end"><a asp-action="ChiTiet" asp-route-id="@r["MaHD"]" class="btn btn-sm btn-outline-primary">Xem</a></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

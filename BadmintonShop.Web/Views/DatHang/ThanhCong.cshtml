@@ -1,0 +1,29 @@
+@model ChiTietDonViewModel
+@using System.Data
+@{ ViewData["Title"] = "Đặt hàng thành công"; var hd = Model.Don; }
+
+<div class="text-center py-4">
+    <h2 class="text-success">Đặt hàng thành công!</h2>
+    <p class="lead">Mã đơn hàng của bạn là <strong>#@hd.MaHD</strong>.</p>
+    @if (TempData["ThongBao"] is string tb) { <div class="alert alert-success d-inline-block">@tb</div> }
+</div>
+
+<div class="card mx-auto" style="max-width:640px">
+    <div class="card-body">
+        @foreach (DataRow r in Model.Dong.Rows)
+        {
+            <div class="d-flex justify-content-between small mb-1">
+                <span>@r["TenSP"] × @r["SoLuong"]</span><span>@(((decimal)r["ThanhTien"]).Dong())</span>
+            </div>
+        }
+        <hr />
+        <div class="d-flex justify-content-between"><span>Giảm giá</span><span>-@hd.TienGiamGia.Dong()</span></div>
+        <div class="d-flex justify-content-between fw-bold fs-5"><span>Tổng cộng</span><span>@hd.TongTien.Dong()</span></div>
+        <p class="mb-0 mt-2 small text-muted">Giao tới: @hd.DiaChiGiao — Thanh toán: @(hd.HinhThucTT == "COD" ? "khi nhận hàng" : "online")</p>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a asp-controller="DonHang" asp-action="ChiTiet" asp-route-id="@hd.MaHD" class="btn btn-primary">Theo dõi đơn hàng</a>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Tiếp tục mua sắm</a>
+</div>
