@@ -15,10 +15,12 @@ public sealed class BieuDoCot : Control
         var dt=DuLieu;int label=dt.Columns.Count>2?1:0;
         var values=dt.AsEnumerable().Select(r=>(Ten:Convert.ToString(r[label])??"",GiaTri:Convert.ToDecimal(r[dt.Columns.Count-1]))).ToList();
         decimal total=values.Sum(x=>x.GiaTri);
-        if(values.Count>12)values=[..values.Take(11),("Các dòng còn lại",values.Skip(11).Sum(x=>x.GiaTri))];
+        int capacity=Math.Clamp((Height-50)/24,1,12);
+        if(values.Count>capacity)values=[..values.Take(capacity-1),("Các dòng còn lại",values.Skip(capacity-1).Sum(x=>x.GiaTri))];
         g.DrawString($"{dt.Columns[^1].ColumnName} — Tổng: {total:N0} (cùng dữ liệu với bảng)",Font,Brushes.Black,10,8);
-        decimal max=Math.Max(1,values.Max(x=>x.GiaTri));float row=Math.Max(17,Math.Min(30,(Height-50f)/values.Count));
-        float chartWidth=Math.Max(30,Width-310);using var brush=new SolidBrush(Color.SeaGreen);
+        if(Height<65)return;
+        decimal max=Math.Max(1,values.Max(x=>x.GiaTri));float row=Math.Max(12,Math.Min(30,(Height-50f)/values.Count));
+        float chartWidth=Math.Max(30,Width-340);using var brush=new SolidBrush(ShopTheme.Green);
         for(int i=0;i<values.Count;i++)
         {
             float y=35+i*row;var x=values[i];

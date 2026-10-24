@@ -12,6 +12,8 @@ static class Program
     [STAThread]
     static void Main()
     {
+        System.Globalization.CultureInfo.DefaultThreadCurrentCulture = ShopTheme.Vietnamese;
+        System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = ShopTheme.Vietnamese;
         // To customize application configuration such as set high DPI settings or default font,
         // see https://aka.ms/applicationconfiguration.
         ApplicationConfiguration.Initialize();

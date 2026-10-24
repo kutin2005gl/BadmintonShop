@@ -1,4 +1,4 @@
-using BadmintonShop.Core.Services;
+﻿using BadmintonShop.Core.Services;
 
 namespace BadmintonShop.Desktop;
 
@@ -25,6 +25,7 @@ public partial class FrmMain : Form
         lblVaiTro.Text = $"   |   Vai trò: {PhanQuyen.TenVaiTro(PhienDangNhap.VaiTro)}";
         lblChao.Text = $"BADMINTON SHOP\nXin chào, {PhienDangNhap.HoTen}";
         ApDungPhanQuyen();
+        TaoKhungMoi();
     }
 
     // TV1: an/hien menu theo bang phan quyen (ADMIN / QUANLY / NHANVIEN)
@@ -42,11 +43,7 @@ public partial class FrmMain : Form
     private void MoForm<T>(ChucNang chucNang) where T : Form, new()
     {
         if (!QuyenForm.DuQuyen(chucNang)) return;
-        var daMo = OwnedForms.OfType<T>().FirstOrDefault();
-        if (daMo != null) { daMo.Activate(); return; }
-        var frm = new T { Owner = this, StartPosition = FormStartPosition.CenterParent };
-        frm.FormClosed += (_, _) => frm.Dispose();
-        frm.Show(this);
+        HienTrang(typeof(T), () => new T());
     }
 
     // TV1: mo form quan ly nhan vien va tai khoan (chi ADMIN thay menu)
@@ -62,6 +59,7 @@ public partial class FrmMain : Form
     private void mnuDoiMatKhau_Click(object? sender, EventArgs e)
     {
         using var frm = new FrmDoiMatKhau();
+        ShopTheme.Apply(frm);
         frm.ShowDialog(this);
     }
 
@@ -70,17 +68,24 @@ public partial class FrmMain : Form
     {
         if (MessageBox.Show("Bạn có chắc muốn đăng xuất?", "Đăng xuất",
                             MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+        if (!ChoPhepDong()) return;
+        daXacNhanDong = true;
         YeuCauDangXuat = true;
         PhienDangNhap.DangXuat();
         Close();
     }
 
     // TV1: mo form sao luu - phuc hoi CSDL (chi ADMIN thay menu)
-    private void mnuSaoLuu_Click(object? sender, EventArgs e) => MoForm<FrmSaoLuu>(ChucNang.SaoLuuPhucHoi);
+    private void mnuSaoLuu_Click(object? sender, EventArgs e)
+    {
+        if (!QuyenForm.DuQuyen(ChucNang.SaoLuuPhucHoi)) return;
+        using var dialog = new FrmSaoLuu(); ShopTheme.Apply(dialog); dialog.ShowDialog(this);
+    }
 
     // TV1: dang xuat khong hoi lai (vd. sau khi phuc hoi CSDL, tai khoan co the da thay doi)
     public void DangXuatBatBuoc()
     {
+        daXacNhanDong = true;
         YeuCauDangXuat = true;
         PhienDangNhap.DangXuat();
         Close();
