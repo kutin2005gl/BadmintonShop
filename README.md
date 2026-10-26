@@ -2,26 +2,26 @@
 
 ## Phần SV4 (desktop)
 
-Sau khi có CSDL nền, áp dụng **`database/04_SV4_Migration.sql`** (bổ sung, chạy lại được); tùy chọn `database/05_SV4_Demo.sql` cho demo riêng 12 tháng. Không chạy lại script 01/file tổng trên CSDL cần giữ.
+Sau khi có CSDL nền, áp dụng **`database/04_SV4_Migration.sql`** (bổ sung, chạy lại được); sau đó `database/06_SV4_POS_Request.sql`; tùy chọn `database/05_SV4_Demo.sql` chỉ trên CSDL test/demo riêng 12 tháng. Không chạy lại script 01/file tổng trên CSDL cần giữ.
 
 - [Hướng dẫn chạy và sử dụng SV4](docs/bao-cao/huong-dan-su-dung-sv4.md)
 - [Đặc tả](docs/bao-cao/dac-ta-sv4.md), [quy ước tích hợp](docs/bao-cao/tich-hop-sv4.md), [sơ đồ lớp](docs/diagrams/06-lop-core-sv4.md)
-- [Kế hoạch/test case](docs/bao-cao/kiem-thu-sv4.md), [kết quả thực tế](docs/bao-cao/ket-qua-kiem-thu-sv4.md), [tổng kết nháp](docs/bao-cao/tong-ket-sv4.md)
+- [Kế hoạch/test case](docs/bao-cao/kiem-thu-sv4.md), [kết quả thực tế](docs/bao-cao/ket-qua-kiem-thu-sv4.md), [tổng kết](docs/bao-cao/tong-ket-sv4.md)
 
-POS hiện giá thường vì service khuyến mãi SV3 chưa triển khai. Ảnh cần cấu hình `BadmintonShop__MediaRoot` dùng chung cho web/desktop; CSDL chỉ lưu `products/<uuid>.jpg`.
+POS đã tích hợp khuyến mãi dùng chung SV3 (sản phẩm, hóa đơn, voucher), kiểm lại trong transaction. Cần migration `04_SV4_Migration.sql` và `06_SV4_POS_Request.sql`; không tự chạy trên CSDL cửa hàng. Xem [tích hợp SV3–SV4 và demo](docs/bao-cao/tich-hop-sv3-sv4.md). Ảnh cần cấu hình `BadmintonShop__MediaRoot` dùng chung cho web/desktop; CSDL chỉ lưu `products/<uuid>.jpg`.
 
 Đồ án môn Công nghệ phần mềm – ĐH Sài Gòn, HK1 2026–2027 (nhóm 4 người).
 
 - **BadmintonShop.Core** – Class Library dùng chung: Models, DataAccess (ADO.NET), Services (SV1)
 - **BadmintonShop.Web** – ASP.NET Core MVC cho khách hàng (SV2, SV3)
 - **BadmintonShop.Desktop** – WinForms cho nhân viên / quản lý (SV1, SV4)
-- **database/** – `BadmintonShop.sql` (file bàn giao, chạy 1 lần trên máy trống) = nối `01_CreateDatabase.sql` → `02_Triggers.sql` → `03_SampleData.sql`
+- **database/** – `BadmintonShop.sql` (file bàn giao, chạy 1 lần trên máy trống) = nối `01_CreateDatabase.sql` → `02_Triggers.sql` → `03_SampleData.sql` → migration `04` → `06`
 - **docs/** – ERD, phân công; **[hướng dẫn cài đặt](docs/bao-cao/huong-dan-cai-dat.md)** (bản mới nhất), các chương báo cáo trong `docs/bao-cao/`
 
 ## Chạy nhanh
 
 1. SSMS: mở và chạy `database/BadmintonShop.sql` (hoặc chạy lần lượt 3 file 01 → 02 → 03).
-   Ai sửa 01/02/03 thì ghép lại file tổng (Git Bash): `cd database && { cat 01_CreateDatabase.sql; sed '1s/^\xEF\xBB\xBF//' 02_Triggers.sql; sed '1s/^\xEF\xBB\xBF//' 03_SampleData.sql; } > BadmintonShop.sql`
+   Ai sửa 01/02/03/04/06 thì ghép lại file tổng (Git Bash): `cd database && { cat 01_CreateDatabase.sql; sed '1s/^\xEF\xBB\xBF//' 02_Triggers.sql; sed '1s/^\xEF\xBB\xBF//' 03_SampleData.sql; cat 04_SV4_Migration.sql; cat 06_SV4_POS_Request.sql; } > BadmintonShop.sql`
    (hoặc nhắn SV1 ghép).
 2. Sửa `Server=` trong `BadmintonShop.Web/appsettings.json` và `BadmintonShop.Desktop/App.config` cho khớp máy mình (`localhost` hoặc `.\SQLEXPRESS`). **Không commit** phần sửa này nếu có mật khẩu.
 3. Mở `BadmintonShop.sln` → Build → chạy Web hoặc Desktop.
@@ -100,3 +100,7 @@ Không muốn sửa file config? Đặt biến môi trường **User** `Connecti
 (vd `Server=(localdb)\MSSQLLocalDB;Database=BadmintonShop;Trusted_Connection=True;TrustServerCertificate=True;`),
 mở lại Visual Studio – cả Web và Desktop đều ưu tiên biến này.
 Chạy script bằng `sqlcmd` nhớ thêm `-I` (bật QUOTED_IDENTIFIER), vd `sqlcmd -S . -E -I -f 65001 -i database\BadmintonShop.sql`.
+
+## Bàn giao SV4 26/10/2026
+
+[Kết quả kiểm thử và giới hạn mới nhất](docs/final-integration/README.md), [kịch bản demo 5–7 phút](docs/bao-cao/huong-dan-su-dung-sv4.md), [checklist SV2 kiểm chéo](docs/bao-cao/checklist-sv2-desktop.md). `--schema-readonly` chỉ kiểm metadata CSDL cấu hình, không tự migration. CSDL máy kiểm tra còn thiếu 04/06 nên không nhận POS cửa hàng đã hoạt động trước khi được SV1 cập nhật.

@@ -38,6 +38,8 @@ public class FrmDonHang : Form
     private int Ma()=>Sv4Ui.MaDong(grid,"MaHD")??throw new ArgumentException("Hãy chọn một hóa đơn.");
     private async void ChiTiet()
     {
+        if(IsDisposed || Disposing)return;
+        if(InvokeRequired) { ShopTheme.OnUi(this,ChiTiet);return; }
         var version=++detailVersion;
         var transitions=new Dictionary<string,string> { ["Xác nhận"]="Đã xác nhận",["Giao hàng"]="Đang giao",["Hoàn thành"]="Hoàn thành",["Hủy + lý do"]="Đã hủy" };
         bool supported=grid.DataSource is DataTable source && source.ExtendedProperties["HoTroLyDoHuy"] is true;
@@ -48,7 +50,7 @@ public class FrmDonHang : Form
         chiTiet.DataSource=null;
         if(Sv4Ui.MaDong(grid,"MaHD") is not int ma) { thongTin.Text="Không có đơn hàng trong khoảng lọc."+(!supported?"\nCSDL chưa hỗ trợ cập nhật trạng thái SV4; hiện chỉ xem / xuất đơn.":"");return; }
         var r=((DataRowView)grid.CurrentRow!.DataBoundItem).Row;
-        var description=$"HĐ {ma} | {r["TrangThai"]} | Giảm hóa đơn: {r["TienGiamGia"]:N0} đ | Tổng thanh toán: {r["TongTien"]:N0} đ\nLý do hủy: {r["LyDoHuy"]}";
+        var description=$"HĐ {ma} | {r["TrangThai"]} | Giảm hóa đơn / voucher: {r["TienGiamGia"]:N0} đ | Tổng thanh toán: {r["TongTien"]:N0} đ\nLý do hủy: {r["LyDoHuy"]}";
         thongTin.Text="Đang tải chi tiết…";
         try
         {

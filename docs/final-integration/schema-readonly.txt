@@ -1,0 +1,28 @@
+Desktop: configured server=localhost; database=BadmintonShop; credentials omitted
+Connected: server=DESKTOP-FGE20L2; database=BadmintonShop; SQL=16.0.1000.6
+MISSING HoaDon.LyDoHuy; apply migration 04 then 06 on a backed-up database after review
+MISSING HoaDon.MaYeuCauPOS; apply migration 04 then 06 on a backed-up database after review
+MISSING HoaDon.TienKhachDua; apply migration 04 then 06 on a backed-up database after review
+MISSING HoaDon.DauVanTayPOS; apply migration 04 then 06 on a backed-up database after review
+OK HoaDon.MaCTKM: int, bytes=4, precision=10, scale=0, computed=False
+OK HoaDon.TienGiamGia: decimal, bytes=9, precision=18, scale=0, computed=False
+OK ChiTietHoaDon.GiamGia: decimal, bytes=5, precision=5, scale=2, computed=False
+OK ChiTietHoaDon.ThanhTien: decimal, bytes=9, precision=18, scale=0, computed=True
+MISSING index UX_HoaDon_MaYeuCauPOS; review migration 04
+TRIGGER trg_CTHD_GiamTon: disabled=False
+TRIGGER trg_CTPN_TangTon: disabled=False
+TRIGGER trg_HoaDon_CapNhat: disabled=False
+Web: configured server=localhost; database=BadmintonShop; credentials omitted
+Connected: server=DESKTOP-FGE20L2; database=BadmintonShop; SQL=16.0.1000.6
+MISSING HoaDon.LyDoHuy; apply migration 04 then 06 on a backed-up database after review
+MISSING HoaDon.MaYeuCauPOS; apply migration 04 then 06 on a backed-up database after review
+MISSING HoaDon.TienKhachDua; apply migration 04 then 06 on a backed-up database after review
+MISSING HoaDon.DauVanTayPOS; apply migration 04 then 06 on a backed-up database after review
+OK HoaDon.MaCTKM: int, bytes=4, precision=10, scale=0, computed=False
+OK HoaDon.TienGiamGia: decimal, bytes=9, precision=18, scale=0, computed=False
+OK ChiTietHoaDon.GiamGia: decimal, bytes=5, precision=5, scale=2, computed=False
+OK ChiTietHoaDon.ThanhTien: decimal, bytes=9, precision=18, scale=0, computed=True
+MISSING index UX_HoaDon_MaYeuCauPOS; review migration 04
+TRIGGER trg_CTHD_GiamTon: disabled=False
+TRIGGER trg_CTPN_TangTon: disabled=False
+TRIGGER trg_HoaDon_CapNhat: disabled=False

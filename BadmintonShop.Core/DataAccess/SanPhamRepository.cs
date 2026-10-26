@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using BadmintonShop.Core.Models;
 using Microsoft.Data.SqlClient;
 
@@ -71,6 +71,14 @@ public class SanPhamRepository
         var dt = DbHelper.ExecuteQuery($"SELECT {Cot} FROM SanPham WHERE MaSP = @ma",
                                        new SqlParameter("@ma", maSP));
         return dt.Rows.Count == 0 ? null : Map(dt.Rows[0]);
+    }
+
+    // SV4: checkout reads and locks products in ascending ID order on its existing transaction.
+    internal SanPham? LayTheoMa(int ma,SqlConnection connection,SqlTransaction transaction)
+    {
+        using var cmd=new SqlCommand($"SELECT {Cot} FROM SanPham WITH (UPDLOCK,HOLDLOCK) WHERE MaSP=@ma",connection,transaction);
+        cmd.Parameters.AddWithValue("@ma",ma);using var adapter=new SqlDataAdapter(cmd);var table=new DataTable();adapter.Fill(table);
+        return table.Rows.Count==0?null:Map(table.Rows[0]);
     }
 
     // TV1: chuyen 1 dong DataRow thanh doi tuong SanPham

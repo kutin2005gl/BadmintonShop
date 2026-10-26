@@ -602,3 +602,11 @@ GO
 IF NOT EXISTS(SELECT 1 FROM sys.indexes WHERE object_id=OBJECT_ID('dbo.HoaDon') AND name='UX_HoaDon_MaYeuCauPOS')
     CREATE UNIQUE INDEX UX_HoaDon_MaYeuCauPOS ON dbo.HoaDon(MaYeuCauPOS) WHERE MaYeuCauPOS IS NOT NULL;
 GO
+
+/* SV4: preserve the exact confirmed request for idempotent POS retry, including a losing voucher.
+   Run after 04_SV4_Migration.sql. Additive, repeatable. Never automatically run on a store database. */
+USE BadmintonShop;
+GO
+IF COL_LENGTH('dbo.HoaDon','DauVanTayPOS') IS NULL
+    ALTER TABLE dbo.HoaDon ADD DauVanTayPOS VARCHAR(64) NULL;
+GO

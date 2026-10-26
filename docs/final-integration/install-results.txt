@@ -1,0 +1,17 @@
+PASS U01 required name / trim / length
+PASS U02 money range and whole dong
+PASS U03 all 25 state pairs
+PASS U04 role matrix and session
+PASS U05 relative image safety
+PASS U06 allocation rounding tie and zero
+PASS U07 allocation 1000 random and large money
+PASS U08 report complete only / counts / quantities / category sum
+PASS U09 empty report
+PASS U10 constructors safe without DB or login
+PASS U11 XLSX roundtrip and OpenXML schema
+PASS U12 PDF report / invoice / empty / multipage reopen
+PASS U13 image decode / reencode / bad / missing / size limit
+Isolated fresh-install database: BadmintonShop_SV4_Test_Install_20261026211927_eded9f88
+PASS J01 aggregate fresh-install SQL includes migrations 04/06 and repeatable demo
+PASS J02 demo safety guard refuses master before any writes
+RESULT: 15 passed, 0 failed. Output: C:\Users\Khiem\AppData\Local\Temp\BadmintonShop-SV4-Checks\20261026-211925

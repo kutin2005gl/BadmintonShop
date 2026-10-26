@@ -1,8 +1,10 @@
-/* SV4: dữ liệu demo RIÊNG, tùy chọn. Chạy sau 04. Không xóa/tạo lại CSDL.
+/* SV4: dữ liệu demo RIÊNG, tùy chọn. Chạy sau 04 và 06. Không xóa/tạo lại CSDL.
    Danh mục [SV4-DEMO] là dấu nhận diện; chạy lại không thêm bản sao.
-   Nhập hàng trước khi bán, không cập nhật tồn trực tiếp. Không phụ thuộc khách SV2. */
-USE BadmintonShop;
-GO
+   Nhập hàng trước khi bán, không cập nhật tồn trực tiếp. Không phụ thuộc khách SV2.
+   Chọn CSDL đích bằng sqlcmd -d hoặc dropdown SSMS; không chọn CSDL cửa hàng. */
+IF DB_NAME() NOT LIKE N'BadmintonShop[_]SV4[_]Test[_]%'
+   AND DB_NAME() NOT LIKE N'BadmintonShop[_]SV4[_]Demo%'
+    THROW 51004,N'Chỉ chạy demo trên CSDL BadmintonShop_SV4_Test_* hoặc BadmintonShop_SV4_Demo*.',1;
 SET XACT_ABORT ON;
 BEGIN TRY
     BEGIN TRANSACTION;
@@ -24,6 +26,17 @@ BEGIN TRY
     INSERT NhaCungCap(TenNCC) VALUES(N'[SV4-DEMO] Nhà cung cấp minh họa');SET @ncc=SCOPE_IDENTITY();
     INSERT PhieuNhap(NgayNhap,MaNCC,MaNV) VALUES(DATEADD(month,-12,GETDATE()),@ncc,@nv);SET @pn=SCOPE_IDENTITY();
     INSERT ChiTietPhieuNhap(MaPN,MaSP,SoLuong,DonGia) VALUES(@pn,@sp1,200,350000),(@pn,@sp2,500,10000);
+    -- Offers are only for the isolated demo; never create accounts or write to the store database.
+    DECLARE @km int;
+    INSERT CTKM(TenCTKM,NgayBatDau,NgayKetThuc,LoaiKM)
+        VALUES(N'[SV4-DEMO] Giảm vợt 10%',CAST(GETDATE() AS date),DATEADD(day,30,CAST(GETDATE() AS date)),'SANPHAM');
+    SET @km=SCOPE_IDENTITY();INSERT KM_TheoSP(MaCTKM,MaSP,PhanTramGG) VALUES(@km,@sp1,10);
+    INSERT CTKM(TenCTKM,NgayBatDau,NgayKetThuc,LoaiKM)
+        VALUES(N'[SV4-DEMO] Hóa đơn từ 1 triệu',CAST(GETDATE() AS date),DATEADD(day,30,CAST(GETDATE() AS date)),'HOADON');
+    SET @km=SCOPE_IDENTITY();INSERT KM_TheoHD(MaCTKM,TongTienToiThieu,PhanTramGG) VALUES(@km,1000000,5);
+    INSERT CTKM(TenCTKM,NgayBatDau,NgayKetThuc,LoaiKM)
+        VALUES(N'[SV4-DEMO] Voucher 15%',CAST(GETDATE() AS date),DATEADD(day,30,CAST(GETDATE() AS date)),'VOUCHER');
+    SET @km=SCOPE_IDENTITY();INSERT KM_TheoVoucher(MaCTKM,MaVoucher,PhanTramGG,SoLuong) VALUES(@km,'SV4DEMO15',15,30);
     DECLARE @i int=0;
     WHILE @i<12
     BEGIN

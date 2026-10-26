@@ -1,0 +1,45 @@
+PASS U01 required name / trim / length
+PASS U02 money range and whole dong
+PASS U03 all 25 state pairs
+PASS U04 role matrix and session
+PASS U05 relative image safety
+PASS U06 allocation rounding tie and zero
+PASS U07 allocation 1000 random and large money
+PASS U08 report complete only / counts / quantities / category sum
+PASS U09 empty report
+PASS U10 constructors safe without DB or login
+PASS U11 XLSX roundtrip and OpenXML schema
+PASS U12 PDF report / invoice / empty / multipage reopen
+PASS U13 image decode / reencode / bad / missing / size limit
+PASS GUI read-only SQL connection
+FAIL GUI open/read Tổng quan: System.Exception: Expected {Width=1920, Height=1080}, actual {Width=1556, Height=884}
+   at Program.Eq[T](T expected, T actual) in C:\Users\Khiem\.codex\worktrees\sv4-final-integration\BadmintonShop\tests\BadmintonShop.SV4.Checks\Program.cs:line 55
+   at Program.<>c__DisplayClass54_1.<UiReadOnly>b__8() in C:\Users\Khiem\.codex\worktrees\sv4-final-integration\BadmintonShop\tests\BadmintonShop.SV4.Checks\UiReadOnly.cs:line 37
+   at Program.Test(String ten, Action a) in C:\Users\Khiem\.codex\worktrees\sv4-final-integration\BadmintonShop\tests\BadmintonShop.SV4.Checks\Program.cs:line 54
+FAIL GUI open/read Sản phẩm: System.Exception: Expected {Width=1920, Height=1080}, actual {Width=1556, Height=884}
+   at Program.Eq[T](T expected, T actual) in C:\Users\Khiem\.codex\worktrees\sv4-final-integration\BadmintonShop\tests\BadmintonShop.SV4.Checks\Program.cs:line 55
+   at Program.<>c__DisplayClass54_1.<UiReadOnly>b__8() in C:\Users\Khiem\.codex\worktrees\sv4-final-integration\BadmintonShop\tests\BadmintonShop.SV4.Checks\UiReadOnly.cs:line 37
+   at Program.Test(String ten, Action a) in C:\Users\Khiem\.codex\worktrees\sv4-final-integration\BadmintonShop\tests\BadmintonShop.SV4.Checks\Program.cs:line 54
+FAIL GUI open/read Danh mục: System.Exception: Expected {Width=1920, Height=1080}, actual {Width=1556, Height=884}
+   at Program.Eq[T](T expected, T actual) in C:\Users\Khiem\.codex\worktrees\sv4-final-integration\BadmintonShop\tests\BadmintonShop.SV4.Checks\Program.cs:line 55
+   at Program.<>c__DisplayClass54_1.<UiReadOnly>b__8() in C:\Users\Khiem\.codex\worktrees\sv4-final-integration\BadmintonShop\tests\BadmintonShop.SV4.Checks\UiReadOnly.cs:line 37
+   at Program.Test(String ten, Action a) in C:\Users\Khiem\.codex\worktrees\sv4-final-integration\BadmintonShop\tests\BadmintonShop.SV4.Checks\Program.cs:line 54
+FAIL GUI open/read Đơn hàng: System.Exception: Expected {Width=1920, Height=1080}, actual {Width=1556, Height=884}
+   at Program.Eq[T](T expected, T actual) in C:\Users\Khiem\.codex\worktrees\sv4-final-integration\BadmintonShop\tests\BadmintonShop.SV4.Checks\Program.cs:line 55
+   at Program.<>c__DisplayClass54_1.<UiReadOnly>b__8() in C:\Users\Khiem\.codex\worktrees\sv4-final-integration\BadmintonShop\tests\BadmintonShop.SV4.Checks\UiReadOnly.cs:line 37
+   at Program.Test(String ten, Action a) in C:\Users\Khiem\.codex\worktrees\sv4-final-integration\BadmintonShop\tests\BadmintonShop.SV4.Checks\Program.cs:line 54
+FAIL GUI open/read Bán tại quầy: System.Exception: Expected {Width=1920, Height=1080}, actual {Width=1556, Height=884}
+   at Program.Eq[T](T expected, T actual) in C:\Users\Khiem\.codex\worktrees\sv4-final-integration\BadmintonShop\tests\BadmintonShop.SV4.Checks\Program.cs:line 55
+   at Program.<>c__DisplayClass54_1.<UiReadOnly>b__8() in C:\Users\Khiem\.codex\worktrees\sv4-final-integration\BadmintonShop\tests\BadmintonShop.SV4.Checks\UiReadOnly.cs:line 37
+   at Program.Test(String ten, Action a) in C:\Users\Khiem\.codex\worktrees\sv4-final-integration\BadmintonShop\tests\BadmintonShop.SV4.Checks\Program.cs:line 54
+FAIL GUI open/read Thống kê: System.Exception: Expected {Width=1920, Height=1080}, actual {Width=1556, Height=884}
+   at Program.Eq[T](T expected, T actual) in C:\Users\Khiem\.codex\worktrees\sv4-final-integration\BadmintonShop\tests\BadmintonShop.SV4.Checks\Program.cs:line 55
+   at Program.<>c__DisplayClass54_1.<UiReadOnly>b__8() in C:\Users\Khiem\.codex\worktrees\sv4-final-integration\BadmintonShop\tests\BadmintonShop.SV4.Checks\UiReadOnly.cs:line 37
+   at Program.Test(String ten, Action a) in C:\Users\Khiem\.codex\worktrees\sv4-final-integration\BadmintonShop\tests\BadmintonShop.SV4.Checks\Program.cs:line 54
+PASS GUI single instance / POS cart survives navigation
+PASS GUI category draft survives navigation
+PASS GUI product editor read-only
+PASS GUI manager sidebar permissions
+PASS GUI simulated scale 125/150 percent
+PASS GUI employee sidebar permissions
+RESULT: 20 passed, 6 failed. Output: C:\Users\Khiem\AppData\Local\Temp\BadmintonShop-SV4-Checks\20261026-212452

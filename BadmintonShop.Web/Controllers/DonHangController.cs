@@ -1,4 +1,4 @@
-using BadmintonShop.Core.DataAccess;
+﻿using BadmintonShop.Core.DataAccess;
 using BadmintonShop.Core.Services;
 using BadmintonShop.Web.Infrastructure;
 using BadmintonShop.Web.Models;
@@ -24,7 +24,7 @@ public class DonHangController : Controller
     {
         var hd = _donHang.LayDonCuaKhach(id, MaKH);
         if (hd == null) return NotFound();
-        return View(new ChiTietDonViewModel { Don = hd, Dong = _donHang.LayChiTietHienThi(id) });
+        return View(new ChiTietDonViewModel { Don = hd, Dong = _donHang.LayChiTietHienThi(id,MaKH) });
     }
 
     // TV3: khach huy don khi con "Cho xac nhan"

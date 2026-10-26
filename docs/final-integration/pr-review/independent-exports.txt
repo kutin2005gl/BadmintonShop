@@ -1,0 +1,3 @@
+PASS independent integration exports: 6 sheets, 6 PDF pages; completed revenue=13172279; historical invoice gross/product/invoice/net discounts match.
+PASS independent filtered exports: all 12 SQL/table/XLSX/PDF combinations match.
+PASS native UI exports: SQL/table/Excel/PDF total=46602300; saved POS42 discounts/cash/change match.

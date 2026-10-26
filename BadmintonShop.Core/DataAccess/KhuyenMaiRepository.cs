@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using BadmintonShop.Core.Models;
 using Microsoft.Data.SqlClient;
 
@@ -10,6 +10,23 @@ namespace BadmintonShop.Core.DataAccess;
 /// </summary>
 public class KhuyenMaiRepository
 {
+    private readonly SqlConnection? connection;
+    private readonly SqlTransaction? transaction;
+    public KhuyenMaiRepository() { }
+    // SV4: bound repository never opens another connection during checkout.
+    public KhuyenMaiRepository(SqlConnection connection, SqlTransaction transaction)
+    { this.connection=connection;this.transaction=transaction; }
+    private DataTable Query(string sql,params SqlParameter[] parameters)
+    {
+        if(connection==null)return DbHelper.ExecuteQuery(sql,parameters);
+        using var cmd=new SqlCommand(sql,connection,transaction);cmd.Parameters.AddRange(parameters);
+        using var adapter=new SqlDataAdapter(cmd);var result=new DataTable();adapter.Fill(result);return result;
+    }
+    private object? Scalar(string sql,params SqlParameter[] parameters)
+    {
+        if(connection==null)return DbHelper.ExecuteScalar(sql,parameters);
+        using var cmd=new SqlCommand(sql,connection,transaction);cmd.Parameters.AddRange(parameters);return cmd.ExecuteScalar();
+    }
     // TV3: % giam cao nhat dang ap dung cho 1 san pham vao ngay 'ngay', khong co tra ve 0
     public decimal LayPhanTramSanPham(int maSP, DateTime ngay)
     {
@@ -17,7 +34,7 @@ public class KhuyenMaiRepository
                              FROM KM_TheoSP sp JOIN CTKM k ON k.MaCTKM = sp.MaCTKM
                              WHERE sp.MaSP = @sp AND k.LoaiKM = 'SANPHAM' AND k.TrangThai = 1
                                AND @ngay BETWEEN k.NgayBatDau AND k.NgayKetThuc";
-        var kq = DbHelper.ExecuteScalar(sql,
+        var kq = Scalar(sql,
             new SqlParameter("@sp", maSP),
             new SqlParameter("@ngay", SqlDbType.Date) { Value = ngay.Date });
         return kq is decimal d ? d : 0m;
@@ -31,8 +48,8 @@ public class KhuyenMaiRepository
                              WHERE k.LoaiKM = 'HOADON' AND k.TrangThai = 1
                                AND @ngay BETWEEN k.NgayBatDau AND k.NgayKetThuc
                                AND h.TongTienToiThieu <= @tong
-                             ORDER BY h.TongTienToiThieu DESC, h.PhanTramGG DESC";
-        var dt = DbHelper.ExecuteQuery(sql,
+                             ORDER BY h.TongTienToiThieu DESC, h.PhanTramGG DESC, h.MaCTKM";
+        var dt = Query(sql,
             new SqlParameter("@tong", tongTienHang),
             new SqlParameter("@ngay", SqlDbType.Date) { Value = ngay.Date });
         if (dt.Rows.Count == 0) return null;
@@ -48,12 +65,13 @@ public class KhuyenMaiRepository
     // TV3: lay voucher con hieu luc (CTKM dang bat, dung ngay, DaDung < SoLuong); sai / het han / het luot tra ve null
     public KMTheoVoucher? LayVoucherHopLe(string maVoucher, DateTime ngay)
     {
-        const string sql = @"SELECT v.MaCTKM, v.MaVoucher, v.PhanTramGG, v.SoLuong, v.DaDung
-                             FROM KM_TheoVoucher v JOIN CTKM k ON k.MaCTKM = v.MaCTKM
+        if(string.IsNullOrWhiteSpace(maVoucher) || maVoucher.Trim().Length>30)return null;
+        string sql = $@"SELECT v.MaCTKM, v.MaVoucher, v.PhanTramGG, v.SoLuong, v.DaDung
+                             FROM KM_TheoVoucher v {(transaction!=null?"WITH (UPDLOCK,HOLDLOCK)":"")} JOIN CTKM k ON k.MaCTKM = v.MaCTKM
                              WHERE v.MaVoucher = @ma AND k.LoaiKM = 'VOUCHER' AND k.TrangThai = 1
                                AND @ngay BETWEEN k.NgayBatDau AND k.NgayKetThuc
                                AND v.DaDung < v.SoLuong";
-        var dt = DbHelper.ExecuteQuery(sql,
+        var dt = Query(sql,
             new SqlParameter("@ma", SqlDbType.VarChar, 30) { Value = (maVoucher ?? "").Trim().ToUpperInvariant() },
             new SqlParameter("@ngay", SqlDbType.Date) { Value = ngay.Date });
         if (dt.Rows.Count == 0) return null;
@@ -68,12 +86,31 @@ public class KhuyenMaiRepository
         };
     }
 
-    // TV3: tang DaDung cua voucher them 1 BEN TRONG transaction dat hang; false = vua het luot (co nguoi dung truoc)
-    public bool DungVoucher(SqlConnection conn, SqlTransaction tran, string maVoucher)
+    // SV4: explain invalid vouchers from the same repository/transaction used by Web and POS.
+    public string? LoiVoucher(string maVoucher, DateTime ngay)
+    {
+        if (string.IsNullOrWhiteSpace(maVoucher) || maVoucher.Trim().Length > 30)
+            return "Mã voucher không hợp lệ (tối đa 30 ký tự).";
+        var rows = Query(@"SELECT k.TrangThai,k.LoaiKM,k.NgayBatDau,k.NgayKetThuc,v.SoLuong,v.DaDung
+            FROM KM_TheoVoucher v JOIN CTKM k ON k.MaCTKM=v.MaCTKM WHERE v.MaVoucher=@ma",
+            new SqlParameter("@ma", SqlDbType.VarChar, 30) { Value = maVoucher.Trim().ToUpperInvariant() });
+        if (rows.Rows.Count == 0) return "Mã voucher không tồn tại.";
+        var r = rows.Rows[0];
+        if (!r.Field<bool>("TrangThai") || r.Field<string>("LoaiKM") != "VOUCHER") return "Voucher đã ngừng áp dụng.";
+        if (ngay.Date < r.Field<DateTime>("NgayBatDau").Date) return $"Voucher chưa đến hạn; bắt đầu {r.Field<DateTime>("NgayBatDau"):dd/MM/yyyy}.";
+        if (ngay.Date > r.Field<DateTime>("NgayKetThuc").Date) return $"Voucher đã hết hạn ngày {r.Field<DateTime>("NgayKetThuc"):dd/MM/yyyy}.";
+        return r.Field<int>("DaDung") >= r.Field<int>("SoLuong") ? "Voucher đã hết lượt sử dụng." : null;
+    }
+
+    // TV3/SV4: increment only within checkout transaction; false means no longer eligible.
+    public bool DungVoucher(SqlConnection conn, SqlTransaction tran, string maVoucher, DateTime? ngay=null, int? maCTKM=null)
     {
         using var cmd = new SqlCommand(
-            "UPDATE KM_TheoVoucher SET DaDung = DaDung + 1 WHERE MaVoucher = @ma AND DaDung < SoLuong", conn, tran);
+            @"UPDATE v SET DaDung = v.DaDung + 1 FROM KM_TheoVoucher v JOIN CTKM k ON k.MaCTKM=v.MaCTKM
+              WHERE v.MaVoucher=@ma AND v.DaDung<v.SoLuong AND k.TrangThai=1 AND k.LoaiKM='VOUCHER'
+                AND @ngay BETWEEN k.NgayBatDau AND k.NgayKetThuc AND (@km IS NULL OR v.MaCTKM=@km)", conn, tran);
         cmd.Parameters.AddWithValue("@ma", maVoucher.Trim().ToUpperInvariant());
-        return cmd.ExecuteNonQuery() > 0;
+        cmd.Parameters.AddWithValue("@ngay",(ngay??DateTime.Now).Date);cmd.Parameters.AddWithValue("@km",DbHelper.GiaTriHoacNull(maCTKM));
+        return cmd.ExecuteNonQuery() == 1;
     }
 }

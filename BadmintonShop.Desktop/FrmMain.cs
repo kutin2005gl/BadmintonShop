@@ -20,6 +20,7 @@ public partial class FrmMain : Form
     // TV1: khoi tao form chinh, hien thong tin nguoi dung va ap dung phan quyen menu
     public FrmMain()
     {
+        LifecycleDiagnostics.Track(this);
         InitializeComponent();
         lblNguoiDung.Text = $"Người dùng: {PhienDangNhap.HoTen} ({PhienDangNhap.TenDangNhap})";
         lblVaiTro.Text = $"   |   Vai trò: {PhanQuyen.TenVaiTro(PhienDangNhap.VaiTro)}";

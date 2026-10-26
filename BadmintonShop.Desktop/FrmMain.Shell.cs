@@ -74,21 +74,31 @@ public partial class FrmMain
     }
     private void HienTrang(Type type, Func<Form> create)
     {
+        if(IsDisposed || Disposing)return;
+        LifecycleDiagnostics.Record("NAV begin "+type.Name);
         if (!pages.TryGetValue(type, out var page) || page.IsDisposed)
         {
             page = create(); pages[type] = page;
+            var ownedPage=page;
+            void RemoveClosed(object? sender,EventArgs args)
+            {
+                if(pages.TryGetValue(type,out var cached) && ReferenceEquals(cached,ownedPage))pages.Remove(type);
+                if(ReferenceEquals(currentPage,ownedPage))currentPage=null;
+            }
+            page.FormClosed+=RemoveClosed;page.Disposed+=RemoveClosed;
             ShopTheme.Apply(page); page.TopLevel = false; page.FormBorderStyle = FormBorderStyle.None;
             page.AutoScroll = true; workspace.Controls.Add(page);
         }
-        currentPage?.Hide(); currentPage = page;
+        if(currentPage is { IsDisposed:false,Disposing:false })currentPage.Hide(); currentPage = page;
         screenTitle.Text = type == typeof(FrmPOS) ? "Bán tại quầy" : page.Text;
         screenTitle.AutoEllipsis = true;
         foreach (var (key, button) in navigation) button.BackColor = key == type ? Color.FromArgb(49, 122, 90) : ShopTheme.Green;
         BoTriTrang(); page.Show(); page.BringToFront();
+        LifecycleDiagnostics.Record("NAV shown "+type.Name);
     }
     private void BoTriTrang()
     {
-        if (currentPage == null) return;
+        if (IsDisposed || Disposing || currentPage == null || currentPage.IsDisposed || currentPage.Disposing) return;
         workspace.AutoScrollPosition = Point.Empty;
         var min = currentPage.MinimumSize;
         currentPage.Bounds = new Rectangle(0, 0, Math.Max(workspace.ClientSize.Width - 2, Math.Max(780, min.Width)), Math.Max(workspace.ClientSize.Height - 2, Math.Max(540, min.Height)));

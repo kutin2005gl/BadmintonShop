@@ -1,29 +1,34 @@
-# Bản nháp tổng kết SV4
+# Tổng kết SV4 — 26/10/2026
 
-## Kết quả đã triển khai
+Nhánh `feature/sv4-final-integration`, nền `origin/develop` tại `920a576`. Tận dụng phần tích hợp đã có tại `6e7657a` trên `feature/sv4-desktop`; các chỉnh sửa lần này chưa commit. Không lấy số liệu kiểm tra ngày 18/10 hoặc 22/10 làm kết quả chạy ngày 26/10.
 
-SV4 bổ sung năm nhóm menu desktop: danh mục, sản phẩm, đơn hàng, POS, thống kê. Danh mục có CRUD và chặn xóa khi đang được dùng. Sản phẩm quản lý thông tin/ảnh, lọc/sắp xếp, ngừng bán giữ lịch sử; tồn chỉ đọc, sản phẩm mới 0 và tăng qua phiếu nhập SV1.
+## Kết quả triển khai
 
-Đơn Online có luồng trạng thái có điều kiện, lý do hủy, kiểm stale update và dùng trigger hoàn kho. POS hỗ trợ khách vãng lai, tiền mặt/tiền thừa, transaction header + chi tiết và token chống ghi lặp. Khuyến mãi chưa sẵn sàng được nêu rõ ở giao diện.
+- Sản phẩm/danh mục: CRUD, kiểm đầu vào, ảnh tương đối an toàn, ngừng bán giữ lịch sử, lọc/tìm/cảnh báo tồn. Sản phẩm mới tồn 0; nhập hàng qua chức năng SV1 và trigger.
+- Đơn Online: so trạng thái kỳ vọng, xác nhận → giao → hoàn thành; nhân viên hủy trước giao, bắt buộc lý do. Khách chỉ hủy đúng đơn của mình khi Chờ xác nhận. Trigger hoàn kho đúng một lần.
+- POS: cùng `GioHangService`/`TinhKhuyenMaiService` với web; giảm SP trước rồi chọn một ưu đãi cấp hóa đơn/voucher. Hiển thị tiền hàng, hai cấp giảm, tổng, tiền khách và tiền thừa. Mã sai/chưa đến hạn/hết hạn/hết lượt/ngừng áp dụng có lý do riêng.
+- Thanh toán đọc lại giá, trạng thái bán, tồn, khuyến mãi trong Serializable transaction; chỉ lưu sau khi báo giá khớp. Voucher tăng lượt atomic cùng header/chi tiết. Không tự trừ tồn/tổng ngoài trigger.
+- Retry POS dùng token và SHA-256 yêu cầu. Giao dịch đã lưu trả lại mã hóa đơn trước khi tính khuyến mãi hiện tại; đổi payload bị từ chối. Giữ nguyên giỏ/token khi lỗi; thành công mới xóa giỏ.
+- Báo cáo có bộ lọc ngày/tháng/năm/khoảng, loại bán, bảng/biểu đồ và XLSX/PDF thật. Doanh thu chỉ Hoàn thành, lấy `TongTien` đã lưu; phân bổ danh mục không giảm hai lần.
+- Sidebar, tải nền, cache trang và giữ bản nháp tiếp tục được dùng. Bảo vệ callback sau đóng và log vòng đời được giữ từ đợt điều tra trước.
 
-Báo cáo có ngày/tháng/năm/khoảng ngày, loại bán, số lượng bán, danh mục, số đơn theo trạng thái; có bảng, biểu đồ, XLSX/PDF thật và xuất lại hóa đơn. Tổng phân bổ danh mục khớp net hóa đơn đến đồng, không giảm hai lần. Script demo riêng có 12 tháng giao dịch tại quầy, nhập kho trước bán và đơn Online để kiểm luồng độc lập.
+## Kiểm chứng và giới hạn
 
-Repository cũ của sản phẩm/danh mục được mở rộng, không tạo bản trùng. Một HoaDonRepository dùng chung với SV3. Constructor form không truy cập DB, mỗi form có kiểm quyền; SQL có tham số nằm ở Core/DataAccess. Trigger SV1 và chức năng web/nhân sự/nhập hàng/sao lưu được giữ nguyên.
+Kết quả chạy mới, môi trường, ảnh và file xuất: [biên bản 26/10](../final-integration/README.md). CSDL test luôn có tên riêng; CSDL người dùng chỉ được đọc metadata. CSDL đang cấu hình còn thiếu migration 04/06, do đó cần cập nhật có chủ đích trước khi dùng POS tích hợp.
 
-Đã có bộ kiểm tra thực thi unit, SQL LocalDB integration, yêu cầu đồng thời, xuất file và render WinForms. Số liệu và trạng thái cụ thể xem [biên bản kết quả](ket-qua-kiem-thu-sv4.md), không dùng bảng tự đánh giá 100% của mẫu phân công làm kết quả thực tế.
+HTTP test chạy MVC/Kestrel thật với cookie/anti-forgery và đăng nhập fixture trong test host; không phải E2E trình duyệt đăng nhập/catalog SV2. Chưa có bằng chứng SV2 kiểm thử chéo; [checklist bàn giao](checklist-sv2-desktop.md) vẫn để trống.
 
-## Hạn chế còn lại
+Ảnh là `Show/OnLoad + DrawToBitmap` của control thật tại 1366×768 và 1556×884; 1920×1080 bị Windows giới hạn nên chưa xác minh. Scale 125%/150% là mô phỏng `Control.Scale`, chưa đổi DPI Windows, chưa xác minh Designer, máy in và mọi nhánh hộp thoại. Chưa fault injection mạng đúng khoảng sau commit/trước phản hồi, dù retry sau commit và rollback giữa transaction đã được kiểm tra.
 
-- TinhKhuyenMaiService SV3 còn là khung; POS hiện giá thường. Cần tích hợp ưu đãi trong transaction và kiểm lượt voucher trước khi đưa vào dùng chung.
-- Web đặt hàng, tài khoản/catalog/đánh giá và email chưa có trên nhánh nền này; chưa kiểm E2E giao dịch web → desktop, chưa kiểm thử chéo SV2.
-- Ảnh dùng filesystem cấu hình chung; chưa có upload API/object storage hay dọn ảnh mồ côi. SV2 cần mount đường dẫn công khai và fallback.
-- Quy tắc nhân viên hủy trước giao cần cả nhóm duyệt khi tích hợp; chưa xử lý trả hàng/hoàn tiền sau hoàn thành hoặc hủy POS hoàn thành.
-- Doanh thu phân kỳ theo NgayLap của đơn hiện Hoàn thành. Chưa có ngày hoàn thành hoặc snapshot tên/danh mục để giữ nguyên báo cáo sau đổi sản phẩm/danh mục.
-- Truy vấn desktop còn đồng bộ, đọc tập dữ liệu phù hợp quy mô đồ án. Báo cáo Serializable có thể chặn ghi khi dữ liệu lớn; chưa benchmark tải lớn.
-- Render form và một số thao tác điều khiển đã chạy; chưa thay thế kiểm thủ công các hộp thoại, DPI, trợ năng, máy in và Visual Studio Designer.
-- Bộ kiểm tra mở file bằng thư viện và kiểm cấu trúc độc lập, không tự động thao tác Microsoft Excel/Adobe Reader hoặc gửi máy in thật.
-- Chưa là phần mềm bán hàng triển khai thương mại, chưa có hóa đơn điện tử thuế/audit log đầy đủ.
+Lỗi `Dispose/CreateHandle` chưa tái hiện ở đợt debugger 22/10; chưa xác định lời gọi gốc, không khẳng định đã sửa dứt điểm. Giữ [log và giới hạn điều tra](../lifecycle-diagnostics/README.md).
 
-## Hướng phát triển
+## Phối hợp và hướng phát triển
 
-Hoàn thiện tích hợp SV2/SV3 và kiểm thử chéo trước tiên; bổ sung ngày hoàn thành, snapshot sản phẩm/danh mục và audit người chuyển trạng thái. Tách dịch vụ thanh toán nghiệp vụ dùng chung để hỗ trợ ưu đãi/cổng thanh toán, mở rộng idempotency cho web. Bổ sung trả hàng/hoàn tiền có kiểm quyền và phiếu kho. Dùng API ảnh/object storage khi triển khai nhiều máy. Tối ưu truy vấn bất đồng bộ/phân trang, báo cáo snapshot isolation sau khi thống nhất với SV1. Bổ sung kiểm thử E2E, fault injection và kiểm UI/DPI trên máy demo.
+SV1 review migration, quyền và trigger trước triển khai; SV3 xác nhận quy tắc ưu đãi/hủy (hiện không hoàn lượt voucher khi hủy), email và idempotency web; SV2 hoàn thiện login/catalog/mount kho ảnh và kiểm thử chéo desktop. Không mở rộng trả hàng, thanh toán thật hoặc hóa đơn điện tử.
+
+Doanh thu hiện phân kỳ theo NgayLap của đơn đang Hoàn thành; chưa có ngày hoàn thành và snapshot tên/danh mục. Ảnh dùng filesystem chung, chưa có object storage/dọn ảnh mồ côi. Query chạy nền trên desktop nhưng chưa benchmark dữ liệu lớn; Serializable có thể chặn ghi. Đây là giới hạn đồ án, không tuyên bố sẵn sàng vận hành thương mại.
+
+
+## Rà cuối trước PR, sau chuyển ổ D
+
+Worktree sử dụng: `D:\CodexWorktrees\BadmintonShop-sv4`, nhánh `feature/sv4-final-integration`. [Kết quả và commit mới](../final-integration/pr-review/README.md) có 74/74 integration, 15/15 install, kiểm độc lập 12 bộ lọc và demo cửa sổ thật. Đã sửa chiều cao tóm tắt POS để không cắt dòng giảm giá và giữ thông tin hóa đơn gần nhất sau tải lại. 1920×1080, DPI Windows thật, browser E2E và kiểm chéo SV2 vẫn chưa xác minh. Được phép commit/push/mở PR theo yêu cầu mới, không merge.

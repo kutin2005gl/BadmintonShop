@@ -1,0 +1,32 @@
+PASS U01 required name / trim / length
+PASS U02 money range and whole dong
+PASS U03 all 25 state pairs
+PASS U04 role matrix and session
+PASS U05 relative image safety
+PASS U06 allocation rounding tie and zero
+PASS U07 allocation 1000 random and large money
+PASS U08 report complete only / counts / quantities / category sum
+PASS U09 empty report
+PASS U10 constructors safe without DB or login
+PASS U11 XLSX roundtrip and OpenXML schema
+PASS U12 PDF report / invoice / empty / multipage reopen
+PASS U13 image decode / reencode / bad / missing / size limit
+PASS L01 closed cache entry/current page removed and recreated
+PASS L02 close page with an in-flight load: no bind after close
+PASS L03 forced logout during load: old owner/page disposed, old callback skipped
+PASS L04 hide during load retains page; callback runs on original UI thread
+PASS L05 disposing hidden page with pending query releases callback
+PASS L06 diagnostic probe captures full first-chance stack (synthetic, not the reported failure)
+PASS GUI read-only SQL connection
+PASS GUI open/read Tổng quan
+PASS GUI open/read Sản phẩm
+PASS GUI open/read Danh mục
+PASS GUI open/read Đơn hàng
+PASS GUI open/read Bán tại quầy
+PASS GUI open/read Thống kê
+PASS GUI single instance / POS cart survives navigation
+PASS GUI category draft survives navigation
+PASS GUI product editor read-only
+PASS GUI simulated scale 125/150 percent
+PASS GUI employee sidebar permissions
+RESULT: 31 passed, 0 failed. Output: C:\Users\Khiem\AppData\Local\Temp\BadmintonShop-SV4-Checks\20261022-165945

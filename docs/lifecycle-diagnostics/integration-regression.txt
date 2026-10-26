@@ -1,0 +1,71 @@
+PASS U01 required name / trim / length
+PASS U02 money range and whole dong
+PASS U03 all 25 state pairs
+PASS U04 role matrix and session
+PASS U05 relative image safety
+PASS U06 allocation rounding tie and zero
+PASS U07 allocation 1000 random and large money
+PASS U08 report complete only / counts / quantities / category sum
+PASS U09 empty report
+PASS U10 constructors safe without DB or login
+PASS U11 XLSX roundtrip and OpenXML schema
+PASS U12 PDF report / invoice / empty / multipage reopen
+PASS U13 image decode / reencode / bad / missing / size limit
+Isolated test database: BadmintonShop_SV4_Test_20261022170125_cf1aea86
+PASS I01 migration repeat / new stock always zero
+PASS I02 category CRUD / duplicate / used delete
+PASS I03 invalid products / imports / edits preserve stock
+PASS I04 POS success / trigger / cash / walk-in / retry
+PASS I05 POS invalid/price/inactive/insufficient leaves no partial rows
+PASS I06 trigger rollback after header and first valid line
+PASS I07 cancel reason / once / stale / no reopen
+PASS I08 online sequence / stale update / no cancel after shipping
+PASS I09 concurrent identical POS only once
+PASS I10 competing orders for final stock
+PASS I11 order date/state/type/search filters
+PASS I12 independent SV4 demo / rerun / monthly data / filters
+PASS I13 simultaneous cancel returns stock once
+PASS I14 date inclusive end / empty date / product read compatibility
+PASS I15 customer name/phone/email filters and saved receipt
+PASS I16 product and invoice discounts applied once in SQL/report
+PASS P01 no promotion / shared Web-POS calculator
+PASS P02 product percent / round line once like computed SQL
+PASS P03 invoice tiers / highest qualified threshold
+PASS P04 voucher beats invoice / equal tie selects voucher / normalized code
+PASS P05 invoice beats voucher / no stacking / changed losing voucher rejected on retry
+PASS P06 product then invoice OR voucher / discount applied once
+PASS P07 invalid / expired / exhausted / disabled voucher cannot silently checkout
+PASS P08 concurrent last voucher across different products
+PASS P09 concurrent identical token / retry after price-stock-expiry changes
+PASS P10 changed price requires a new confirmation before collection
+PASS P11 changed promotion / effectiveness / inactive product / stock / insufficient cash
+PASS P12 rollback after voucher increment and header failure
+PASS P13 injected second-detail failure rolls back voucher/header/first-line/stock
+PASS P14 Web create / Desktop progress / Web ownership and historical prices
+PASS P15 customer cancel vs staff confirm / mandatory reason / stock restored once / voucher policy unchanged
+PASS P16 Web and POS race for final product
+PASS P17 SQL/details/report/category-allocation/Excel/PDF reconciliation
+PASS P18 real WinForms voucher apply/remove and totals (no payment click)
+PASS P19 repeat Web/POS last-stock interleavings eight times without SQL deadlocks
+PASS H01 live Kestrel MVC checkout / anti-forgery / ownership / Desktop state / stale quote
+PASS GUI render FrmDanhMuc
+PASS GUI render FrmSanPham
+PASS GUI render FrmSanPhamSua
+PASS GUI render FrmDonHang
+PASS GUI render FrmPOS
+PASS GUI render FrmThongKe
+PASS GUI read-only SQL connection
+PASS GUI open/read Tổng quan
+PASS GUI open/read Sản phẩm
+PASS GUI open/read Danh mục
+PASS GUI open/read Đơn hàng
+PASS GUI open/read Bán tại quầy
+PASS GUI open/read Thống kê
+PASS GUI single instance / POS cart survives navigation
+PASS GUI category draft survives navigation
+PASS GUI product editor read-only
+PASS GUI simulated scale 125/150 percent
+PASS GUI employee sidebar permissions
+Final SQL completed revenue: 13172235
+PASS F01 final database and persisted exports after all Web/Desktop tests
+RESULT: 68 passed, 0 failed. Output: C:\Users\Khiem\AppData\Local\Temp\BadmintonShop-SV4-Checks\20261022-170124

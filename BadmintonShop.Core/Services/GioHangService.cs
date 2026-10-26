@@ -1,3 +1,4 @@
+﻿using Microsoft.Data.SqlClient;
 using BadmintonShop.Core.DataAccess;
 using BadmintonShop.Core.Models;
 
@@ -22,15 +23,25 @@ public class GioHangService
 
     // TV3: tinh toan bo gio hang tu danh sach (MaSP, SoLuong) + ma voucher tuy chon
     public KetQuaGioHang Tinh(IEnumerable<(int MaSP, int SoLuong)> dongTho, string? maVoucher = null, DateTime? ngay = null)
-    {
-        var bayGio = ngay ?? DateTime.Now;
-        var kq = new KetQuaGioHang();
+        => TinhCore(dongTho,maVoucher,ngay??DateTime.Now,_sanPham.LayTheoMa,false);
 
-        foreach (var nhom in dongTho.Where(d => d.SoLuong > 0).GroupBy(d => d.MaSP))
+    // SV4: same calculator and SV3 rules, using locked products and a transaction-bound promotion repository.
+    internal static KetQuaGioHang TinhTrongGiaoDich(SqlConnection c,SqlTransaction t,IEnumerable<(int MaSP,int SoLuong)> rows,string? voucher,DateTime ngay)
+    {
+        var service=new GioHangService(new SanPhamRepository(),new TinhKhuyenMaiService(new KhuyenMaiRepository(c,t)));
+        return service.TinhCore(rows,voucher,ngay,id=>service._sanPham.LayTheoMa(id,c,t),true);
+    }
+    private KetQuaGioHang TinhCore(IEnumerable<(int MaSP,int SoLuong)> dongTho,string? maVoucher,DateTime bayGio,Func<int,SanPham?> doc,bool strict)
+    {
+        maVoucher=string.IsNullOrWhiteSpace(maVoucher)?null:maVoucher.Trim().ToUpperInvariant();
+        var kq = new KetQuaGioHang { VoucherYeuCau=maVoucher };
+
+        foreach (var nhom in dongTho.Where(d => d.SoLuong > 0).GroupBy(d => d.MaSP).OrderBy(g=>g.Key))
         {
-            var sp = _sanPham.LayTheoMa(nhom.Key);
+            var sp = doc(nhom.Key);
             if (sp == null || sp.TrangThai != "Đang bán")
             {
+                if(strict)throw new InvalidOperationException($"Sản phẩm {nhom.Key} không còn bán. Hãy xem lại giỏ.");
                 kq.CanhBao.Add($"Sản phẩm mã {nhom.Key} không còn bán nên đã được bỏ khỏi giỏ.");
                 continue;
             }
@@ -47,8 +58,9 @@ public class GioHangService
                 DonGia = sp.DonGiaBan,
                 PhanTramGiam = pt,
                 DonGiaSauGiam = _km.TinhGiaSauGiam(sp.DonGiaBan, pt),
-                ThanhTien = Math.Round(sl * sp.DonGiaBan * (1 - pt / 100m), 0, MidpointRounding.AwayFromZero),
+                ThanhTien = TinhKhuyenMaiService.TinhThanhTien(sl,sp.DonGiaBan,pt),
             };
+            if (!dong.DuHang && strict)throw new InvalidOperationException($"Sản phẩm {sp.MaSP} không đủ tồn kho. Hãy giảm số lượng.");
             if (!dong.DuHang)
                 kq.CanhBao.Add($"“{sp.TenSP}” chỉ còn {sp.SoLuongTon} sản phẩm, vui lòng giảm số lượng.");
             kq.Dong.Add(dong);
@@ -63,9 +75,8 @@ public class GioHangService
 
         if (!string.IsNullOrWhiteSpace(maVoucher))
         {
-            if (_km.TinhGiamTheoVoucher(maVoucher, kq.TongTienHang, bayGio) == null)
-                kq.LoiVoucher = "Mã giảm giá không hợp lệ, đã hết hạn hoặc hết lượt dùng.";
-            else if (kq.MaVoucher == null)
+            kq.LoiVoucher = _km.LoiVoucher(maVoucher, bayGio);
+            if (kq.LoiVoucher == null && kq.MaVoucher == null)
                 kq.CanhBao.Add("Đang áp dụng ưu đãi theo giá trị đơn hàng vì giảm nhiều hơn mã giảm giá.");
         }
         return kq;

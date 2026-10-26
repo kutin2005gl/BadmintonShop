@@ -14,12 +14,13 @@ internal static class ShopTheme
     public static readonly Color Muted = Color.FromArgb(100, 117, 110);
     public static readonly Color Line = Color.FromArgb(224, 233, 228);
     public static readonly CultureInfo Vietnamese = CultureInfo.GetCultureInfo("vi-VN");
-    private sealed class LoadState { public bool Busy; public Label? Status; }
+    private sealed class LoadState { public bool Busy; public bool Closed; public Label? Status; }
     private static readonly ConditionalWeakTable<Form, LoadState> States = new();
     public static bool IsBusy(Form form) => States.TryGetValue(form, out var state) && state.Busy;
 
     public static void Apply(Control root)
     {
+        if(root is Form tracked)LifecycleDiagnostics.Track(tracked);
         if (root is Form) root.Font = new Font("Segoe UI", 10);
         root.ForeColor = Ink;
         if (root is Form f)
@@ -75,15 +76,34 @@ internal static class ShopTheme
     }
     public static Label Title(string text, int size = 17) => new() { Text = text, AutoSize = true, Font = new Font("Segoe UI", size, FontStyle.Bold), ForeColor = Green, Margin = new Padding(4, 8, 4, 8) };
 
+    // Use the destination control's thread, even if a caller has no WinForms SynchronizationContext.
+    public static bool OnUi(Form form, Action action)
+    {
+        bool Ended()=>form.IsDisposed || form.Disposing || States.TryGetValue(form,out var state) && state.Closed;
+        if(Ended() || !form.IsHandleCreated)return false;
+        try
+        {
+            if(form.InvokeRequired)form.Invoke((Action)(()=> { if(!Ended())action(); }));
+            else action();
+            return !form.IsDisposed;
+        }
+        catch(InvalidOperationException ex) when(Ended() && !ex.Message.Contains("CreateHandle",StringComparison.OrdinalIgnoreCase))
+        { LifecycleDiagnostics.Record(form.GetType().Name+" skipped callback after close");return false; }
+    }
+
     // The repository runs off the UI thread. Inputs must be captured before calling this method.
     // Each screen serializes loads and remains mounted when hidden by navigation.
     public static async Task<bool> Load<T>(Form form, Func<T> query, Action<T> bind, Func<T, bool>? empty = null)
     {
         var state = States.GetOrCreateValue(form);
-        if (state.Busy || form.IsDisposed) return false;
+        if (state.Busy || state.Closed || form.IsDisposed || form.Disposing) return false;
+        LifecycleDiagnostics.Record(form.GetType().Name+" load begin");
         state.Busy = true;
         if (state.Status == null)
         {
+            LifecycleDiagnostics.Track(form);
+            form.FormClosed+=(_,_)=>state.Closed=true;
+            form.Disposed+=(_,_)=>state.Closed=true;
             state.Status = new Label { Dock = DockStyle.Bottom, Height = 34, Padding = new Padding(8), BackColor = Background, ForeColor = Muted };
             form.Controls.Add(state.Status);
         }
@@ -95,19 +115,21 @@ internal static class ShopTheme
         {
             var result = await Task.Run(query);
             if (form.IsDisposed) return false;
-            bind(result);
-            state.Status.Text = empty?.Invoke(result) == true ? "Chưa có dữ liệu phù hợp. Hãy thay đổi bộ lọc hoặc thêm dữ liệu." : $"Đã cập nhật lúc {DateTime.Now:HH:mm:ss}";
-            return true;
+            return OnUi(form,()=> {
+                bind(result);
+                state.Status.Text = empty?.Invoke(result) == true ? "Chưa có dữ liệu phù hợp. Hãy thay đổi bộ lọc hoặc thêm dữ liệu." : $"Đã cập nhật lúc {DateTime.Now:HH:mm:ss}";
+            });
         }
         catch (Exception ex)
         {
-            if (!form.IsDisposed) { state.Status.ForeColor = Color.Firebrick; state.Status.Text = "Lỗi: " + LoiCsdl.ThongBao(ex); state.Status.AutoEllipsis = true; }
+            OnUi(form,()=> { state.Status.ForeColor = Color.Firebrick; state.Status.Text = "Lỗi: " + LoiCsdl.ThongBao(ex.GetBaseException()); state.Status.AutoEllipsis = true; });
             return false;
         }
         finally
         {
+            OnUi(form,()=> { foreach (var item in controls) if (!item.Control.IsDisposed) item.Control.Enabled = item.Enabled; });
             state.Busy = false;
-            if (!form.IsDisposed) foreach (var item in controls) if (!item.Control.IsDisposed) item.Control.Enabled = item.Enabled;
+            LifecycleDiagnostics.Record(form.GetType().Name+" load end closed="+state.Closed);
         }
     }
 }

@@ -1,4 +1,4 @@
-namespace BadmintonShop.Core.Models;
+﻿namespace BadmintonShop.Core.Models;
 
 public class DongGioHang
 {
@@ -18,6 +18,9 @@ public class DongGioHang
 public class KetQuaGioHang
 {
     public List<DongGioHang> Dong { get; } = new();
+    public string? VoucherYeuCau { get; set; } // normalized input, including a valid voucher losing to an invoice offer
+    public decimal TienHangTruocGiam => Dong.Sum(d=>d.SoLuong*d.DonGia);
+    public decimal TienGiamSanPham => TienHangTruocGiam-TongTienHang;
     public decimal TongTienHang { get; set; }    // tong ThanhTien (da giam theo SP)
     public decimal TienGiamHoaDon { get; set; }  // giam theo bac hoa don hoac voucher
     public int? MaCTKM { get; set; }

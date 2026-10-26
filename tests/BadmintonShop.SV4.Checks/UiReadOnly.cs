@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Reflection;
 using System.Xml.Linq;
 using BadmintonShop.Core.DataAccess;
@@ -9,9 +9,9 @@ using Microsoft.Data.SqlClient;
 internal static partial class Program
 {
     // This mode only reads the configured store. It never submits save/payment/status actions.
-    private static void UiReadOnly()
+    private static void UiReadOnly(bool useCurrentDatabase=false)
     {
-        var connection = Environment.GetEnvironmentVariable("ConnectionStrings__BadmintonShop")
+        var connection = useCurrentDatabase?DbHelper.ConnectionString:Environment.GetEnvironmentVariable("ConnectionStrings__BadmintonShop")
             ?? XDocument.Load(Path.Combine(root,"BadmintonShop.Desktop/App.config")).Descendants("add")
                 .Single(x => (string?)x.Attribute("name") == "BadmintonShop").Attribute("connectionString")!.Value;
         var builder = new SqlConnectionStringBuilder(connection) { ConnectTimeout = 5 };
@@ -32,8 +32,11 @@ internal static partial class Program
             foreach (var size in new[] { new Size(1366,768),new Size(1920,1080) })
             {
                 main.Size=size;Application.DoEvents();
+                // Record the size Windows actually permits; never label a capped bitmap as 1920x1080.
+                if(main.Size!=size)Ghi($"LIMIT {type.Name}: requested {size.Width}x{size.Height}, actual {main.Width}x{main.Height}; target size UNVERIFIED");
+                File.AppendAllText(Path.Combine(output,"render-sizes.tsv"),$"{type.Name}\t{size.Width}x{size.Height}\t{main.Width}x{main.Height}\n");
                 using var bitmap=new Bitmap(main.Width,main.Height);main.DrawToBitmap(bitmap,new Rectangle(Point.Empty,bitmap.Size));
-                bitmap.Save(Path.Combine(output,$"{type.Name}-{size.Width}x{size.Height}.png"));
+                bitmap.Save(Path.Combine(output,$"{type.Name}-{main.Width}x{main.Height}.png"));
             }
             main.Size=new Size(1366,768);
         });
@@ -49,10 +52,11 @@ internal static partial class Program
             if(available==null) { Ghi("POS cart check skipped: no stock.");return; }
             product.CurrentCell=available.Cells["TenSP"];
             Controls(pos).OfType<Button>().Single(b=>b.Text=="Thêm vào giỏ").PerformClick();
+            Pump(main);
             var cart=(BindingList<DongPOS>)grids.Single(g=>g.DataSource is BindingList<DongPOS>).DataSource!;
             Eq(1,cart.Count);Link("Sản phẩm").PerformClick();Link("Bán tại quầy").PerformClick();Eq(1,cart.Count);
             Eq(1,Controls(main).OfType<FrmPOS>().Count());
-            Controls(pos).OfType<Button>().Single(b=>b.Text=="Bỏ dòng giỏ").PerformClick();Eq(0,cart.Count);
+            Controls(pos).OfType<Button>().Single(b=>b.Text=="Bỏ dòng giỏ").PerformClick();Pump(main);Eq(0,cart.Count);
         });
         Test("GUI category draft survives navigation",()=>
         {
@@ -69,6 +73,15 @@ internal static partial class Program
             True(!Controls(editor).OfType<Label>().Any(l=>l.Text.StartsWith("Lỗi:")));
             using var bmp=new Bitmap(editor.Width,editor.Height);editor.DrawToBitmap(bmp,new Rectangle(Point.Empty,bmp.Size));
             bmp.Save(Path.Combine(output,"FrmSanPhamSua.png"));editor.Close();
+        });
+        Test("GUI manager sidebar permissions",()=>
+        {
+            PhienDangNhap.BatDau(1,1,"ui-manager","Kiểm tra quản lý",VaiTro.QuanLy);
+            using var manager=new FrmMain();manager.WindowState=FormWindowState.Normal;manager.Show();Pump(manager);
+            var buttons=Controls(manager).OfType<Button>().Select(b=>b.Text.Trim()).ToList();
+            foreach(var name in new[]{"Sản phẩm","Danh mục","Đơn hàng","Bán tại quầy","Thống kê","Phiếu nhập"})True(buttons.Any(t=>t.EndsWith(name)));
+            True(!buttons.Any(t=>t.EndsWith("Nhân viên, tài khoản") || t.EndsWith("Sao lưu, phục hồi")));
+            manager.Close();PhienDangNhap.BatDau(1,1,"ui-readonly","Kiểm tra giao diện",VaiTro.Admin);
         });
         // Font/layout scaling is a simulation; actual per-monitor DPI still requires a Windows setting check.
         Test("GUI simulated scale 125/150 percent",()=>
@@ -101,7 +114,7 @@ internal static partial class Program
         {
             Application.DoEvents();Thread.Sleep(25);
             if(!Controls(main).OfType<Form>().Append(main).Any(f=>(bool)busy.Invoke(null,[f])!))
-            { Application.DoEvents();Thread.Sleep(150);Application.DoEvents();return; }
+            { Application.DoEvents();Thread.Sleep(150);Application.DoEvents();if(!Controls(main).OfType<Form>().Append(main).Any(f=>(bool)busy.Invoke(null,[f])!))return; }
         }while(DateTime.UtcNow<until);
         throw new TimeoutException("UI load exceeded 40 seconds.");
     }

@@ -1,5 +1,7 @@
 # Bàn giao giao diện SV4 — 22/10/2026
 
+> Tài liệu này ghi lại đợt nâng cấp UI. Phần POS giá thường/giới hạn CSDL bên dưới là trạng thái của đợt đó; xem cập nhật tích hợp khuyến mãi và migration 06 trong [tài liệu SV3–SV4](bao-cao/tich-hop-sv3-sv4.md).
+
 Đã triển khai trực tiếp giao diện WinForms .NET 8, không thêm thư viện giao diện. Không tìm thấy AGENTS.md trong project hoặc các thư mục cha áp dụng. Trước khi sửa, Git chỉ có thay đổi chưa commit ở `BadmintonShop.Desktop/App.config`; thay đổi đó được giữ nguyên. Không chạy script SQL, migration, seed, cập nhật dữ liệu cửa hàng, commit, push hoặc merge.
 
 ## Mở trong Visual Studio
@@ -81,3 +83,14 @@ Log: [ui-sv4/results.txt](ui-sv4/results.txt).
 | `docs/UI-SV4.md`, `docs/ui-sv4/*` (mới) | Hướng dẫn, log và ảnh bàn giao |
 
 `App.config` vẫn là thay đổi có sẵn của người dùng; không nằm trong phần chỉnh sửa giao diện.
+
+## Bổ sung POS và kiểm tra lại 26/10/2026
+
+POS đã có voucher, tiền trước giảm, giảm SP/cấp đơn, tổng phải trả/tiền thừa. Voucher có lý do riêng (sai/chưa mở/hết hạn/hết lượt/tắt); quy tắc chọn ưu đãi dùng chung web. Giữ giỏ khi thất bại, tính lại báo giá và yêu cầu xác nhận lại nếu giá/CTKM đổi; chỉ thành công sau transaction.
+
+Các kết quả cũ bên trên là lịch sử. [Biên bản final](final-integration/README.md) có lần chạy mới trên SQL test, ảnh 1366×768/1556×884 và báo cáo xuất (1920×1080 chưa xác minh). 125%/150% vẫn là mô phỏng Scale, chưa DPI Windows; chưa kiểm tay mọi hộp thoại/Designer/máy in và chưa có xác nhận SV2 kiểm chéo. Lỗi CreateHandle gốc vẫn chưa tái hiện; xem log vòng đời 22/10, không coi bảo vệ callback là bằng chứng đã sửa gốc.
+
+
+## Rà cuối trước PR, sau chuyển ổ D
+
+Worktree sử dụng: `D:\CodexWorktrees\BadmintonShop-sv4`, nhánh `feature/sv4-final-integration`. [Kết quả và commit mới](final-integration/pr-review/README.md) có 74/74 integration, 15/15 install, kiểm độc lập 12 bộ lọc và demo cửa sổ thật. Đã sửa chiều cao tóm tắt POS để không cắt dòng giảm giá và giữ thông tin hóa đơn gần nhất sau tải lại. 1920×1080, DPI Windows thật, browser E2E và kiểm chéo SV2 vẫn chưa xác minh. Được phép commit/push/mở PR theo yêu cầu mới, không merge.

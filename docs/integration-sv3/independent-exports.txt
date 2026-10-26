@@ -1,0 +1,1 @@
+PASS independent integration exports: 6 sheets, 6 PDF pages; completed revenue=13172235; historical invoice gross/product/invoice/net discounts match.
