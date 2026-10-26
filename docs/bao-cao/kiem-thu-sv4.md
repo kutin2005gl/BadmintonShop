@@ -1,4 +1,26 @@
+# Kế hoạch kiểm thử SV4 — cập nhật 26/10/2026
+
+Kết quả mới xem [biên bản 26/10](../final-integration/README.md). Phần TC01–TC61 bên dưới là kế hoạch và trạng thái lịch sử ngày 18/10, không phải trạng thái hiện tại. Các ca voucher/web trước đây chờ đã được kiểm bằng repository/SQL và HTTP fixture ngày 22/10, chạy lại 26/10; chưa gọi đó là browser E2E.
+
+## Bộ kiểm tra hiện tại
+
+| Nhóm | Phạm vi | Bằng chứng |
+| --- | --- | --- |
+| U/I | Quy tắc, quyền, CRUD, tồn/trigger, token, hủy cạnh tranh, migration, demo, xuất file | results.txt mới |
+| P01–P19 | Không ưu đãi, SP/HĐ/voucher, cộng dồn/chọn ưu đãi, làm tròn, stale giá/CTKM, voucher cuối, tồn cuối, retry/đổi payload, rollback header/dòng hai | results.txt mới |
+| H01 | Kestrel/MVC thật, cookie fixture + anti-forgery, checkout, chủ đơn, stale quote, web phản ánh desktop | HTTP fixture, chưa browser E2E |
+| N01–N05 | Lý do voucher gồm chưa mở, tiền sau giảm, thiếu index chặn POS, 12 bộ lọc đối chiếu SQL/bảng/XLSX/PDF, demo chạy lại | results.txt và filtered-expected.tsv |
+| J01–J02 | Cài mới từ SQL tổng trên DB riêng, 04/06/05 lặp; demo từ chối master trước mọi ghi | install-results.txt |
+| GUI | Form thật, voucher Apply/Bỏ, giữ giỏ/bản nháp, sidebar ADMIN/QUANLY/NHANVIEN, 1366×768/1556×884 và scale mô phỏng; 1920×1080 chưa xác minh | Ảnh DrawToBitmap, chưa DPI Windows |
+| Schema | Chỉ SELECT metadata cấu hình hiện tại, chỉ rõ thiếu trường/index/trigger | schema-readonly.txt; không migration CSDL người dùng |
+
+Chưa kiểm: browser login/catalog SV2, SMTP, fault injection mạng đúng sau commit, mọi hộp thoại, Designer, DPI Windows thực, máy in. [Checklist SV2](checklist-sv2-desktop.md) chưa điền. Các lệnh chạy và CSDL test trong [HDSD](huong-dan-su-dung-sv4.md).
+
+## Hồ sơ kế hoạch lịch sử 18/10/2026
+
 # Kế hoạch và kết quả kiểm thử SV4
+
+> Đợt tích hợp SV3 mới: xem [thiết kế, test case và kết quả hiện tại](tich-hop-sv3-sv4.md). Bảng dưới giữ biên bản lịch sử 18/10; các mục khuyến mãi/Web trước đây chờ SV3 đã có kiểm tra P01–P19 và HTTP H01 ở đợt mới, với giới hạn xác minh ghi trong tài liệu liên kết.
 
 Ngày thực hiện: 18/10/2026. Không đánh dấu đạt cho module chưa chạy hoặc màn hình giả lập.
 
@@ -77,13 +99,13 @@ Lệnh chạy và lưu trữ bằng chứng: xem [hướng dẫn SV4](huong-dan-
 | TC55 | Web giỏ hàng đổi số lượng/thiếu tồn | Không bán quá tồn, giữ giỏ để sửa | Chờ SV3 |
 | TC56 | Web COD/online giả lập → desktop xác nhận/giao/hoàn thành | Cùng hóa đơn/trạng thái và tồn, không ghi trùng | Chờ SV3 E2E; luồng repository đã đạt |
 | TC57 | Khách web hủy đơn của mình còn Chờ | Lưu lý do, hoàn đúng 1; không hủy đơn người khác/đã xác nhận | Chờ SV3 endpoint kiểm chủ đơn |
-| TC58 | Voucher hết hạn/hết lượt/SP + HĐ giảm chồng nhau | Từ chối voucher sai, không trừ hai lần, lượt dùng atomic | Chờ SV3; POS hiện không áp voucher |
+| TC58 | Voucher hết hạn/hết lượt/SP + HĐ giảm chồng nhau | Từ chối voucher sai, không trừ hai lần, lượt dùng atomic | Lịch sử 18/10: chờ SV3; hiện đã kiểm P/N, xem biên bản 26/10 |
 | TC59 | Gửi email xác nhận web | Nội dung đúng đơn, không gửi trùng sau retry | Chờ SV3 cấu hình/test SMTP |
 | TC60 | Khách chưa mua/đã mua gửi đánh giá, desktop duyệt | Chặn đánh giá trái quyền; ẩn/hiện đúng | Chờ SV2 |
 | TC61 | Mất mạng ngay sau commit POS trước nhận kết quả | Retry cùng token trả đơn cũ; thao tác người dùng không tạo đơn mới | Chờ fault injection mạng; retry bền vững đã đạt I04/I09 |
 
 ## Tiêu chí bàn giao và kiểm thử chéo
 
-Build solution không lỗi, unit/integration pass trên CSDL riêng, không sửa CSDL người dùng; file có số liệu và cấu trúc đọc được; không tuyên bố web/khuyến mãi đã tích hợp. SV2 cần kiểm thử chéo phần SV4 theo phân công, đặc biệt nhập liệu tương tác, hộp thoại, DPI và Designer. SV1/SV3 review quy tắc hủy và transaction dùng chung trước PR.
+Build solution không lỗi, unit/integration pass trên CSDL riêng, không sửa CSDL người dùng; file có số liệu và cấu trúc đọc được; ghi chính xác tầng đã kiểm (SQL/repository/HTTP fixture), không đánh đồng browser E2E. SV2 cần kiểm thử chéo phần SV4 theo phân công, đặc biệt nhập liệu tương tác, hộp thoại, DPI và Designer. SV1/SV3 review quy tắc hủy và transaction dùng chung trước PR.
 
 Kiểm độc lập: pypdf đọc Unicode tiếng Việt/PDF nhiều trang, Poppler render xem bố cục; openpyxl đọc đủ 6 sheet, tổng danh mục bằng tổng CSDL. Không kiểm bằng cách đổi đuôi tệp. Kết quả theo lần chạy được lưu trong [biên bản kiểm thử](ket-qua-kiem-thu-sv4.md).

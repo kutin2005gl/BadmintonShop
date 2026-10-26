@@ -5,3 +5,7 @@
 *.docx binary
 *.png binary
 *.jpg binary
+# SV4: preserve exported evidence bytes on Windows; never normalize these formats.
+*.pdf binary
+*.xlsx binary
+*.jpeg binary

@@ -1,0 +1,113 @@
+
+2026-10-22T16:59:59.8412235+07:00 FIRST CHANCE thread=1
+2026-10-22T16:59:45.9325935+07:00 thread=1 FrmDanhMuc Tracked handle=False disposed=False disposing=False
+2026-10-22T16:59:45.9402111+07:00 thread=1 FrmSanPham Tracked handle=False disposed=False disposing=False
+2026-10-22T16:59:45.9571536+07:00 thread=1 FrmSanPhamSua Tracked handle=False disposed=False disposing=False
+2026-10-22T16:59:45.9626158+07:00 thread=1 FrmDonHang Tracked handle=False disposed=False disposing=False
+2026-10-22T16:59:45.9750869+07:00 thread=1 FrmPOS Tracked handle=False disposed=False disposing=False
+2026-10-22T16:59:45.9814649+07:00 thread=1 FrmThongKe Tracked handle=False disposed=False disposing=False
+2026-10-22T16:59:45.9830714+07:00 thread=1 FrmDanhMuc Disposed handle=False disposed=False disposing=True
+2026-10-22T16:59:45.9836097+07:00 thread=1 FrmSanPham Disposed handle=False disposed=False disposing=True
+2026-10-22T16:59:45.9839005+07:00 thread=1 FrmSanPhamSua Disposed handle=False disposed=False disposing=True
+2026-10-22T16:59:45.9839285+07:00 thread=1 FrmDonHang Disposed handle=False disposed=False disposing=True
+2026-10-22T16:59:45.9839625+07:00 thread=1 FrmPOS Disposed handle=False disposed=False disposing=True
+2026-10-22T16:59:45.9839799+07:00 thread=1 FrmThongKe Disposed handle=False disposed=False disposing=True
+2026-10-22T16:59:50.3152981+07:00 thread=1 START runtime=8.0.32 module=c18b22cf-eaf2-437d-8592-30efbc7de184
+2026-10-22T16:59:50.3159719+07:00 thread=1 FrmMain Tracked handle=False disposed=False disposing=False
+2026-10-22T16:59:50.3477708+07:00 thread=1 FrmMain HandleCreated handle=True disposed=False disposing=False
+2026-10-22T16:59:50.3617491+07:00 thread=1 FrmMain Load handle=True disposed=False disposing=False
+2026-10-22T16:59:50.3961500+07:00 thread=1 FrmMain Shown handle=True disposed=False disposing=False
+2026-10-22T16:59:50.3966972+07:00 thread=1 NAV begin FrmTongQuan
+2026-10-22T16:59:50.4035748+07:00 thread=1 FrmTongQuan Tracked handle=False disposed=False disposing=False
+2026-10-22T16:59:50.4053726+07:00 thread=1 FrmTongQuan HandleCreated handle=True disposed=False disposing=False
+2026-10-22T16:59:50.4320154+07:00 thread=1 FrmTongQuan Load handle=True disposed=False disposing=False
+2026-10-22T16:59:50.4338722+07:00 thread=1 FrmTongQuan load begin
+2026-10-22T16:59:50.4744036+07:00 thread=1 NAV shown FrmTongQuan
+2026-10-22T16:59:50.4744676+07:00 thread=1 FrmTongQuan Shown handle=True disposed=False disposing=False
+2026-10-22T16:59:54.5690618+07:00 thread=1 FrmTongQuan load end closed=False
+2026-10-22T16:59:54.7850045+07:00 thread=1 NAV begin LifecyclePage
+2026-10-22T16:59:54.7850637+07:00 thread=1 LifecyclePage Tracked handle=False disposed=False disposing=False
+2026-10-22T16:59:54.7888806+07:00 thread=1 LifecyclePage HandleCreated handle=True disposed=False disposing=False
+2026-10-22T16:59:54.7904345+07:00 thread=1 LifecyclePage Load handle=True disposed=False disposing=False
+2026-10-22T16:59:54.7928555+07:00 thread=1 NAV shown LifecyclePage
+2026-10-22T16:59:54.7945288+07:00 thread=1 LifecyclePage FormClosing reason=UserClosing cancel=False handle=True disposed=False disposing=False
+2026-10-22T16:59:54.7947494+07:00 thread=1 LifecyclePage FormClosed handle=True disposed=False disposing=False
+2026-10-22T16:59:54.8003360+07:00 thread=1 LifecyclePage HandleDestroyed handle=True disposed=False disposing=True
+2026-10-22T16:59:54.8016576+07:00 thread=1 LifecyclePage Disposed handle=False disposed=False disposing=True
+2026-10-22T16:59:54.8024396+07:00 thread=1 NAV begin LifecyclePage
+2026-10-22T16:59:54.8024594+07:00 thread=1 LifecyclePage Tracked handle=False disposed=False disposing=False
+2026-10-22T16:59:54.8029446+07:00 thread=1 LifecyclePage HandleCreated handle=True disposed=False disposing=False
+2026-10-22T16:59:54.8044497+07:00 thread=1 LifecyclePage Load handle=True disposed=False disposing=False
+2026-10-22T16:59:54.8076690+07:00 thread=1 NAV shown LifecyclePage
+2026-10-22T16:59:54.8077611+07:00 thread=1 FrmMain FormClosing reason=UserClosing cancel=False handle=True disposed=False disposing=False
+2026-10-22T16:59:54.8084337+07:00 thread=1 FrmMain FormClosed handle=True disposed=False disposing=False
+2026-10-22T16:59:54.8138447+07:00 thread=1 FrmMain HandleDestroyed handle=True disposed=False disposing=True
+2026-10-22T16:59:54.8148334+07:00 thread=1 LifecyclePage HandleDestroyed handle=True disposed=False disposing=False
+2026-10-22T16:59:54.8150676+07:00 thread=1 FrmTongQuan HandleDestroyed handle=True disposed=False disposing=False
+2026-10-22T16:59:54.8314339+07:00 thread=1 LifecyclePage Disposed handle=False disposed=False disposing=True
+2026-10-22T16:59:54.8316790+07:00 thread=1 FrmTongQuan Disposed handle=False disposed=False disposing=True
+2026-10-22T16:59:54.8318379+07:00 thread=1 FrmMain Disposed handle=False disposed=False disposing=True
+2026-10-22T16:59:54.8318620+07:00 thread=1 FrmMain Disposed handle=False disposed=True disposing=True
+2026-10-22T16:59:54.8505117+07:00 thread=1 LifecyclePage load begin
+2026-10-22T16:59:54.8505338+07:00 thread=1 LifecyclePage Tracked handle=True disposed=False disposing=False
+2026-10-22T16:59:54.8576171+07:00 thread=1 LifecyclePage Shown handle=True disposed=False disposing=False
+2026-10-22T16:59:54.8629799+07:00 thread=1 LifecyclePage FormClosing reason=UserClosing cancel=False handle=True disposed=False disposing=False
+2026-10-22T16:59:54.8630051+07:00 thread=1 LifecyclePage FormClosed handle=True disposed=False disposing=False
+2026-10-22T16:59:54.8684633+07:00 thread=1 LifecyclePage HandleDestroyed handle=True disposed=False disposing=True
+2026-10-22T16:59:54.8757077+07:00 thread=1 LifecyclePage Disposed handle=False disposed=False disposing=True
+2026-10-22T16:59:54.8763821+07:00 thread=1 LifecyclePage load end closed=True
+2026-10-22T16:59:54.8927939+07:00 thread=1 LifecyclePage Disposed handle=False disposed=True disposing=True
+2026-10-22T16:59:54.8934438+07:00 thread=1 FrmMain Tracked handle=False disposed=False disposing=False
+2026-10-22T16:59:54.9073461+07:00 thread=1 FrmMain HandleCreated handle=True disposed=False disposing=False
+2026-10-22T16:59:54.9195123+07:00 thread=1 FrmMain Load handle=True disposed=False disposing=False
+2026-10-22T16:59:54.9310321+07:00 thread=1 FrmMain Shown handle=True disposed=False disposing=False
+2026-10-22T16:59:54.9310423+07:00 thread=1 NAV begin FrmTongQuan
+2026-10-22T16:59:54.9364887+07:00 thread=1 FrmTongQuan Tracked handle=False disposed=False disposing=False
+2026-10-22T16:59:54.9413674+07:00 thread=1 FrmTongQuan HandleCreated handle=True disposed=False disposing=False
+2026-10-22T16:59:54.9677422+07:00 thread=1 FrmTongQuan Load handle=True disposed=False disposing=False
+2026-10-22T16:59:54.9678139+07:00 thread=1 FrmTongQuan load begin
+2026-10-22T16:59:55.0075673+07:00 thread=1 NAV shown FrmTongQuan
+2026-10-22T16:59:55.0076751+07:00 thread=1 FrmTongQuan Shown handle=True disposed=False disposing=False
+2026-10-22T16:59:59.4668191+07:00 thread=1 FrmTongQuan load end closed=False
+2026-10-22T16:59:59.6684365+07:00 thread=1 NAV begin LifecyclePage
+2026-10-22T16:59:59.6684684+07:00 thread=1 LifecyclePage Tracked handle=False disposed=False disposing=False
+2026-10-22T16:59:59.6815859+07:00 thread=1 LifecyclePage HandleCreated handle=True disposed=False disposing=False
+2026-10-22T16:59:59.6881750+07:00 thread=1 LifecyclePage Load handle=True disposed=False disposing=False
+2026-10-22T16:59:59.6904967+07:00 thread=1 NAV shown LifecyclePage
+2026-10-22T16:59:59.6907629+07:00 thread=1 LifecyclePage load begin
+2026-10-22T16:59:59.6948631+07:00 thread=1 LifecyclePage Shown handle=True disposed=False disposing=False
+2026-10-22T16:59:59.7145138+07:00 thread=1 FrmMain FormClosing reason=UserClosing cancel=False handle=True disposed=False disposing=False
+2026-10-22T16:59:59.7145267+07:00 thread=1 FrmMain FormClosed handle=True disposed=False disposing=False
+2026-10-22T16:59:59.7203671+07:00 thread=1 FrmMain HandleDestroyed handle=True disposed=False disposing=True
+2026-10-22T16:59:59.7206477+07:00 thread=1 LifecyclePage HandleDestroyed handle=True disposed=False disposing=False
+2026-10-22T16:59:59.7207012+07:00 thread=1 FrmTongQuan HandleDestroyed handle=True disposed=False disposing=False
+2026-10-22T16:59:59.7377122+07:00 thread=1 LifecyclePage Disposed handle=False disposed=False disposing=True
+2026-10-22T16:59:59.7378684+07:00 thread=1 FrmTongQuan Disposed handle=False disposed=False disposing=True
+2026-10-22T16:59:59.7378894+07:00 thread=1 FrmMain Disposed handle=False disposed=False disposing=True
+2026-10-22T16:59:59.7380836+07:00 thread=1 LifecyclePage load end closed=True
+2026-10-22T16:59:59.7459638+07:00 thread=1 FrmMain Disposed handle=False disposed=True disposing=True
+2026-10-22T16:59:59.7621018+07:00 thread=1 LifecyclePage load begin
+2026-10-22T16:59:59.7621180+07:00 thread=1 LifecyclePage Tracked handle=True disposed=False disposing=False
+2026-10-22T16:59:59.7680078+07:00 thread=1 LifecyclePage Shown handle=True disposed=False disposing=False
+2026-10-22T16:59:59.7688525+07:00 thread=1 LifecyclePage load end closed=False
+2026-10-22T16:59:59.7852346+07:00 thread=1 LifecyclePage FormClosing reason=UserClosing cancel=False handle=True disposed=False disposing=False
+2026-10-22T16:59:59.7852470+07:00 thread=1 LifecyclePage FormClosed handle=True disposed=False disposing=False
+2026-10-22T16:59:59.7882309+07:00 thread=1 LifecyclePage HandleDestroyed handle=True disposed=False disposing=True
+2026-10-22T16:59:59.7937798+07:00 thread=1 LifecyclePage Disposed handle=False disposed=False disposing=True
+2026-10-22T16:59:59.7938006+07:00 thread=1 LifecyclePage Disposed handle=False disposed=True disposing=True
+2026-10-22T16:59:59.8069040+07:00 thread=1 LifecyclePage load begin
+2026-10-22T16:59:59.8069177+07:00 thread=1 LifecyclePage Tracked handle=True disposed=False disposing=False
+2026-10-22T16:59:59.8155986+07:00 thread=1 LifecyclePage HandleDestroyed handle=True disposed=False disposing=True
+2026-10-22T16:59:59.8241224+07:00 thread=1 LifecyclePage Disposed handle=False disposed=False disposing=True
+2026-10-22T16:59:59.8243241+07:00 thread=1 LifecyclePage load end closed=True
+EXCEPTION
+System.InvalidOperationException: LIFECYCLE DIAGNOSTIC PROBE CreateHandle; not an application failure
+   at Program.<>c__DisplayClass5_0.<LifecycleChecks>b__5() in D:\Desktop\BadmintonShop\tests\BadmintonShop.SV4.Checks\LifecycleChecks.cs:line 73
+THROW STACK
+   at System.Environment.get_StackTrace()
+   at BadmintonShop.Desktop.LifecycleDiagnostics.Capture(String kind, Exception error) in D:\Desktop\BadmintonShop\BadmintonShop.Desktop\LifecycleDiagnostics.cs:line 64
+   at BadmintonShop.Desktop.LifecycleDiagnostics.FirstChance(Object sender, FirstChanceExceptionEventArgs e) in D:\Desktop\BadmintonShop\BadmintonShop.Desktop\LifecycleDiagnostics.cs:line 53
+   at Program.<>c__DisplayClass5_0.<LifecycleChecks>b__5() in D:\Desktop\BadmintonShop\tests\BadmintonShop.SV4.Checks\LifecycleChecks.cs:line 73
+   at Program.Test(String ten, Action a) in D:\Desktop\BadmintonShop\tests\BadmintonShop.SV4.Checks\Program.cs:line 47
+   at Program.LifecycleChecks() in D:\Desktop\BadmintonShop\tests\BadmintonShop.SV4.Checks\LifecycleChecks.cs:line 69
+   at Program.Main(String[] args) in D:\Desktop\BadmintonShop\tests\BadmintonShop.SV4.Checks\Program.cs:line 33

@@ -1,67 +1,60 @@
-# Hướng dẫn sử dụng SV4
+# Hướng dẫn sử dụng SV4 — 26/10/2026
 
-## Cài đặt và chạy
+## Mở trong Visual Studio và thiết lập
 
-1. Máy Windows có .NET 8 Desktop Runtime/SDK, SQL Server và CSDL theo hướng dẫn SV1.
-2. Với CSDL đã tồn tại, **chỉ chạy migration bổ sung**:
-   ```powershell
-   sqlcmd -S localhost -E -C -I -b -f 65001 -i database/04_SV4_Migration.sql
-   ```
-   Không chạy lại `01_CreateDatabase.sql` hoặc `BadmintonShop.sql` vì chúng xóa/tạo lại CSDL. File 04 giữ nguyên dữ liệu, chạy lại được.
-3. Nếu cần demo, tự chọn chạy `database/05_SV4_Demo.sql` sau 04 bằng cùng tham số. Script tự nhập kho trước, tạo 12 tháng hóa đơn tại quầy và đơn Online mẫu không có khách. Chạy lại không thêm trùng. Mọi bản ghi riêng có nhãn `[SV4-DEMO]`. Không có chức năng tự xóa demo.
-4. Đặt chuỗi kết nối bằng biến môi trường phiên PowerShell (không commit thông tin máy):
-   ```powershell
-   $env:ConnectionStrings__BadmintonShop='Server=localhost;Database=BadmintonShop;Trusted_Connection=True;TrustServerCertificate=True;'
-   $env:BadmintonShop__MediaRoot='D:\BadmintonShopMedia'
-   dotnet build BadmintonShop.sln
-   dotnet run --project BadmintonShop.Desktop
-   ```
-   Thư mục ảnh là ví dụ cấu hình máy triển khai; CSDL chỉ lưu khóa tương đối. Web/desktop cần trỏ đến cùng kho ảnh.
-5. Đăng nhập bằng tài khoản SV1 có quyền phù hợp. Xem tài khoản mẫu trong README; không cần tạo tài khoản cho nhân viên demo SV4.
+Mở `D:\CodexWorktrees\BadmintonShop-sv4\BadmintonShop.sln` trên nhánh `feature/sv4-final-integration`, đặt `BadmintonShop.Desktop` làm Startup Project, Build rồi F5. Cần Windows, .NET 8 Desktop Runtime/SDK và SQL Server. Mở đúng worktree ổ D, không sửa/build bản dự phòng ổ C. Kết quả/commit trước PR và lệnh chạy demo hiện có: [rà soát cuối](../final-integration/pr-review/README.md).
 
-## Danh mục và sản phẩm
-
-- Sản phẩm → Danh mục: Mới, nhập tên/mô tả, Lưu. Chọn dòng để sửa hoặc xóa; danh mục có sản phẩm sẽ được chặn xóa.
-- Sản phẩm → Sản phẩm: thêm/sửa, chọn danh mục, nhập giá nguyên đồng, đơn vị. Không có ô sửa tồn. Muốn có hàng, vào Nhập hàng → Phiếu nhập của SV1.
-- Chọn ảnh và xem trước; Bỏ ảnh nếu ảnh cũ thiếu/không hợp lệ. Chọn ảnh mới chỉ ghi kho khi Lưu. Không xóa ảnh cũ tự động vì web có thể còn dùng/cache.
-- Ngừng bán giữ lịch sử. Có thể Sửa trạng thái về Đang bán khi cần bán tiếp; đây là trạng thái sản phẩm, không phải mở lại đơn đã hủy.
-- Nhập từ khóa, chọn bộ lọc và Lọc. Tải lại cập nhật dữ liệu và đặt danh mục/thương hiệu về tất cả. Bấm tiêu đề cột để sắp xếp. Ngưỡng sắp hết là 1–5 đơn vị, hết hàng là 0.
-
-## Đơn hàng
-
-- Bán hàng → Đơn hàng: mặc định 12 tháng gần nhất, có thể mở rộng ngày; lọc loại/trạng thái và mã/tên/SĐT/email.
-- Chọn dòng để xem chi tiết và tiền giảm hóa đơn. Các nút Xác nhận, Giao hàng, Hoàn thành chỉ hoạt động theo luồng. Chỉ hủy trước khi giao và phải nhập lý do.
-- Nếu báo đơn đã thay đổi, tải lại để xem trạng thái mới; không cố nhấn lại theo trạng thái cũ.
-- Xuất PDF hóa đơn cho dòng đang chọn để xem/in lại; giá lấy từ chi tiết đã lưu.
-
-## POS
-
-1. Bán hàng → Bán hàng tại quầy. Tìm và chọn sản phẩm ở bảng trên.
-2. Chọn số lượng, Thêm vào giỏ. Muốn sửa: chọn dòng ở bảng dưới, đặt số lượng mới rồi Sửa số lượng giỏ. Bỏ dòng giỏ để xóa trước khi lưu.
-3. Nhập tiền khách đưa. Tổng, tiền thiếu/thừa cập nhật tại màn hình.
-4. Thanh toán tiền mặt và xác nhận. Repository kiểm tồn và giá một lần nữa; nếu giá đổi, dùng Giỏ mới, tải sản phẩm và chọn lại giỏ trước khi thanh toán.
-5. Khi nhận mã hóa đơn thành công, bấm Xuất lại PDF. Hóa đơn trước đây xuất từ Đơn hàng.
-
-Khuyến mãi SV3 chưa sẵn sàng, toàn bộ dòng POS bán theo giá thường. Không có voucher được áp thành công giả.
-
-Nếu thanh toán báo lỗi kết nối, giữ nguyên giỏ để thử lại cùng mã yêu cầu hoặc kiểm tra Đơn hàng trên khoảng ngày hiện tại. Chỉ Giỏ mới sau khi xác định giao dịch trước đã/ chưa lưu; nút có nhắc điều này. Không sửa chi tiết hóa đơn sau khi lưu.
-
-## Báo cáo
-
-- Báo cáo → Thống kê: chọn ngày, loại bán, Xem báo cáo. Mặc định từ đầu năm đến hôm nay; để xem đủ demo 12 tháng cần mở rộng về năm trước.
-- Chuyển các tab để xem bảng và biểu đồ. Chỉ Hoàn thành tính doanh thu và số lượng; Số đơn theo trạng thái đếm cả đơn hủy.
-- Excel/PDF xuất tất cả tab của **kết quả đang hiển thị**. Đổi bộ lọc chưa bấm Xem không làm đổi dữ liệu xuất; khoảng và loại bán thực tế có trong file.
-- File XLSX có thể mở bằng Excel/LibreOffice; PDF bằng trình đọc PDF. Bản in hóa đơn phục vụ đồ án, không phải hóa đơn điện tử thuế.
-
-## Chạy bộ kiểm tra
+Cả web và desktop ưu tiên biến môi trường `ConnectionStrings__BadmintonShop`; nếu không có thì đọc appsettings.json/App.config tương ứng. Giữ cấu hình cá nhân ở máy. Có thể kiểm schema mà không ghi dữ liệu:
 
 ```powershell
-# Quy tắc + xuất file, không dùng CSDL
-dotnet run --project tests/BadmintonShop.SV4.Checks
-# Tạo CSDL test mới hoàn toàn trên LocalDB, giữ lại để review
-dotnet run --project tests/BadmintonShop.SV4.Checks -- --integration --server '(localdb)\MSSQLLocalDB'
+dotnet run --project tests/BadmintonShop.SV4.Checks -- --schema-readonly
 ```
 
-Tên CSDL test luôn là `BadmintonShop_SV4_Test_<timestamp>_<random>`. Không dùng CSDL `BadmintonShop`, không chạy khối DROP/CREATE của script 01. Kết quả, ảnh render form thật, XLSX/PDF nằm trong thư mục Temp được in ở cuối lệnh. Cần quyền CREATE DATABASE trên server test. Bộ kiểm tra không tự dọn CSDL để tránh xóa nhầm; có thể tự quản lý các CSDL test đã nhận diện sau khi review.
+Ngày 26/10, cấu hình hiện tại trỏ `localhost / BadmintonShop`; kết nối thực tế `DESKTOP-FGE20L2`. Thiếu `HoaDon.LyDoHuy`, `MaYeuCauPOS`, `TienKhachDua`, `DauVanTayPOS` và index `UX_HoaDon_MaYeuCauPOS`. Ba trigger vẫn bật. Công cụ chỉ SELECT metadata, không sửa/seed CSDL; xem [kết quả](../final-integration/schema-readonly.txt). Máy khác cần chạy lại kiểm tra.
 
-Kiểm độc lập file xuất (Python có `openpyxl` và `pypdf`): `python tests/BadmintonShop.SV4.Checks/verify_exports.py '<thu-muc-ket-qua>' --expected-revenue <tong-doanh-thu-trong-csdl-test>`. Chỉ dùng đúng tổng và thư mục từ cùng lần chạy.
+Với CSDL hiện có cần giữ: SV1 sao lưu/review rồi áp dụng **04 → 06** bằng SSMS hoặc sqlcmd. Hai migration có `USE BadmintonShop`; phải kiểm tên đích trước Execute. Không chạy script 01 hoặc SQL tổng trên CSDL đang có dữ liệu. Không chạy demo trên CSDL cửa hàng.
+
+Cài máy trống: script tổng đã gồm schema nền, trigger, dữ liệu mẫu, 04 và 06; có đoạn DROP/CREATE nên chỉ dùng cho môi trường bỏ được. Bộ kiểm tra cài mới tạo CSDL `BadmintonShop_SV4_Test_Install_*`, bỏ hoàn toàn đoạn DROP/CREATE và đổi `USE` sang tên test.
+
+Kho ảnh: đặt `BadmintonShop__MediaRoot` tới cùng thư mục bền vững cho web/desktop, ví dụ `D:\BadmintonShopMedia`; desktop cần ghi, web cần đọc và mount `/media/products`. CSDL chỉ lưu `products/<uuid>.jpg`. Chưa mount/fallback ảnh trên web là việc SV2 cần xác minh.
+
+## Thao tác chính
+
+- **Danh mục/Sản phẩm:** tìm/lọc, thêm/sửa, chọn ảnh, ngừng bán. Tồn 0 khi tạo; dùng Nhập hàng → Phiếu nhập của SV1 để tăng tồn, không sửa tồn trực tiếp. Cảnh báo hết = 0; sắp hết = 1–5.
+- **Đơn hàng:** lọc ngày/trạng thái/loại/mã hoặc thông tin khách. Chọn đơn để xem giá và giảm đã lưu; xác nhận → giao → hoàn thành. Nhân viên hủy trước giao phải nhập lý do. Đơn đã thay đổi cần tải lại. Xuất PDF từ đơn đã lưu.
+- **POS:** sản phẩm bên trái, giỏ bên phải. Chọn số lượng → Thêm vào giỏ; sửa/bỏ dòng trước thanh toán. Nhập voucher rồi Áp dụng hoặc Bỏ mã. Sau giảm SP, chọn bậc hóa đơn hoặc voucher giảm nhiều hơn; bằng nhau ưu tiên voucher; không cộng hai ưu đãi cấp hóa đơn. Voucher thua bậc hóa đơn không bị trừ lượt.
+- **Thanh toán:** kiểm tiền hàng, giảm SP, giảm hóa đơn/voucher, tổng, tiền khách đưa và tiền thiếu/thừa. Nút khóa khi đang xử lý hoặc chưa đủ điều kiện. Giá/ưu đãi thay đổi: xem báo giá mới rồi xác nhận lại, không cần bỏ giỏ. Chỉ báo thành công sau transaction. Khi lỗi kết nối chưa rõ kết quả: giữ nguyên giỏ/tiền/voucher/token để retry hoặc tra Đơn hàng; không bấm Giỏ mới rồi bán lại ngay.
+- **Báo cáo:** chọn khoảng/loại bán → Xem báo cáo. Chỉ Hoàn thành tạo doanh thu và số lượng; trạng thái đếm cả đơn hủy. Phân kỳ theo NgayLap. Excel/PDF dùng đúng kết quả đang hiển thị; sửa bộ lọc chưa tải không làm đổi file. PDF hóa đơn dùng giá/giảm/tổng đã lưu.
+- **Điều hướng:** chuyển mục giữ giỏ và bản nháp. Đóng/đăng xuất cảnh báo dữ liệu chưa lưu và chặn khi có tác vụ chạy. ADMIN có mọi mục; QUANLY trừ nhân viên/tài khoản và sao lưu; NHANVIEN chỉ đơn hàng/POS (ngoài các mục phiên cá nhân).
+
+## CSDL demo và kịch bản 5–7 phút
+
+Dùng CSDL riêng tên `BadmintonShop_SV4_Demo*` hoặc `BadmintonShop_SV4_Test_*`, có đủ schema/trigger/04/06. Có thể dùng CSDL cài mới test do lệnh dưới tạo; tài khoản mẫu được seed chỉ ở CSDL này. Chuyển chuỗi kết nối của cả hai app bằng biến môi trường phiên rồi mở lại app. Không tạo tài khoản/cửa hậu trong CSDL thật.
+
+```powershell
+dotnet run --project tests/BadmintonShop.SV4.Checks -- --install-checks --server .
+# Đọc tên CSDL test vừa in; tuyệt đối không thay bằng CSDL cửa hàng:
+sqlcmd -S . -E -C -I -b -f 65001 -d '<TEN_CSDL_TEST_VUA_TAO>' -i database/05_SV4_Demo.sql
+$env:ConnectionStrings__BadmintonShop='Server=.;Database=<TEN_CSDL_TEST_VUA_TAO>;Integrated Security=True;TrustServerCertificate=True;'
+dotnet run --project BadmintonShop.Desktop
+```
+
+Script 05 chỉ nhận CSDL có tiền tố test/demo trên, nhập kho trước bán, 12 tháng đơn, nhãn `[SV4-DEMO]`; khóa transaction và sentinel chống thêm trùng. Có giảm vợt 10%, bậc đơn từ 1 triệu giảm 5% và `SV4DEMO15` giảm 15%, hiệu lực 30 ngày kể từ lần seed đầu, 30 lượt. Chạy lại không gia hạn chương trình đã có.
+
+| Thời gian | Thao tác và điểm cần thấy |
+| --- | --- |
+| 0:00–1:00 | ADMIN/QUANLY thêm sản phẩm `[DEMO]`, chọn ảnh; tồn 0. |
+| 1:00–2:00 | Phiếu nhập SV1 chọn nhà cung cấp, nhập hàng vừa tạo; lưu rồi kiểm tồn tăng. |
+| 2:00–3:30 | POS chọn vợt `[SV4-DEMO]`, áp `SV4DEMO15`: một vợt 500.000 → giảm SP 50.000 → voucher 67.500 → trả 382.500; đưa 400.000 thừa 17.500. Lưu và xuất PDF. |
+| 3:30–5:00 | Nếu SV2 login/catalog sẵn sàng: khách đặt COD, desktop thấy cùng mã/chi tiết rồi xác nhận/giao/hoàn thành; web cập nhật trạng thái. Nếu thiếu UI SV2, dùng đơn `[SV4-DEMO]` để minh họa trạng thái và nói rõ đó là dữ liệu demo, không nhận đã đi web E2E. |
+| 5:00–6:30 | Thống kê mở từ 13 tháng trước đến hôm nay; lọc Online/Tại quầy, xem biểu đồ và xuất XLSX/PDF. Đơn hoàn thành tính doanh thu; hủy không tính. |
+
+## Kiểm tra và bằng chứng
+
+```powershell
+dotnet build BadmintonShop.sln
+dotnet run --project tests/BadmintonShop.SV4.Checks -- --integration --server .
+python tests/BadmintonShop.SV4.Checks/verify_integration_exports.py '<thu-muc-ket-qua>'
+```
+
+Test ghi riêng `BadmintonShop_SV4_Test_*`, không tự xóa CSDL. Kết quả và giới hạn xem [biên bản](../final-integration/README.md); checklist SV2 chưa được đánh dấu thay người kiểm. Ảnh render thực tế 1366×768 và 1556×884; 1920×1080 chưa xác minh do giới hạn cửa sổ. Scale mô phỏng không thay thế kiểm DPI Windows thật, hộp thoại, Designer hoặc in giấy.

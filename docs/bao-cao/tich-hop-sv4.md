@@ -2,7 +2,7 @@
 
 ## SV1 — lược đồ, tồn kho, phân quyền
 
-Áp dụng `database/04_SV4_Migration.sql` trên mỗi môi trường. Thêm nullable `HoaDon.LyDoHuy NVARCHAR(500)`, `MaYeuCauPOS UNIQUEIDENTIFIER`, `TienKhachDua DECIMAL(18,0)` và unique filtered index cho token khác NULL. Web cũ không cần truyền các cột mới. Model HoaDon đã bổ sung property tương ứng.
+SV1 review/sao lưu rồi áp dụng `database/04_SV4_Migration.sql` và `06_SV4_POS_Request.sql` trên từng CSDL cần giữ; không tự chạy khi ứng dụng khởi động. Thêm nullable `HoaDon.LyDoHuy NVARCHAR(500)`, `MaYeuCauPOS UNIQUEIDENTIFIER`, `TienKhachDua DECIMAL(18,0)` và unique filtered index cho token khác NULL. Web cũ không cần truyền các cột mới. Model HoaDon đã bổ sung property tương ứng.
 
 Giữ nguyên trigger `trg_CTPN_TangTon`, `trg_CTHD_GiamTon`, `trg_HoaDon_CapNhat`. Trigger giảm tồn khi **INSERT chi tiết**, kể cả đơn Online Chờ xác nhận; không trừ thêm lúc xác nhận/hoàn thành. Hủy qua UPDATE trạng thái làm trigger hoàn kho. Không sửa/xóa từng dòng sau lưu; hoàn/trả sau giao chưa có nghiệp vụ.
 
@@ -24,7 +24,7 @@ Quy tắc hủy nhân viên hiện triển khai: Chờ xác nhận/Đã xác nh�
 
 ## SV3 — hóa đơn, trạng thái và khuyến mãi
 
-`HoaDonRepository` trước đó chưa tồn tại, SV4 tạo **một** repository chung. SV3 bổ sung API đặt hàng vào chính lớp này, không tạo repository hóa đơn song song. Các API hiện có: `LayTheoMa`, `LayDanhSachHienThi`, `LayChiTietHienThi`, `ChuyenTrangThai`, `ThanhToanPOS`.
+Sau tích hợp, giữ `HoaDonRepository` cho nhân viên/POS và `DonHangOnlineRepository` cho khách hàng, chia sẻ ghi đơn qua `GiaoDichBanHang` để không làm mất ranh giới quyền sở hữu. Các API nhân viên/POS hiện có: `LayTheoMa`, `LayDanhSachHienThi`, `LayChiTietHienThi`, `ChuyenTrangThai`, `ThanhToanPOS`.
 
 Online: Chờ xác nhận → Đã xác nhận → Đang giao → Hoàn thành. `QuyTacBanHang.DuocChuyen` chia sẻ ma trận. `ChuyenTrangThai(ma, trạng thái kỳ vọng, mới, lý do)` UPDATE có điều kiện để tránh ghi đè; chỉ luồng nhân viên Online. Khách web tự hủy cần endpoint kiểm đúng MaKH và chỉ Chờ xác nhận; không gọi API nhân viên mà thiếu kiểm quyền/chủ đơn.
 
@@ -32,7 +32,11 @@ Hóa đơn POS: MaKH=NULL, MaNV=phiên, LoaiBan=`Tại quầy`, HinhThucTT=`Ti�
 
 Giảm theo SP là phần trăm `ChiTietHoaDon.GiamGia`; `ThanhTien` là cột tính. Giảm cấp hóa đơn/voucher ghi `HoaDon.TienGiamGia`, `MaCTKM`; `TongTien` do trigger tính. Không tự tính lại rồi trừ lần hai.
 
-`TinhKhuyenMaiService` ở develop hiện vẫn ném NotImplementedException. SV4 không sửa ruột service, không bắt lỗi rồi báo áp voucher thành công. POS hiện công khai giá thường và truyền giảm 0. Khi SV3 hoàn thiện cần một thay đổi tích hợp riêng: tính lại khuyến mãi trong transaction thanh toán, kiểm lượt voucher atomic, cập nhật tổng tiền/tiền khách trước commit và kiểm thử chéo. Chưa tự bật theo sự tồn tại của class.
+`TinhKhuyenMaiService` và `GioHangService` SV3 đã được dùng chung Web/POS. Sản phẩm giảm trước; cấp hóa đơn chọn một giữa bậc hóa đơn và voucher, bằng tiền ưu tiên voucher theo quy tắc SV3. `KhuyenMaiRepository` hỗ trợ connection/transaction có sẵn. Khi lưu, hai luồng khóa sản phẩm tăng dần, đọc lại giá/khuyến mãi/lượt dùng trong Serializable, so báo giá đã xác nhận rồi mới tăng lượt và ghi đơn. Tổng và tồn vẫn do trigger.
+
+POS thêm migration riêng `06_SV4_POS_Request.sql` (sau 04), cột nullable `DauVanTayPOS VARCHAR(64)` lưu SHA-256 của yêu cầu xác nhận. Giữ token và báo giá khi chưa rõ kết quả; retry token thành công đọc lại hóa đơn cũ trước khi tính giá hiện tại, không trừ voucher/tồn lần nữa. Khóa `sp_getapplock` theo token tránh khoảng khóa trên index token gây deadlock với Web. Chưa tự chạy migration trên CSDL cửa hàng.
+
+Quy tắc hoàn lượt voucher khi hủy **chưa chốt**: giữ cách SV3 đang làm là không giảm `DaDung` lúc hủy; không tự đặt chính sách mới. Chi tiết thiết kế, bằng chứng, giới hạn và demo: [tích hợp SV3–SV4](tich-hop-sv3-sv4.md).
 
 ## Thống kê và thư viện
 
@@ -49,3 +53,16 @@ Thư viện thêm, tương thích project .NET 8 Windows, giấy phép MIT phù 
 - Biểu đồ vẽ bằng WinForms/GDI sẵn có, không thêm gói biểu đồ.
 
 Giữ thông báo bản quyền/license của các package khi phân phối theo MIT; phụ thuộc bắc cầu do NuGet restore theo dependency metadata, không chép DLL thủ công. Không dùng license trả phí/trial hoặc watermark. Version trực tiếp được pin trong csproj, NuGet audit chạy khi restore/build.
+
+## Cập nhật bàn giao 26/10/2026
+
+Nhánh final tạo từ develop `920a576`, tận dụng `6e7657a`; chưa commit/push/PR. CSDL cấu hình hiện tại `localhost / BadmintonShop` thiếu 4 cột HoaDon và index token; [kiểm tra chỉ đọc](../final-integration/schema-readonly.txt) xác định chính xác. Không sửa CSDL cửa hàng. Script tổng đã gồm 04/06 cho cài mới; không chạy tổng lên dữ liệu đang giữ. Demo 05 chỉ nhận DB riêng theo tiền tố test/demo, có 12 tháng dữ liệu và ba CTKM `[SV4-DEMO]`.
+
+Lý do voucher phân biệt không tồn tại/chưa mở/hết hạn/hết lượt/ngừng áp dụng, dùng chung service cho Web/POS. POS chỉ sẵn sàng khi có cả cột và unique filtered index MaYeuCauPOS. Giá thay đổi cần xác nhận lại; không yêu cầu xóa giỏ. Tiền/giảm từ UI chỉ là báo giá xác nhận, transaction đọc lại dữ liệu thật trước ghi.
+
+Kết quả hiện tại và giới hạn ở [biên bản final](../final-integration/README.md). SV1 review schema/trigger, SV3 xác nhận chính sách voucher/email/idempotency web; SV2 thực hiện [checklist kiểm thử chéo](checklist-sv2-desktop.md), login/catalog và mount kho ảnh. Không ghi SV2 đã kiểm khi chưa có xác nhận.
+
+
+## Rà cuối trước PR, sau chuyển ổ D
+
+Worktree sử dụng: `D:\CodexWorktrees\BadmintonShop-sv4`, nhánh `feature/sv4-final-integration`. [Kết quả và commit mới](../final-integration/pr-review/README.md) có 74/74 integration, 15/15 install, kiểm độc lập 12 bộ lọc và demo cửa sổ thật. Đã sửa chiều cao tóm tắt POS để không cắt dòng giảm giá và giữ thông tin hóa đơn gần nhất sau tải lại. 1920×1080, DPI Windows thật, browser E2E và kiểm chéo SV2 vẫn chưa xác minh. Được phép commit/push/mở PR theo yêu cầu mới, không merge.

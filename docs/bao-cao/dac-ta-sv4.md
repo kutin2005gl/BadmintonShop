@@ -1,6 +1,6 @@
 # Đặc tả chức năng SV4 — Desktop quản trị
 
-Ngày: 18/10/2026. Nhánh triển khai: `feature/sv4-desktop`, nền `origin/develop` tại `c57ef31`. Mã nguồn thực tế là căn cứ cho tài liệu này.
+Cập nhật 26/10/2026. Nhánh `feature/sv4-final-integration`, nền `origin/develop` tại `920a576`, tái sử dụng tích hợp `6e7657a`; thay đổi hiện chưa commit. Mã nguồn thực tế là căn cứ.
 
 ## Tác nhân và quyền
 
@@ -31,22 +31,23 @@ ADMIN dùng toàn bộ chức năng. QUANLY dùng sản phẩm, danh mục, đơ
 - Tiền điều kiện: quyền `DonHangPOS`, migration 04 đã áp dụng.
 - Lọc khoảng ngày (ngày cuối bao gồm cả ngày), trạng thái, Online/Tại quầy; tìm theo mã đơn hoặc tên/SĐT/email khách. Xem giá, lượng, giảm % từng dòng, thành tiền, giảm hóa đơn, tổng, lý do hủy.
 - Chỉ đơn Online đi theo Chờ xác nhận → Đã xác nhận → Đang giao → Hoàn thành.
-- Nhân viên chỉ được hủy Chờ xác nhận hoặc Đã xác nhận; lý do sau trim dài 1–500. Khách tự hủy trên web cần SV3 áp quy tắc chặt hơn: chỉ Chờ xác nhận và đúng chủ đơn.
+- Nhân viên chỉ được hủy Chờ xác nhận hoặc Đã xác nhận; lý do sau trim dài 1–500. Khách tự hủy trên web qua DonHangOnlineRepository: chỉ Chờ xác nhận và đúng chủ đơn; endpoint có Authorize và anti-forgery.
 - UPDATE so sánh trạng thái đang hiển thị trong WHERE. Nếu khác: báo đơn đã thay đổi, người dùng tải lại; không ghi đè. Không nhảy bước, mở lại đơn hủy, hủy đang giao/hoàn thành hoặc sửa POS hoàn thành.
 - Trigger hiện có hoàn tồn khi chuyển sang Đã hủy; repository không hoàn lần hai. Hủy lặp không thay đổi tồn.
 - Có thể xuất lại PDF cho mọi đơn đã lưu, bản in ghi rõ trạng thái (đơn chưa hoàn thành không được hiểu là đã thanh toán).
 
-## UC4.4 — Bán tại quầy
+## UC4.4 — POS và khuyến mãi dùng chung web
 
-- Tiền điều kiện: quyền `DonHangPOS`, phiên có MaNV, migration 04 và trigger đã áp dụng.
-- Tìm sản phẩm đang bán ở lưới trên; chọn số lượng và Thêm vào giỏ. Chọn dòng lưới dưới để Sửa số lượng/Bỏ dòng. Hiển thị đơn giá, thành tiền, tổng.
-- Nhập tiền khách đưa nguyên đồng; hiển thị thiếu/thừa. Không cho lưu giỏ rỗng, thiếu tiền, lượng ≤0, sản phẩm trùng, sản phẩm ngừng bán.
-- Khi xác nhận thanh toán: khóa các sản phẩm theo thứ tự mã; kiểm lại giá hiện tại, trạng thái và tồn trong transaction; giá khác yêu cầu tải lại và chọn lại giỏ; không âm thầm bán theo giá mới.
-- Ghi HoaDon và toàn bộ ChiTietHoaDon atomic. MaKH=NULL, MaNV lấy phiên, LoaiBan=Tại quầy, HinhThucTT=Tiền mặt, TrangThai=Hoàn thành. Trigger tính tổng và giảm tồn.
-- Token GUID có unique index ngăn lưu lặp, kể cả retry sau phản hồi mạng lỗi. Cùng token nhưng giỏ/nhân viên/tiền khác bị từ chối. Chỉ tạo token mới khi thành công hoặc người dùng chủ động Giỏ mới.
-- Sau lỗi kết nối không rõ đã commit chưa: thử lại cùng giỏ/token hoặc kiểm tra Đơn hàng; không tự tạo lại giao dịch khác.
-- Sau thành công có mã hóa đơn, cho xuất PDF ngay hoặc từ Đơn hàng.
-- Khuyến mãi SV3 vẫn là khung, nên giao diện công khai bán theo giá thường; không có ô voucher giả hoạt động.
+- Tiền điều kiện: quyền DonHangPOS, MaNV hợp lệ, migration 04/06 và trigger bật; token có unique filtered index khác NULL. POS từ chối sẵn sàng khi thiếu cột/index.
+- Bố cục sản phẩm trái/giỏ phải; thêm/sửa lượng/bỏ dòng, voucher Áp dụng/Bỏ mã. Hiển thị giá, giảm % và thành tiền dòng, tiền trước giảm, giảm SP, giảm cấp hóa đơn/voucher, phải trả, tiền khách và thiếu/thừa.
+- Dùng GioHangService/TinhKhuyenMaiService, không có bộ tính riêng của desktop. SP chọn % cao nhất còn hiệu lực; hóa đơn lấy bậc có ngưỡng cao nhất đạt được; so với voucher, chỉ dùng một ưu đãi cấp đơn có tiền giảm cao hơn, bằng nhau chọn voucher. Giảm SP cộng với một giảm cấp đơn; voucher không được chọn không tăng lượt.
+- Làm tròn AwayFromZero một lần mỗi dòng như DECIMAL(18,0), rồi làm tròn giảm cấp đơn; không nhân giá đơn vị đã làm tròn để tính dòng.
+- Voucher sai, chưa mở, hết hạn, hết lượt hoặc tắt có thông báo riêng; không âm thầm bỏ mã để tạo đơn. Mã tối đa 30 ký tự, trim/uppercase.
+- Serializable transaction khóa sản phẩm tăng dần, tính lại giá/trạng thái/tồn/ưu đãi và so toàn bộ báo giá đã xác nhận. Thay đổi giá hoặc ưu đãi trả báo giá mới, chưa thu tiền/lưu; UI giữ giỏ và yêu cầu xác nhận lại.
+- MaKH NULL, MaNV phiên, LoaiBan Tại quầy, HinhThucTT Tiền mặt, TrangThai Hoàn thành. Ghi GiamGia % ở chi tiết, MaCTKM/TienGiamGia cấp đơn; trigger tính tổng/trừ tồn. Voucher tăng atomic cùng transaction; mọi lỗi rollback cả header/chi tiết/tồn/lượt.
+- Giữ token MaYeuCauPOS và SHA-256 DauVanTayPOS. Khóa applock theo token; retry đã commit đọc mã cũ trước khi tính giá hiện tại. Payload gồm nhân viên, tiền khách, SP/lượng/giá/giảm/thành tiền, voucher nhập và ưu đãi chọn. Payload khác bị từ chối, không thêm lượt hay trừ tồn lần hai.
+- Giữ giỏ/token/báo giá khi lỗi, khóa thao tác lặp khi đang lưu. Thành công mới xóa giỏ/tạo token mới. Giỏ mới có cảnh báo kiểm hóa đơn nếu lần trước lỗi kết nối.
+- PDF xuất lại lấy hóa đơn/chi tiết đã lưu. Không cập nhật giá/giảm lịch sử theo CTKM hiện tại. Tên SP/danh mục chưa có snapshot.
 
 ## UC4.5 — Thống kê và xuất báo cáo
 
@@ -64,4 +65,9 @@ ADMIN dùng toàn bộ chức năng. QUANLY dùng sản phẩm, danh mục, đơ
 
 SQL chỉ ở Core/DataAccess, có tham số; Form không viết SQL. Giữ API đọc SV1; một HoaDonRepository dùng chung với SV3. Constructor form SV4 chỉ dựng điều khiển, OnLoad mới nạp dữ liệu/kiểm quyền. Chưa xác nhận Visual Studio Designer thao tác kéo thả; các form dựng bố cục bằng mã và constructor được kiểm tra không truy cập DB.
 
-Không sửa nghiệp vụ khuyến mãi/email/web của SV2/SV3. Không chỉnh trigger SV1. Thống kê truy vấn đồng bộ phù hợp dữ liệu đồ án; dữ liệu lớn có thể cần async, phân trang và tối ưu tổng hợp.
+Chỉ điều chỉnh Core/Web cần thiết cho tính lại giá trong transaction và xác nhận báo giá; giữ API đọc, xác thực và chủ đơn. Không chỉnh trigger SV1 hoặc bổ sung email/thanh toán thật. Truy vấn desktop chạy worker qua ShopTheme.Load; dữ liệu lớn vẫn cần phân trang/benchmark. Quy tắc voucher khi hủy giữ nguyên SV3: chưa hoàn lượt.
+
+
+## Rà cuối trước PR, sau chuyển ổ D
+
+Worktree sử dụng: `D:\CodexWorktrees\BadmintonShop-sv4`, nhánh `feature/sv4-final-integration`. [Kết quả và commit mới](../final-integration/pr-review/README.md) có 74/74 integration, 15/15 install, kiểm độc lập 12 bộ lọc và demo cửa sổ thật. Đã sửa chiều cao tóm tắt POS để không cắt dòng giảm giá và giữ thông tin hóa đơn gần nhất sau tải lại. 1920×1080, DPI Windows thật, browser E2E và kiểm chéo SV2 vẫn chưa xác minh. Được phép commit/push/mở PR theo yêu cầu mới, không merge.

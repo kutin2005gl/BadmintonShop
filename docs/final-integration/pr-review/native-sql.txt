@@ -1,0 +1,20 @@
+MaSP|TenSP|SoLuongTon|HinhAnh
+----|-----|----------|-------
+15|[SV4-DEMO-LIVE] Vot D|4|products/252b95fa4ef54f239a21efae49048a64.jpg
+MaPN|MaSP|SoLuong|DonGia|ThanhTien
+----|----|-------|------|---------
+8|15|5|300000|1500000
+MaHD|TrangThai|TienGiamGia|TongTien|TienKhachDua
+----|---------|-----------|--------|------------
+37|Hoàn thành|0|30000|NULL
+42|Hoàn thành|142500|807500|1000000
+MaSP|SoLuong|DonGia|GiamGia|ThanhTien
+----|-------|------|-------|---------
+13|1|500000|10.00|450000
+15|1|500000|.00|500000
+MaVoucher|DaDung
+---------|------
+SV4DEMO15|1
+CompletedRevenue_20260101_20261026
+----------------------------------
+46602300

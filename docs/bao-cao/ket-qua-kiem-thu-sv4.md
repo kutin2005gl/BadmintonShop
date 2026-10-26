@@ -1,3 +1,27 @@
+# Rà soát trước PR từ ổ D — 26/10/2026
+
+[Kết quả chạy mới](../final-integration/pr-review/README.md) trên D:\CodexWorktrees\BadmintonShop-sv4, nhánh feature/sv4-final-integration: build 0 lỗi/cảnh báo; integration **74/74**, install **15/15**; Python đối chiếu 12 bộ lọc và file xuất từ cửa sổ thật đều đạt. Đã sửa nhãn giảm giá POS bị cắt, mở lại build cuối xác minh đủ ba dòng. Demo thật thêm SP15 có ảnh/tồn 0, phiếu nhập8 tăng 5, POS42 trả 807.500/thừa 192.500, đơn Online demo37 hoàn thành; SQL và Excel/PDF báo cáo native cùng bộ lọc = 46.602.300đ. CSDL hồi quy riêng có tổng 13.172.279đ, không trộn hai phạm vi.
+
+1920×1080/DPI Windows thật vẫn chưa xác minh; HTTP fixture chưa browser E2E, chưa SV2 kiểm chéo. CSDL người dùng chỉ đọc schema, vẫn thiếu 4 cột/index; chưa migration/seed/ghi thử. Các đoạn dưới là lịch sử các lượt trước, không phải số liệu của lần rà cuối.
+
+## Hồ sơ trước lượt rà PR
+
+# Kết quả SV4 hiện tại — 26/10/2026
+
+Nhánh `feature/sv4-final-integration` chưa commit, nền develop `920a576`, tái sử dụng `6e7657a`. Môi trường Windows x64/SDK 10.0.402, target .NET 8, SQL Server 2022. [Biên bản final và SHA-256 mã được kiểm](../final-integration/README.md) là kết quả hiện tại; bên dưới giữ riêng hồ sơ 18/10 và 22/10, không gộp thành một lần chạy.
+
+- Build solution: 0 lỗi, 0 cảnh báo.
+- Tích hợp: **74 đạt, 0 lỗi**, CSDL riêng `BadmintonShop_SV4_Test_20261026212650_f83402ea`; 6 LIMIT 1920×1080 chưa xác minh, không tính như kiểm màn hình đích đã đạt.
+- Cài mới/migration/demo: **15 đạt, 0 lỗi** (gồm 13 unit + 2 ca cài đặt), CSDL `BadmintonShop_SV4_Test_Install_20261026211927_eded9f88`.
+- Python openpyxl/pypdf kiểm độc lập file cuối và cả 12 bộ lọc SQL/bảng/XLSX/PDF: đạt. Tổng doanh thu hoàn thành toàn khoảng cuối = **13.172.379 đồng**; số tiền của lần trước có thể khác do ca cạnh tranh, không dùng lẫn CSDL/file.
+- Schema đang cấu hình `localhost / BadmintonShop`: chỉ đọc metadata; thiếu 4 cột HoaDon và index POS, chưa cập nhật. Không ghi thử/seed/migration vào CSDL người dùng.
+- Ảnh control WinForms thật 1366×768 và 1556×884, scale 125%/150% mô phỏng. Harness cũ đặt tên 1920×1080 sai do giới hạn cửa sổ; đã sửa ghi kích thước thật, lưu probe phát hiện trước sửa. **Chưa kiểm 1920×1080 hoặc DPI Windows thực tế.**
+- Web được kiểm repository/SQL và HTTP Kestrel với đăng nhập fixture trong test host; chưa browser E2E login/catalog SV2. Chưa có bằng chứng SV2 kiểm thử chéo; chưa fault injection mạng đúng sau commit, mọi hộp thoại, Designer hoặc in giấy.
+
+Log/build, ảnh, Excel/PDF, phép đối chiếu và lệnh chạy: [docs/final-integration](../final-integration/README.md). HDSD/demo và checklist SV2 đã cập nhật. Không commit, push, mở PR hoặc merge trong lần này.
+
+## Hồ sơ kết quả lịch sử (giữ nguyên theo từng ngày)
+
 # Biên bản kết quả SV4 — 18/10/2026
 
 ## Phiên bản và phạm vi
@@ -62,3 +86,8 @@ pypdf mở đủ 6 trang báo cáo, đọc được tiếng Việt và quy tắc
 Chưa chạy E2E web SV2/SV3, khuyến mãi/voucher/email, hộp thoại và thao tác tay đầy đủ, scale/DPI, mở Visual Studio Designer, thiết bị máy in hoặc fault injection mạng ngay sau commit. Ma trận quyền đã kiểm tự động; mở form trái quyền và hộp thoại chặn cần kiểm thủ công riêng.
 
 SV1 cần review migration/luồng tồn; SV2 cần mount kho ảnh và kiểm thử chéo desktop; SV3 cần dùng chung HoaDonRepository, thống nhất quyền hủy khách/nhân viên và tích hợp service khuyến mãi khi hoàn thiện. Danh sách đầy đủ nằm trong [61 test case](kiem-thu-sv4.md) và [quy ước tích hợp](tich-hop-sv4.md).
+
+
+## Cập nhật tích hợp SV3–SV4 ngày 22/10/2026
+
+Xem [báo cáo tích hợp hiện tại](tich-hop-sv3-sv4.md) và bằng chứng riêng tại `docs/integration-sv3/`. Không thay số liệu của các lần chạy lịch sử bên trên.

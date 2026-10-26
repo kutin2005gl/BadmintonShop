@@ -1,6 +1,6 @@
 # Sơ đồ lớp Core và nghiệp vụ — SV4
 
-Phản ánh mã nguồn nhánh `feature/sv4-desktop` ngày 18/10/2026. Ký hiệu: liên kết thực thể theo FK; dependency là lời gọi trong mã. Thuộc tính trình bày phần chính, không thay thế model đầy đủ.
+Phản ánh mã nguồn nhánh `feature/sv4-final-integration` ngày 26/10/2026 (chưa commit, nền develop `920a576`). Ký hiệu: liên kết thực thể theo FK; dependency là lời gọi trong mã. Thuộc tính trình bày phần chính, không thay thế model đầy đủ.
 
 ## Các thực thể Core
 
@@ -254,4 +254,62 @@ classDiagram
 
 Tất cả form SV4 gọi QuyenForm ở OnLoad và dùng Sv4Ui khi thực hiện thao tác CSDL; lược bỏ các cạnh lặp để dễ đọc. Các lớp NhaCungCapRepository, NhanVienRepository, TaiKhoanRepository, KhachHangRepository, PhieuNhapRepository, SaoLuuRepository (SV1) cũng truy cập DbHelper và model tương ứng; không bị thay thế bởi SV4.
 
-Dịch vụ Core hiện có khác: MatKhauHelper, KiemTraDuLieu, LoiCsdl, VaiTro, ChucNang, KetQuaDangNhap. `TinhKhuyenMaiService` tồn tại với ba API ném NotImplementedException; POS chưa phụ thuộc service này và công khai bán giá thường. `XuatTaiLieu`, `AnhSanPham`, `QuyenForm`, `BieuDoCot` nằm ở Desktop do phụ thuộc WinForms/GDI, không đưa vào Core đa nền tảng.
+Dịch vụ Core hiện có khác: MatKhauHelper, KiemTraDuLieu, LoiCsdl, VaiTro, ChucNang, KetQuaDangNhap. `TinhKhuyenMaiService` và `GioHangService` đã tính khuyến mãi thật dùng chung Web/POS; không còn service khung. Cột SQL `HoaDon.DauVanTayPOS` do repository ghi/đọc trực tiếp, chưa thêm property vào POCO HoaDon. `XuatTaiLieu`, `AnhSanPham`, `QuyenForm`, `BieuDoCot` nằm ở Desktop do phụ thuộc WinForms/GDI, không đưa vào Core đa nền tảng.
+
+## Luồng thanh toán cuối cùng
+
+```mermaid
+classDiagram
+    class FrmPOS
+    class DatHangController
+    class GioHangService {
+        +Tinh() KetQuaGioHang
+        ~TinhTrongGiaoDich() KetQuaGioHang
+    }
+    class TinhKhuyenMaiService {
+        +LayPhanTramGiamSanPham() decimal
+        +TinhGiamHoaDon()
+        +LoiVoucher() string
+        +TinhThanhTien() decimal
+    }
+    class KhuyenMaiRepository {
+        +KhuyenMaiRepository(SqlConnection c, SqlTransaction t)
+        +LayVoucherHopLe()
+        +LoiVoucher() string
+        +DungVoucher() bool
+    }
+    class KetQuaGioHang {
+        +string VoucherYeuCau
+        +decimal TongTienHang
+        +decimal TienGiamHoaDon
+        +decimal TongThanhToan
+    }
+    class XacNhanGia {
+        +DauVanTay() string
+        +DauVanTayPOS() string
+        +KiemTra() void
+    }
+    class GiaThanhToanThayDoiException
+    class HoaDonRepository
+    class DonHangOnlineRepository
+    class GiaoDichBanHang {
+        ~TinhLai() KetQuaGioHang
+        ~DungVoucher() void
+        ~GhiChiTiet() void
+    }
+    FrmPOS ..> GioHangService
+    FrmPOS ..> HoaDonRepository
+    DatHangController ..> GioHangService
+    DatHangController ..> DonHangOnlineRepository
+    GioHangService ..> TinhKhuyenMaiService
+    GioHangService ..> KetQuaGioHang
+    TinhKhuyenMaiService ..> KhuyenMaiRepository
+    HoaDonRepository ..> XacNhanGia
+    HoaDonRepository ..> GiaoDichBanHang
+    DonHangOnlineRepository ..> GiaoDichBanHang
+    GiaoDichBanHang ..> GioHangService
+    GiaoDichBanHang ..> XacNhanGia
+    XacNhanGia ..> GiaThanhToanThayDoiException
+```
+
+GiaoDichBanHang internal chia sẻ điều kiện ghi, không thay ranh giới quyền: POS dùng MaNV/QuyenForm; web dùng Authorize/MaKH chủ đơn. KhuyenMaiRepository gắn connection/transaction để không đọc giá qua kết nối khác khi thanh toán. Trigger SV1 là nơi duy nhất sửa tồn và TongTien; không biểu diễn trigger như class C#.
