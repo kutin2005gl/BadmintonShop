@@ -21,7 +21,10 @@ internal static class QuyenForm
     public static bool KiemTraKhiMo(Form form, ChucNang chucNang)
     {
         if (DuQuyen(chucNang)) return true;
-        form.BeginInvoke(form.Close);
+        // OnLoad runs in the initial display call. Queue the denial close after that call returns;
+        // an owner may already have closed the form before the posted delegate is dispatched.
+        LifecycleDiagnostics.Record(form.GetType().Name+" access denied; queue close");
+        form.BeginInvoke((Action)(()=> { if(!form.IsDisposed && !form.Disposing && form.IsHandleCreated)form.Close(); }));
         return false;
     }
 }

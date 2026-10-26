@@ -1,4 +1,4 @@
-@model DatHangViewModel
+﻿@model DatHangViewModel
 @{ ViewData["Title"] = "Đặt hàng"; var g = Model.Gio; }
 
 <h2 class="mb-3">Xác nhận đơn hàng</h2>
@@ -43,8 +43,8 @@
                     </div>
                 }
                 <hr />
-                <div class="d-flex justify-content-between"><span>Tạm tính</span><span>@g.TongTienHang.Dong()</span></div>
-                <div class="d-flex justify-content-between text-success"><span>Giảm giá</span><span>-@g.TienGiamHoaDon.Dong()</span></div>
+                <div class="d-flex justify-content-between"><span>Tiền hàng sau giảm sản phẩm</span><span>@g.TongTienHang.Dong()</span></div>
+                <div class="d-flex justify-content-between text-success"><span>Giảm hóa đơn / voucher</span><span>-@g.TienGiamHoaDon.Dong()</span></div>
                 <div class="d-flex justify-content-between fw-bold fs-5 mt-2"><span>Tổng cộng</span><span>@g.TongThanhToan.Dong()</span></div>
             </div>
         </div>

@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using System.Globalization;
 using BadmintonShop.Core.Models;
 using BadmintonShop.Core.Services;
@@ -64,8 +64,14 @@ public static class XuatTaiLieu
         if(!string.IsNullOrEmpty(hd.LyDoHuy))s.AddParagraph("Lý do hủy: "+hd.LyDoHuy);
         s.AddParagraph("Giảm giá dòng là phần trăm (%). Thành tiền dòng đã trừ giảm sản phẩm.");
         ThemBang(s,chiTiet);
-        s.AddParagraph($"Tiền hàng: {chiTiet.AsEnumerable().Sum(r=>r.Field<decimal>("ThanhTien")):N0} đồng");
-        s.AddParagraph($"Giảm hóa đơn: {hd.TienGiamGia:N0} đồng");
+        var after=chiTiet.AsEnumerable().Sum(r=>r.Field<decimal>("ThanhTien"));
+        if(chiTiet.Columns.Contains("DonGia") && chiTiet.Columns.Contains("SoLuong"))
+        {
+            var before=chiTiet.AsEnumerable().Sum(r=>r.Field<decimal>("DonGia")*r.Field<int>("SoLuong"));
+            s.AddParagraph($"Tiền hàng trước giảm: {before:N0} đồng | Giảm sản phẩm: {before-after:N0} đồng");
+        }
+        s.AddParagraph($"Tiền hàng sau giảm sản phẩm: {after:N0} đồng");
+        s.AddParagraph($"Giảm hóa đơn / voucher: {hd.TienGiamGia:N0} đồng | Mã CTKM đã lưu: {hd.MaCTKM}");
         s.AddParagraph($"Tổng thanh toán: {hd.TongTien:N0} đồng","Heading2");
         if(hd.TienKhachDua is decimal tien)s.AddParagraph($"Khách đưa: {tien:N0} đồng | Tiền thừa: {tien-hd.TongTien:N0} đồng");
         s.AddParagraph("Bản in giao dịch phục vụ đồ án; không thay thế hóa đơn điện tử thuế.");LuuPdf(doc,path);

@@ -14,6 +14,7 @@ public partial class FrmDangNhap : Form
     // TV1: khoi tao form dang nhap
     public FrmDangNhap()
     {
+        LifecycleDiagnostics.Track(this);
         InitializeComponent();
     }
 

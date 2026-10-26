@@ -25,14 +25,25 @@ internal static partial class Program
         root=Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,"../../../../../"));
         if (!File.Exists(Path.Combine(root,"BadmintonShop.sln")) && File.Exists(Path.Combine(Environment.CurrentDirectory,"BadmintonShop.sln"))) root=Environment.CurrentDirectory;
         output=Path.Combine(Path.GetTempPath(),"BadmintonShop-SV4-Checks",DateTime.Now.ToString("yyyyMMdd-HHmmss"));Directory.CreateDirectory(output);
+        if(args.Contains("--schema-readonly"))return SchemaReadOnly();
+        if(args.Contains("--lifecycle-debug"))return LifecycleDebug();
         Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);
+        // Keep one STA UI context while opening/closing many independent test forms, as Application.Run does.
+        SynchronizationContext.SetSynchronizationContext(new WindowsFormsSynchronizationContext());
         Unit();
+        if(args.Contains("--install-checks"))
+        {
+            int serverIndex=Array.IndexOf(args,"--server");
+            if(serverIndex<0 || serverIndex+1>=args.Length)throw new ArgumentException("Install checks require --server; creates an isolated test database.");
+            FreshInstallChecks(args[serverIndex+1]);
+        }
+        if(args.Contains("--lifecycle-checks"))LifecycleChecks();
         if(args.Contains("--ui-readonly")) UiReadOnly();
         if(args.Contains("--integration"))
         {
             int index=Array.IndexOf(args,"--server");
             if(index<0 || index+1>=args.Length)throw new ArgumentException("Integration yêu cầu --server <SQL Server>; luôn tạo CSDL test mới.");
-            try { TaoCsdlTest(args[index+1]);Integration();Render(); }
+            try { TaoCsdlTest(args[index+1]);Integration();PromotionIntegration();WebHttpChecks();Render();UiReadOnly(true);FinalIntegrationChecks();FinalReconciliation(); }
             catch(Exception ex) { failed++;Ghi("FAIL SETUP: "+ex); }
         }
         Ghi($"RESULT: {passed} passed, {failed} failed. Output: {output}");
@@ -121,8 +132,9 @@ internal static partial class Program
         using(var c=new SqlConnection(b.ConnectionString)) { c.Open();using var cmd=new SqlCommand($"CREATE DATABASE [{name}]",c);cmd.ExecuteNonQuery(); }
         b.InitialCatalog=name;DbHelper.ConnectionString=b.ConnectionString;Ghi("Isolated test database: "+name);
         var schema=File.ReadAllText(Path.Combine(root,"database/01_CreateDatabase.sql"));schema=schema[schema.IndexOf("-- ====== DANH MUC",StringComparison.Ordinal)..];Batches(schema);
-        foreach(var file in new[]{"02_Triggers.sql","04_SV4_Migration.sql","04_SV4_Migration.sql"})Batches(File.ReadAllText(Path.Combine(root,"database",file)).Replace("USE BadmintonShop;",$"USE [{name}];",StringComparison.Ordinal));
+        foreach(var file in new[]{"02_Triggers.sql","04_SV4_Migration.sql","04_SV4_Migration.sql","06_SV4_POS_Request.sql","06_SV4_POS_Request.sql"})Batches(File.ReadAllText(Path.Combine(root,"database",file)).Replace("USE BadmintonShop;",$"USE [{name}];",StringComparison.Ordinal));
         nv=ScalarInt("INSERT NhanVien(HoTen,ChucVu) VALUES(N'SV4 TEST',N'Nhân viên bán hàng');SELECT CAST(SCOPE_IDENTITY() AS int)");
+        DbHelper.ExecuteNonQuery("INSERT TaiKhoan(TenDangNhap,MatKhau,VaiTro,MaNV) VALUES('sv4test',@hash,'ADMIN',@nv)",new SqlParameter("@hash",MatKhauHelper.BamMatKhau("TestOnly@123")),new SqlParameter("@nv",nv));
         ncc=ScalarInt("INSERT NhaCungCap(TenNCC) VALUES(N'SV4 TEST');SELECT CAST(SCOPE_IDENTITY() AS int)");
         dm1=new DanhMucRepository().Luu(new DanhMuc { TenDanhMuc="SV4 TEST Vợt" });dm2=new DanhMucRepository().Luu(new DanhMuc { TenDanhMuc="SV4 TEST Cầu" });
         sp1=new SanPhamRepository().Luu(new SanPham { TenSP="Vợt thử",MaDM=dm1,DonGiaBan=100,DonViTinh="Cây",TrangThai="Đang bán",SoLuongTon=999 });
@@ -244,19 +256,22 @@ internal static partial class Program
         {
             using(form)
             {
-                form.Show();Application.DoEvents();
+                form.Show();Pump(form);
                 if(form is FrmDanhMuc)
                 {
                     var controls=Controls(form).ToList();var grid=controls.OfType<DataGridView>().Single();grid.Rows[0].Selected=true;Application.DoEvents();
-                    controls.OfType<Button>().Single(x=>x.Text=="Mới").PerformClick();Application.DoEvents();
+                    controls.OfType<Button>().Single(x=>x.Text=="Mới").PerformClick();Pump(form);
                     True(controls.OfType<TextBox>().All(x=>x.Text.Length==0));True(controls.OfType<Label>().Any(x=>x.Text=="Danh mục mới"));
                 }
                 if(form is FrmPOS)
                 {
-                    var controls=Controls(form).ToList();controls.OfType<Button>().Single(x=>x.Text=="Thêm vào giỏ").PerformClick();Application.DoEvents();
+                    var products=Controls(form).OfType<DataGridView>().Single(g=>g.DataSource is not System.ComponentModel.BindingList<DongPOS>);
+                    var available=products.Rows.Cast<DataGridViewRow>().First(r=>Convert.ToInt32(r.Cells["SoLuongTon"].Value)>0);
+                    products.CurrentCell=available.Cells["TenSP"];
+                    var controls=Controls(form).ToList();controls.OfType<Button>().Single(x=>x.Text=="Thêm vào giỏ").PerformClick();Pump(form);
                     var cart=controls.OfType<DataGridView>().Single(x=>x.DataSource is System.ComponentModel.BindingList<DongPOS>);
                     var list=(System.ComponentModel.BindingList<DongPOS>)cart.DataSource!;Eq(1,list.Count);
-                    controls.OfType<Button>().Single(x=>x.Text=="Bỏ dòng giỏ").PerformClick();Eq(0,list.Count);
+                    controls.OfType<Button>().Single(x=>x.Text=="Bỏ dòng giỏ").PerformClick();Pump(form);Eq(0,list.Count);
                 }
                 using var bmp=new Bitmap(form.Width,form.Height);form.DrawToBitmap(bmp,new Rectangle(Point.Empty,bmp.Size));bmp.Save(Path.Combine(output,form.GetType().Name+".png"));form.Close();
             }

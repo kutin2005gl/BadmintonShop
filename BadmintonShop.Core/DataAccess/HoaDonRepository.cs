@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using BadmintonShop.Core.Models;
 using BadmintonShop.Core.Services;
 using Microsoft.Data.SqlClient;
@@ -9,7 +9,13 @@ namespace BadmintonShop.Core.DataAccess;
 public class HoaDonRepository
 {
     public bool HoTroPOS() => Convert.ToInt32(DbHelper.ExecuteScalar(@"SELECT CASE WHEN
-        COL_LENGTH('dbo.HoaDon','MaYeuCauPOS') IS NOT NULL AND COL_LENGTH('dbo.HoaDon','TienKhachDua') IS NOT NULL
+        COL_LENGTH('dbo.HoaDon','MaYeuCauPOS') IS NOT NULL AND COL_LENGTH('dbo.HoaDon','TienKhachDua') IS NOT NULL AND COL_LENGTH('dbo.HoaDon','DauVanTayPOS') IS NOT NULL
+        AND EXISTS(SELECT 1 FROM sys.indexes i JOIN sys.index_columns ic ON ic.object_id=i.object_id AND ic.index_id=i.index_id
+          JOIN sys.columns c ON c.object_id=ic.object_id AND c.column_id=ic.column_id
+          WHERE i.object_id=OBJECT_ID('dbo.HoaDon') AND i.is_unique=1 AND i.is_disabled=0
+          AND i.has_filter=1 AND i.filter_definition=N'([MaYeuCauPOS] IS NOT NULL)'
+          AND c.name='MaYeuCauPOS' AND ic.key_ordinal=1
+          AND NOT EXISTS(SELECT 1 FROM sys.index_columns extra WHERE extra.object_id=i.object_id AND extra.index_id=i.index_id AND extra.key_ordinal>1))
         THEN 1 ELSE 0 END")) == 1;
     // SV4: danh sách tìm mã đơn/tên/điện thoại/email khách, ngày cuối bao gồm trọn ngày.
     public DataTable LayDanhSachHienThi(DateTime tu, DateTime den, string? trangThai = null, string? loaiBan = null, string? tuKhoa = null)
@@ -40,7 +46,11 @@ public class HoaDonRepository
     {
         var dt = DbHelper.ExecuteQuery("SELECT * FROM HoaDon WHERE MaHD=@ma",new SqlParameter("@ma",ma));
         if (dt.Rows.Count==0) return null;
-        var r=dt.Rows[0];
+        return Map(dt.Rows[0]);
+    }
+    internal static HoaDon Map(DataRow r)
+    {
+        var dt=r.Table;var ma=r.Field<int>("MaHD");
         return new HoaDon { MaHD=ma,MaKH=r.Field<int?>("MaKH"),MaNV=r.Field<int?>("MaNV"),
             NgayLap=r.Field<DateTime>("NgayLap"),LoaiBan=r.Field<string>("LoaiBan")!,HinhThucTT=r.Field<string>("HinhThucTT")!,
             DiaChiGiao=r.Field<string?>("DiaChiGiao"),MaCTKM=r.Field<int?>("MaCTKM"),TienGiamGia=r.Field<decimal>("TienGiamGia"),
@@ -66,67 +76,77 @@ public class HoaDonRepository
             new SqlParameter("@lydo",DbHelper.GiaTriHoacNull(lyDo)));
     }
 
-    // SV4: POS atomic + chống lặp bằng token bền vững; kiểm giá/tồn dưới khóa, không tự trừ tồn.
-    public int ThanhToanPOS(int maNV, IReadOnlyList<ChiTietHoaDon> gio, decimal tienKhachDua, Guid yeuCau)
+    // SV4: compatibility overload; callers with promotions use the confirmed shared cart snapshot overload.
+    public int ThanhToanPOS(int maNV,IReadOnlyList<ChiTietHoaDon> rows,decimal cash,Guid token)
     {
-        if (maNV<=0 || yeuCau==Guid.Empty || gio.Count==0) throw new ArgumentException("Cần nhân viên, mã yêu cầu và ít nhất một sản phẩm.");
-        QuyTacBanHang.KiemTraTien(tienKhachDua);
-        if (gio.Any(x=>x.MaSP<=0 || x.SoLuong<=0 || x.GiamGia!=0) || gio.GroupBy(x=>x.MaSP).Any(g=>g.Count()>1))
-            throw new ArgumentException("Giỏ có số lượng không hợp lệ, sản phẩm trùng hoặc khuyến mãi chưa hỗ trợ.");
-        foreach(var ct in gio) QuyTacBanHang.KiemTraTien(ct.DonGia);
+        var quote=new KetQuaGioHang();
+        foreach(var row in rows)quote.Dong.Add(new DongGioHang { MaSP=row.MaSP,SoLuong=row.SoLuong,DonGia=row.DonGia,
+            PhanTramGiam=row.GiamGia,ThanhTien=TinhKhuyenMaiService.TinhThanhTien(row.SoLuong,row.DonGia,row.GiamGia) });
+        quote.TongTienHang=quote.Dong.Sum(d=>d.ThanhTien);
+        return ThanhToanPOS(maNV,quote,cash,token);
+    }
+
+    // SV4: reprice under locks and compare the confirmation before consuming a voucher or inserting any rows.
+    public int ThanhToanPOS(int maNV,KetQuaGioHang quote,decimal tienKhachDua,Guid yeuCau)
+    {
+        if(maNV<=0 || yeuCau==Guid.Empty)throw new ArgumentException("Cần nhân viên và mã yêu cầu POS.");
+        QuyTacBanHang.KiemTraTien(tienKhachDua);GiaoDichBanHang.KiemTraGio(quote);
+        var fingerprint=XacNhanGia.DauVanTayPOS(maNV,tienKhachDua,quote);
         return DbHelper.ExecuteTransaction((c,t)=>
         {
-            using var lap=new SqlCommand("SELECT MaHD,MaNV,TienKhachDua FROM HoaDon WITH(UPDLOCK,HOLDLOCK) WHERE MaYeuCauPOS=@id",c,t);
-            lap.Parameters.AddWithValue("@id",yeuCau);
-            int? daLuu=null;
-            using(var r=lap.ExecuteReader())
+            // Serialize only equal tokens. A range lock on an absent unique-index key can deadlock
+            // with a Web order holding product locks while inserting its own invoice into that gap.
+            using(var gate=new SqlCommand("DECLARE @r int; EXEC @r=sys.sp_getapplock @Resource=@key,@LockMode='Exclusive',@LockOwner='Transaction',@LockTimeout=15000; SELECT @r;",c,t))
             {
-                if(r.Read())
+                gate.Parameters.AddWithValue("@key","BadmintonShop.POS."+yeuCau.ToString("N"));
+                if(Convert.ToInt32(gate.ExecuteScalar())<0)throw new InvalidOperationException("Yêu cầu POS đang được xử lý. Hãy thử lại cùng giỏ và mã yêu cầu.");
+            }
+            int? existing=null;string? savedFingerprint=null;bool legacy=false;
+            using(var cmd=new SqlCommand("SELECT MaHD,MaNV,TienKhachDua,DauVanTayPOS,MaCTKM,TienGiamGia FROM HoaDon WITH(READCOMMITTED) WHERE MaYeuCauPOS=@id",c,t))
+            {
+                cmd.Parameters.AddWithValue("@id",yeuCau);using var reader=cmd.ExecuteReader();
+                if(reader.Read())
                 {
-                    daLuu=r.GetInt32(0);
-                    if(r.GetInt32(1)!=maNV || r.GetDecimal(2)!=tienKhachDua) throw new InvalidOperationException("Mã yêu cầu đã dùng cho giao dịch khác. Hãy tải lại hóa đơn.");
+                    existing=reader.GetInt32(0);savedFingerprint=reader.IsDBNull(3)?null:reader.GetString(3);
+                    if(reader.GetInt32(1)!=maNV || reader.GetDecimal(2)!=tienKhachDua)
+                        throw new InvalidOperationException("Mã yêu cầu đã dùng cho giao dịch khác. Hãy xem hóa đơn đã lưu.");
+                    legacy=reader.IsDBNull(4) && reader.GetDecimal(5)==0;
                 }
             }
-            if(daLuu.HasValue)
+            if(existing.HasValue)
             {
-                using var check=new SqlCommand("SELECT MaSP,SoLuong,DonGia FROM ChiTietHoaDon WHERE MaHD=@ma",c,t);
-                check.Parameters.AddWithValue("@ma",daLuu.Value);
-                using var r=check.ExecuteReader();
-                var count=0;
-                while(r.Read())
+                if(savedFingerprint!=null)
                 {
-                    count++;
-                    if(!gio.Any(x=>x.MaSP==r.GetInt32(0) && x.SoLuong==r.GetInt32(1) && x.DonGia==r.GetDecimal(2)))
-                        throw new InvalidOperationException("Yêu cầu đã được lưu với giỏ khác. Xem lại hóa đơn trước khi bán tiếp.");
+                    if(savedFingerprint!=fingerprint)throw new InvalidOperationException("Giỏ, voucher hoặc báo giá đã thay đổi so với yêu cầu được lưu. Hãy xem hóa đơn trước khi bán tiếp.");
                 }
-                if(count!=gio.Count) throw new InvalidOperationException("Giỏ đã thay đổi so với hóa đơn được lưu.");
-                return daLuu.Value;
+                else
+                {
+                    // Before integration only undiscounted POS requests existed. Never infer an old voucher input.
+                    if(!legacy || quote.VoucherYeuCau!=null || quote.MaVoucher!=null || quote.TienGiamHoaDon!=0)
+                        throw new InvalidOperationException("Hóa đơn POS cũ không có dấu vết voucher. Hãy xem lại hóa đơn đã lưu.");
+                    using var cmd=new SqlCommand("SELECT MaSP,SoLuong,DonGia,GiamGia FROM ChiTietHoaDon WHERE MaHD=@ma",c,t);
+                    cmd.Parameters.AddWithValue("@ma",existing.Value);using var reader=cmd.ExecuteReader();int count=0;
+                    while(reader.Read())
+                    {
+                        count++;
+                        if(!quote.Dong.Any(d=>d.MaSP==reader.GetInt32(0) && d.SoLuong==reader.GetInt32(1) && d.DonGia==reader.GetDecimal(2) && d.PhanTramGiam==reader.GetDecimal(3)))
+                            throw new InvalidOperationException("Giỏ đã thay đổi so với hóa đơn được lưu.");
+                    }
+                    if(count!=quote.Dong.Count)throw new InvalidOperationException("Giỏ đã thay đổi so với hóa đơn được lưu.");
+                }
+                return existing.Value; // No repricing, voucher increment, or stock mutation on successful retry.
             }
-            decimal tong=0;
-            foreach(var ct in gio.OrderBy(x=>x.MaSP))
-            {
-                using var sp=new SqlCommand("SELECT DonGiaBan,SoLuongTon,TrangThai FROM SanPham WITH(UPDLOCK,HOLDLOCK) WHERE MaSP=@ma",c,t);
-                sp.Parameters.AddWithValue("@ma",ct.MaSP);
-                using var r=sp.ExecuteReader();
-                if(!r.Read() || r.GetString(2)!="Đang bán") throw new InvalidOperationException($"Sản phẩm {ct.MaSP} không còn bán. Hãy tải lại.");
-                if(r.GetInt32(1)<ct.SoLuong) throw new InvalidOperationException($"Sản phẩm {ct.MaSP} không đủ tồn kho. Hãy giảm số lượng.");
-                if(r.GetDecimal(0)!=ct.DonGia) throw new InvalidOperationException($"Giá sản phẩm {ct.MaSP} đã thay đổi. Hãy tải lại sản phẩm và chọn lại giỏ.");
-                tong+=ct.DonGia*ct.SoLuong;
-            }
-            QuyTacBanHang.KiemTraTien(tong);
-            if(tienKhachDua<tong) throw new ArgumentException("Tiền khách đưa chưa đủ thanh toán.");
-            using var hd=new SqlCommand(@"INSERT HoaDon(MaNV,LoaiBan,HinhThucTT,TrangThai,MaYeuCauPOS,TienKhachDua)
-                VALUES(@nv,N'Tại quầy',N'Tiền mặt',N'Hoàn thành',@id,@tien); SELECT CAST(SCOPE_IDENTITY() AS int);",c,t);
-            hd.Parameters.AddWithValue("@nv",maNV);hd.Parameters.AddWithValue("@id",yeuCau);hd.Parameters.AddWithValue("@tien",tienKhachDua);
-            var ma=(int)hd.ExecuteScalar()!;
-            foreach(var ct in gio.OrderBy(x=>x.MaSP))
-            {
-                using var dong=new SqlCommand("INSERT ChiTietHoaDon(MaHD,MaSP,SoLuong,DonGia,GiamGia) VALUES(@hd,@sp,@sl,@gia,0)",c,t);
-                dong.Parameters.AddWithValue("@hd",ma);dong.Parameters.AddWithValue("@sp",ct.MaSP);
-                dong.Parameters.AddWithValue("@sl",ct.SoLuong);dong.Parameters.AddWithValue("@gia",ct.DonGia);
-                dong.ExecuteNonQuery();
-            }
+            var ngay=DateTime.Now;
+            var fresh=GiaoDichBanHang.TinhLai(c,t,quote,ngay);
+            if(tienKhachDua<fresh.TongThanhToan)throw new ArgumentException("Tiền khách đưa chưa đủ thanh toán.");
+            GiaoDichBanHang.DungVoucher(c,t,fresh,ngay);
+            using var hd=new SqlCommand(@"INSERT HoaDon(MaNV,LoaiBan,HinhThucTT,TrangThai,MaYeuCauPOS,TienKhachDua,MaCTKM,TienGiamGia,DauVanTayPOS)
+                VALUES(@nv,N'Tại quầy',N'Tiền mặt',N'Hoàn thành',@id,@cash,@km,@discount,@hash); SELECT CAST(SCOPE_IDENTITY() AS int);",c,t);
+            hd.Parameters.AddWithValue("@nv",maNV);hd.Parameters.AddWithValue("@id",yeuCau);hd.Parameters.AddWithValue("@cash",tienKhachDua);
+            hd.Parameters.AddWithValue("@km",DbHelper.GiaTriHoacNull(fresh.MaCTKM));hd.Parameters.AddWithValue("@discount",fresh.TienGiamHoaDon);hd.Parameters.AddWithValue("@hash",fingerprint);
+            int ma=(int)hd.ExecuteScalar()!;
+            GiaoDichBanHang.GhiChiTiet(c,t,ma,fresh);
             return ma;
-        });
+        },IsolationLevel.Serializable);
     }
 }

@@ -1,4 +1,4 @@
-using BadmintonShop.Core.DataAccess;
+﻿using BadmintonShop.Core.DataAccess;
 
 namespace BadmintonShop.Core.Services;
 
@@ -14,6 +14,9 @@ public class TinhKhuyenMaiService
 
     public TinhKhuyenMaiService() : this(new KhuyenMaiRepository()) { }
     public TinhKhuyenMaiService(KhuyenMaiRepository repo) => _repo = repo;
+
+    // SV4: shared validation message, without changing the existing SV3 discount APIs.
+    public string? LoiVoucher(string maVoucher, DateTime ngay) => _repo.LoiVoucher(maVoucher, ngay);
 
     // TV3: tra ve % giam dang ap dung cho 1 san pham vao ngay 'ngay', khong co tra ve 0
     public decimal LayPhanTramGiamSanPham(int maSP, DateTime ngay)
@@ -50,6 +53,10 @@ public class TinhKhuyenMaiService
             return (vc.MaCTKM, vc.TienGiam, maVoucher!.Trim().ToUpperInvariant());
         return (theoHD.MaCTKM, theoHD.TienGiam, null);
     }
+
+    // SV4: round once per invoice line, exactly like the persisted SQL computed ThanhTien column.
+    public static decimal TinhThanhTien(int soLuong,decimal donGia,decimal phanTram)
+        => LamTronDong(soLuong*donGia*(1-phanTram/100m));
 
     // TV3: tien giam = tong * %/100, lam tron dong, khong vuot tong
     private static decimal TienGiamTu(decimal tongTienHang, decimal phanTram)
