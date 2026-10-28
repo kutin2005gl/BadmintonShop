@@ -6,6 +6,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Chuoi ket noi lay tu appsettings.json (hoac bien moi truong ConnectionStrings__BadmintonShop)
 DbHelper.ConnectionString = builder.Configuration.GetConnectionString("BadmintonShop")!;
 
+// Email xac nhan don (SV3): cau hinh muc "Email" (mat khau dat bang user-secrets); thieu cau hinh thi bo qua gui mail
+BadmintonShop.Core.Services.EmailService.CauHinh =
+    builder.Configuration.GetSection("Email").Get<BadmintonShop.Core.Services.EmailCauHinh>() ?? new();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
