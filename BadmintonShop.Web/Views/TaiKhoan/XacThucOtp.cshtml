@@ -1,0 +1,85 @@
+﻿@model BadmintonShop.Web.Models.XacThucOtpViewModel
+
+@{
+    ViewData["Title"] = "Xác thực OTP";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Xác thực OTP</h4>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <p class="text-muted">
+                        Vui lòng nhập mã OTP gồm 6 chữ số.
+                        Mã có hiệu lực trong 5 phút.
+                    </p>
+
+                    @if (TempData["OtpDemo"] != null)
+                    {
+                        <div class="alert alert-warning text-center">
+                            <strong>OTP mô phỏng (chỉ dùng để demo)</strong>
+
+                            <div class="fs-2 fw-bold mt-2">
+                                @TempData["OtpDemo"]
+                            </div>
+
+                            <small>
+                                Mã này không được gửi qua email thật.
+                            </small>
+                        </div>
+                    }
+
+                    <form asp-controller="TaiKhoan"
+                          asp-action="XacThucOtp"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="MaOtp"
+                                   class="form-label"></label>
+
+                            <input asp-for="MaOtp"
+                                   class="form-control text-center fs-4"
+                                   maxlength="6"
+                                   inputmode="numeric"
+                                   autocomplete="one-time-code"
+                                   placeholder="Nhập 6 chữ số" />
+
+                            <span asp-validation-for="MaOtp"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+                            Xác nhận OTP
+                        </button>
+
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <a asp-controller="TaiKhoan"
+                           asp-action="QuenMatKhau">
+                            Yêu cầu mã OTP mới
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

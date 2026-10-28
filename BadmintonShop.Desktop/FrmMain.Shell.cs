@@ -54,8 +54,20 @@ public partial class FrmMain
         }
         if (PhienDangNhap.CoQuyen(ChucNang.ThongKeBinhLuan))
         {
-            Group("BÁO CÁO"); Link("▥   Thống kê", () => mnuThongKe_Click(this, EventArgs.Empty), typeof(FrmThongKe));
-            Link("▤   Duyệt bình luận", () => mnuDuyetBinhLuan.PerformClick());
+            Group("BÁO CÁO");
+
+            Link(
+                "▥   Thống kê",
+                () => mnuThongKe_Click(this, EventArgs.Empty),
+                typeof(FrmThongKe)
+            );
+
+            // SV2: Quản lý đánh giá sản phẩm
+            Link(
+                "★   Quản lý đánh giá",
+                () => mnuQuanLyDanhGia_Click(this, EventArgs.Empty),
+                typeof(FrmQuanLyDanhGia)
+            );
         }
         Group("HỆ THỐNG");
         if (PhienDangNhap.CoQuyen(ChucNang.NhanVienTaiKhoan)) Link("◇   Nhân viên, tài khoản", () => mnuNhanVien_Click(this, EventArgs.Empty), typeof(FrmNhanVien));

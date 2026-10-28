@@ -103,4 +103,10 @@ public partial class FrmMain : Form
         MessageBox.Show($"Chức năng \"{ten}\" đang được phát triển.", "Thông báo",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
+
+    // SV2: Mở giao diện quản lý đánh giá
+    private void mnuQuanLyDanhGia_Click(object? sender, EventArgs e)
+    {
+        MoForm<FrmQuanLyDanhGia>(ChucNang.ThongKeBinhLuan);
+    }
 }

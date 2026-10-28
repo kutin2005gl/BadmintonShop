@@ -1,0 +1,470 @@
+﻿@model BadmintonShop.Core.Models.SanPham
+@using BadmintonShop.Core.Models
+
+@{
+    ViewData["Title"] = Model.TenSP;
+
+    bool daDangNhap = User.Identity?.IsAuthenticated == true;
+
+    var danhGia = ViewBag.DanhSachDanhGia as List<DanhGia>
+                  ?? new List<DanhGia>();
+
+    int tongDanhGia = danhGia.Count;
+
+    double saoTrungBinh = tongDanhGia > 0
+        ? danhGia.Average(dg => dg.SoSao)
+        : 0;
+}
+
+<div class="container mt-4 mb-5">
+
+    <div class="mb-4">
+        <a asp-controller="SanPham"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            ← Quay lại danh sách sản phẩm
+        </a>
+    </div>
+
+    <!-- THÔNG TIN SẢN PHẨM -->
+    <div class="row g-4">
+
+        <div class="col-md-5">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+
+                    @if (!string.IsNullOrWhiteSpace(Model.HinhAnh))
+                    {
+                        <img src="@Url.Content(Model.HinhAnh)"
+                             alt="@Model.TenSP"
+                             class="img-fluid"
+                             style="max-height:400px; object-fit:contain;"
+                             onerror="this.style.display='none'; document.getElementById('anhDuPhong').style.display='flex';" />
+
+                        <div id="anhDuPhong"
+                             class="bg-light align-items-center justify-content-center text-muted"
+                             style="height:350px; display:none;">
+                            Không tải được hình ảnh sản phẩm
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="bg-light d-flex align-items-center justify-content-center text-muted"
+                             style="height:350px;">
+                            Chưa có hình ảnh sản phẩm
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+
+            <h2 class="fw-bold mb-3">
+                @Model.TenSP
+            </h2>
+
+            <p class="text-muted">
+                Thương hiệu:
+                <strong>
+                    @(Model.ThuongHieu ?? "Đang cập nhật")
+                </strong>
+            </p>
+
+            <!-- ĐIỂM ĐÁNH GIÁ -->
+            <div class="mb-3">
+
+                @if (tongDanhGia > 0)
+                {
+                    <span class="text-warning fs-5">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            @(i <= Math.Round(saoTrungBinh, MidpointRounding.AwayFromZero) ? "★" : "☆")
+                        }
+                    </span>
+
+                    <span class="ms-2">
+                        <strong>@saoTrungBinh.ToString("0.0")/5</strong>
+                        (@tongDanhGia đánh giá)
+                    </span>
+                }
+                else
+                {
+                    <span class="text-warning fs-5">
+                        ☆☆☆☆☆
+                    </span>
+
+                    <span class="text-muted ms-2">
+                        Chưa có đánh giá
+                    </span>
+                }
+
+            </div>
+
+            <h3 class="text-danger fw-bold mb-4">
+                @Model.DonGiaBan.ToString("N0") đ
+            </h3>
+
+            <hr />
+
+            <p>
+                <strong>Mã sản phẩm:</strong>
+                @Model.MaSP
+            </p>
+
+            <p>
+                <strong>Đơn vị tính:</strong>
+                @Model.DonViTinh
+            </p>
+
+            <p>
+                <strong>Tình trạng:</strong>
+
+                @if (Model.SoLuongTon > 0)
+                {
+                    <span class="badge bg-success">
+                        Còn hàng
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-danger">
+                        Hết hàng
+                    </span>
+                }
+            </p>
+
+            <p>
+                <strong>Số lượng tồn kho:</strong>
+                @Model.SoLuongTon
+            </p>
+
+            <hr />
+
+            <h5 class="fw-bold">Mô tả sản phẩm</h5>
+
+            @if (!string.IsNullOrWhiteSpace(Model.MoTa))
+            {
+                <p style="white-space:pre-line;">
+                    @Model.MoTa
+                </p>
+            }
+            else
+            {
+                <p class="text-muted">
+                    Sản phẩm chưa có mô tả.
+                </p>
+            }
+
+            <div class="mt-4">
+
+                @if (Model.SoLuongTon > 0)
+                {
+                    <button type="button"
+                            class="btn btn-secondary btn-lg"
+                            disabled>
+                        Thêm vào giỏ hàng (sắp ra mắt)
+                    </button>
+                }
+                else
+                {
+                    <button type="button"
+                            class="btn btn-secondary btn-lg"
+                            disabled>
+                        Sản phẩm đã hết hàng
+                    </button>
+                }
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ĐÁNH GIÁ SẢN PHẨM -->
+    <section class="mt-5" id="danh-gia">
+
+        <hr class="mb-4" />
+
+        <h3 class="fw-bold mb-4">
+            Đánh giá và nhận xét sản phẩm
+        </h3>
+
+        @if (TempData["ThanhCongDanhGia"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["ThanhCongDanhGia"]
+            </div>
+        }
+
+        @if (TempData["LoiDanhGia"] != null)
+        {
+            <div class="alert alert-danger">
+                @TempData["LoiDanhGia"]
+            </div>
+        }
+
+        <div class="row g-4">
+
+            <!-- FORM GỬI ĐÁNH GIÁ -->
+            <div class="col-lg-5">
+
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+
+                        <h5 class="fw-bold mb-3">
+                            Viết đánh giá của bạn
+                        </h5>
+
+                        @if (daDangNhap)
+                        {
+                            <div class="alert alert-info small">
+                                Bạn đã đăng nhập.
+                                Hãy chọn số sao và nhập nhận xét.
+                            </div>
+
+                            <form asp-controller="SanPham"
+                                  asp-action="GuiDanhGia"
+                                  method="post"
+                                  id="formDanhGia">
+
+                                @Html.AntiForgeryToken()
+
+                                <input type="hidden"
+                                       name="MaSP"
+                                       value="@Model.MaSP" />
+
+                                <div class="mb-3">
+
+                                    <label class="form-label fw-semibold">
+                                        Chất lượng sản phẩm
+                                    </label>
+
+                                    <div class="d-flex gap-2"
+                                         id="chonSoSao">
+
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <button type="button"
+                                                    class="btn btn-link p-0 text-decoration-none nut-sao"
+                                                    data-sao="@i"
+                                                    aria-label="Đánh giá @i sao"
+                                                    style="font-size:32px; color:#adb5bd;">
+                                                ★
+                                            </button>
+                                        }
+
+                                    </div>
+
+                                    <input type="hidden"
+                                           id="SoSao"
+                                           name="SoSao"
+                                           value="0" />
+
+                                    <div id="thongBaoSoSao"
+                                         class="form-text">
+                                        Chưa chọn số sao
+                                    </div>
+
+                                </div>
+
+                                <div class="mb-3">
+
+                                    <label for="NoiDung"
+                                           class="form-label fw-semibold">
+                                        Nội dung nhận xét
+                                    </label>
+
+                                    <textarea id="NoiDung"
+                                              name="NoiDung"
+                                              class="form-control"
+                                              rows="5"
+                                              maxlength="1000"
+                                              required
+                                              placeholder="Hãy chia sẻ trải nghiệm của bạn về sản phẩm..."></textarea>
+
+                                    <div class="form-text">
+                                        Tối đa 1000 ký tự.
+                                    </div>
+
+                                </div>
+
+                                <button type="submit"
+                                        class="btn btn-primary w-100">
+                                    Gửi đánh giá
+                                </button>
+
+                                <p class="text-muted small mt-3 mb-0">
+                                    Đánh giá sẽ hiển thị sau khi
+                                    quản trị viên duyệt.
+                                </p>
+
+                            </form>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                Bạn cần đăng nhập để đánh giá sản phẩm.
+                            </div>
+
+                            <a asp-controller="TaiKhoan"
+                               asp-action="DangNhap"
+                               class="btn btn-primary w-100">
+                                Đăng nhập để đánh giá
+                            </a>
+                        }
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- DANH SÁCH ĐÁNH GIÁ -->
+            <div class="col-lg-7">
+
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+
+                        <h5 class="fw-bold mb-3">
+                            Nhận xét từ khách hàng
+                            (@tongDanhGia)
+                        </h5>
+
+                        @if (tongDanhGia == 0)
+                        {
+                            <div class="text-center py-5">
+
+                                <div class="text-warning fs-2 mb-2">
+                                    ☆☆☆☆☆
+                                </div>
+
+                                <h6>
+                                    Chưa có đánh giá được duyệt
+                                </h6>
+
+                                <p class="text-muted">
+                                    Hãy là người đầu tiên
+                                    đánh giá sản phẩm này.
+                                </p>
+
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var dg in danhGia)
+                            {
+                                <div class="border-bottom pb-3 mb-3">
+
+                                    <div class="d-flex justify-content-between">
+
+                                        <strong>
+                                            Khách hàng #@dg.MaKH
+                                        </strong>
+
+                                        <span class="text-muted small">
+                                            @dg.NgayDanhGia.ToString("dd/MM/yyyy HH:mm")
+                                        </span>
+
+                                    </div>
+
+                                    <div class="text-warning fs-5 my-2">
+
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            @(i <= dg.SoSao ? "★" : "☆")
+                                        }
+
+                                    </div>
+
+                                    @if (!string.IsNullOrWhiteSpace(dg.NoiDung))
+                                    {
+                                        <p class="mb-0"
+                                           style="white-space:pre-line;">
+                                            @dg.NoiDung
+                                        </p>
+                                    }
+
+                                </div>
+                            }
+                        }
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+@section Scripts {
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const cacNutSao = document.querySelectorAll(".nut-sao");
+            const inputSoSao = document.getElementById("SoSao");
+            const thongBaoSoSao = document.getElementById("thongBaoSoSao");
+            const formDanhGia = document.getElementById("formDanhGia");
+
+            if (!inputSoSao || !formDanhGia) {
+                return;
+            }
+
+            function capNhatSao(soSao) {
+
+                cacNutSao.forEach(function (nut) {
+
+                    const giaTri = Number(nut.dataset.sao);
+
+                    nut.style.color =
+                        giaTri <= soSao ? "#ffc107" : "#adb5bd";
+                });
+
+                thongBaoSoSao.textContent =
+                    soSao > 0
+                        ? "Bạn đã chọn " + soSao + "/5 sao"
+                        : "Chưa chọn số sao";
+            }
+
+            cacNutSao.forEach(function (nut) {
+
+                nut.addEventListener("click", function () {
+
+                    const soSao = Number(this.dataset.sao);
+
+                    inputSoSao.value = soSao;
+
+                    capNhatSao(soSao);
+                });
+
+            });
+
+            formDanhGia.addEventListener("submit", function (event) {
+
+                const soSao = Number(inputSoSao.value);
+
+                const noiDung = document
+                    .getElementById("NoiDung")
+                    .value
+                    .trim();
+
+                if (soSao < 1 || soSao > 5) {
+                    event.preventDefault();
+                    alert("Vui lòng chọn số sao đánh giá.");
+                    return;
+                }
+
+                if (noiDung.length === 0) {
+                    event.preventDefault();
+                    alert("Vui lòng nhập nội dung nhận xét.");
+                    return;
+                }
+
+            });
+
+        });
+    </script>
+}
