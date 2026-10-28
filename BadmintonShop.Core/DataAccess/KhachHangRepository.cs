@@ -60,6 +60,27 @@ public class KhachHangRepository
                                     new SqlParameter("@ma", maKH)) > 0;
 
     // TV1: chuan hoa email: cat khoang trang, doi ve chu thuong
+
+    // SV2: Cap nhat thong tin ho so khach hang
+    public bool CapNhatHoSo(int maKH, string hoTen, string? sdt, string? diaChi)
+    {
+        const string sql = @"
+            UPDATE KhachHang
+            SET HoTen = @hoTen,
+                SDT = @sdt,
+                DiaChi = @diaChi
+            WHERE MaKH = @maKH
+              AND TrangThai = 1";
+
+        return DbHelper.ExecuteNonQuery(
+            sql,
+            new SqlParameter("@hoTen", hoTen.Trim()),
+            new SqlParameter("@sdt", DbHelper.GiaTriHoacNull(sdt)),
+            new SqlParameter("@diaChi", DbHelper.GiaTriHoacNull(diaChi)),
+            new SqlParameter("@maKH", maKH)
+        ) > 0;
+    }
+
     private static string ChuanHoaEmail(string email) => email.Trim().ToLowerInvariant();
 
     // TV1: chay cau SELECT tra ve toi da 1 khach hang theo 1 tham so @gt

@@ -1,18 +1,28 @@
+
+using BadmintonShop.Web.Services;
 using BadmintonShop.Core.DataAccess;
+using BadmintonShop.Core.Services;
 using BadmintonShop.Web.Infrastructure;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Chuoi ket noi lay tu appsettings.json (hoac bien moi truong ConnectionStrings__BadmintonShop)
-DbHelper.ConnectionString = builder.Configuration.GetConnectionString("BadmintonShop")!;
+// OTP mô phỏng
+builder.Services.AddSingleton<OtpService>();
 
-// Add services to the container.
+// Kết nối SQL Server
+DbHelper.ConnectionString =
+    builder.Configuration.GetConnectionString("BadmintonShop")!;
+
+// MVC
 builder.Services.AddControllersWithViews();
 
-// Dang nhap khach hang bang cookie (SV1) - xem Infrastructure/XacThucKhachHang.cs
+// Xác thực khách hàng
 builder.Services.AddXacThucKhachHang();
 
+// Session
 builder.Services.AddDistributedMemoryCache();
+
 builder.Services.AddSession(o =>
 {
     o.IdleTimeout = TimeSpan.FromHours(2);
@@ -23,22 +33,42 @@ builder.Services.AddSession(o =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Xử lý lỗi
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
+
+// File tĩnh trong wwwroot
 app.UseStaticFiles();
+
+// Hình ảnh sản phẩm dùng chung Web và Desktop
+var mediaRoot = KhoAnhSanPham.ThuMucGoc;
+Console.WriteLine("THU MUC ANH SAN PHAM: " + mediaRoot);
+System.Diagnostics.Debug.WriteLine(
+    "THU MUC ANH SAN PHAM: " + mediaRoot
+);
+
+// Tạo thư mục products nếu chưa tồn tại
+Directory.CreateDirectory(
+    Path.Combine(mediaRoot, "products")
+);
+
+// Phục vụ ảnh từ thư mục MediaRoot qua /media
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(mediaRoot),
+    RequestPath = "/media"
+});
 
 app.UseRouting();
 
 app.UseSession();
 
-app.UseAuthentication();   // phai dung TRUOC UseAuthorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

@@ -1,0 +1,106 @@
+﻿@model BadmintonShop.Web.Models.DangNhapViewModel
+
+@{
+    ViewData["Title"] = "Đăng nhập";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-body p-4">
+
+                    <h3 class="text-center mb-4">
+                        Đăng nhập
+                    </h3>
+
+                    @if (TempData["ThongBao"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["ThongBao"]
+                        </div>
+                    }
+
+                    <form asp-controller="TaiKhoan"
+                          asp-action="DangNhap"
+                          asp-route-returnUrl="@ViewData["ReturnUrl"]"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email"
+                                   class="form-label"></label>
+
+                            <input asp-for="Email"
+                                   class="form-control"
+                                   placeholder="Nhập email"
+                                   autocomplete="email" />
+
+                            <span asp-validation-for="Email"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="MatKhau"
+                                   class="form-label"></label>
+
+                            <input asp-for="MatKhau"
+                                   class="form-control"
+                                   placeholder="Nhập mật khẩu"
+                                   autocomplete="current-password" />
+
+                            <span asp-validation-for="MatKhau"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input asp-for="GhiNho"
+                                   class="form-check-input" />
+
+                            <label asp-for="GhiNho"
+                                   class="form-check-label"></label>
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+                            Đăng nhập
+                        </button>
+                    </form>
+
+                    <!-- Quên mật khẩu -->
+                    <div class="text-center mt-3">
+                        <a asp-controller="TaiKhoan"
+                           asp-action="QuenMatKhau"
+                           class="text-decoration-none">
+                            Quên mật khẩu?
+                        </a>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <!-- Đăng ký tài khoản -->
+                    <div class="text-center">
+                        <span class="text-muted">
+                            Chưa có tài khoản?
+                        </span>
+
+                        <a asp-controller="TaiKhoan"
+                           asp-action="DangKy"
+                           class="text-decoration-none fw-bold">
+                            Đăng ký ngay
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
