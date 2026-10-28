@@ -9,11 +9,12 @@ namespace BadmintonShop.Desktop;
 public partial class FrmMain : Form
 {
     // SV4: tích hợp đúng nhóm quyền; form con kiểm tra lại trong OnLoad và khi thao tác.
-    private void mnuDsSanPham_Click(object? s,EventArgs e)=>MoForm<FrmSanPham>(ChucNang.SanPhamDanhMucKhuyenMai);
-    private void mnuDanhMuc_Click(object? s,EventArgs e)=>MoForm<FrmDanhMuc>(ChucNang.SanPhamDanhMucKhuyenMai);
-    private void mnuPOS_Click(object? s,EventArgs e)=>MoForm<FrmPOS>(ChucNang.DonHangPOS);
-    private void mnuDonHang_Click(object? s,EventArgs e)=>MoForm<FrmDonHang>(ChucNang.DonHangPOS);
-    private void mnuThongKe_Click(object? s,EventArgs e)=>MoForm<FrmThongKe>(ChucNang.ThongKeBinhLuan);
+    private void mnuDsSanPham_Click(object? s, EventArgs e) => MoForm<FrmSanPham>(ChucNang.SanPhamDanhMucKhuyenMai);
+    private void mnuDanhMuc_Click(object? s, EventArgs e) => MoForm<FrmDanhMuc>(ChucNang.SanPhamDanhMucKhuyenMai);
+    private void mnuKhuyenMai_Click(object? s, EventArgs e) => MoForm<FrmKhuyenMai>(ChucNang.SanPhamDanhMucKhuyenMai);   // SV3
+    private void mnuPOS_Click(object? s, EventArgs e) => MoForm<FrmPOS>(ChucNang.DonHangPOS);
+    private void mnuDonHang_Click(object? s, EventArgs e) => MoForm<FrmDonHang>(ChucNang.DonHangPOS);
+    private void mnuThongKe_Click(object? s, EventArgs e) => MoForm<FrmThongKe>(ChucNang.ThongKeBinhLuan);
     /// <summary>true = nguoi dung bam Dang xuat -> Program.cs hien lai FrmDangNhap.</summary>
     public bool YeuCauDangXuat { get; private set; }
 
@@ -32,12 +33,12 @@ public partial class FrmMain : Form
     // TV1: an/hien menu theo bang phan quyen (ADMIN / QUANLY / NHANVIEN)
     private void ApDungPhanQuyen()
     {
-        mnuNhanSu.Visible   = PhienDangNhap.CoQuyen(ChucNang.NhanVienTaiKhoan);
+        mnuNhanSu.Visible = PhienDangNhap.CoQuyen(ChucNang.NhanVienTaiKhoan);
         mnuNhapHang.Visible = PhienDangNhap.CoQuyen(ChucNang.NhaCungCapPhieuNhap);
-        mnuSanPham.Visible  = PhienDangNhap.CoQuyen(ChucNang.SanPhamDanhMucKhuyenMai);
-        mnuBanHang.Visible  = PhienDangNhap.CoQuyen(ChucNang.DonHangPOS);
-        mnuBaoCao.Visible   = PhienDangNhap.CoQuyen(ChucNang.ThongKeBinhLuan);
-        mnuSaoLuu.Visible   = PhienDangNhap.CoQuyen(ChucNang.SaoLuuPhucHoi);
+        mnuSanPham.Visible = PhienDangNhap.CoQuyen(ChucNang.SanPhamDanhMucKhuyenMai);
+        mnuBanHang.Visible = PhienDangNhap.CoQuyen(ChucNang.DonHangPOS);
+        mnuBaoCao.Visible = PhienDangNhap.CoQuyen(ChucNang.ThongKeBinhLuan);
+        mnuSaoLuu.Visible = PhienDangNhap.CoQuyen(ChucNang.SaoLuuPhucHoi);
     }
 
     // TV1: mo form con (khong chan form chinh) neu du quyen, form da mo thi chi dua len truoc

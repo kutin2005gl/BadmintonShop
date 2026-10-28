@@ -15,6 +15,11 @@ DbHelper.ConnectionString =
     builder.Configuration.GetConnectionString("BadmintonShop")!;
 
 // MVC
+// Email xac nhan don (SV3): cau hinh muc "Email" (mat khau dat bang user-secrets); thieu cau hinh thi bo qua gui mail
+BadmintonShop.Core.Services.EmailService.CauHinh =
+    builder.Configuration.GetSection("Email").Get<BadmintonShop.Core.Services.EmailCauHinh>() ?? new();
+
+// Add services to the container.
 builder.Services.AddControllersWithViews();
 
 // Xác thực khách hàng

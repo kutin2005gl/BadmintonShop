@@ -16,7 +16,7 @@ public class DatHangController : Controller
     private readonly DonHangOnlineRepository _donHang = new();
     private readonly KhachHangRepository _khachHang = new();
 
-    private const string QuoteKey="Checkout.ConfirmedQuote";
+    private const string QuoteKey = "Checkout.ConfirmedQuote";
     private int MaKH => User.LayMaKH() ?? 0;
 
     // TV3: trang xac nhan don, dien san dia chi trong ho so
@@ -25,7 +25,7 @@ public class DatHangController : Controller
     {
         var gio = _gioHang.TinhTuSession(HttpContext.Session);
         if (gio.Dong.Count == 0) return RedirectToAction("Index", "GioHang");
-        HttpContext.Session.SetString(QuoteKey,XacNhanGia.DauVanTay(gio));
+        HttpContext.Session.SetString(QuoteKey, XacNhanGia.DauVanTay(gio));
         var kh = _khachHang.LayTheoMa(MaKH);
         return View(new DatHangViewModel { Gio = gio, HoTen = kh?.HoTen ?? "", DiaChi = kh?.DiaChi ?? "" });
     }
@@ -48,23 +48,23 @@ public class DatHangController : Controller
 
         try
         {
-            if(HttpContext.Session.GetString(QuoteKey)!=XacNhanGia.DauVanTay(gio))
+            if (HttpContext.Session.GetString(QuoteKey) != XacNhanGia.DauVanTay(gio))
             {
-                HttpContext.Session.SetString(QuoteKey,XacNhanGia.DauVanTay(gio));
-                vm.Loi="Giỏ hàng hoặc khuyến mãi đã thay đổi. Kiểm tra tổng mới và bấm Đặt hàng để xác nhận lại.";
-                return View("Index",vm);
+                HttpContext.Session.SetString(QuoteKey, XacNhanGia.DauVanTay(gio));
+                vm.Loi = "Giỏ hàng hoặc khuyến mãi đã thay đổi. Kiểm tra tổng mới và bấm Đặt hàng để xác nhận lại.";
+                return View("Index", vm);
             }
             var maHD = _donHang.TaoDon(MaKH, vm.DiaChi, tt, gio);
-            HttpContext.Session.XoaGio();HttpContext.Session.Remove(QuoteKey);
-            // TODO SV3: gui email xac nhan don (buoc EmailService)
+            HttpContext.Session.XoaGio(); HttpContext.Session.Remove(QuoteKey);
+            _ = EmailService.GuiXacNhanDonAsync(maHD, MaKH);   // SV3: gui email xac nhan (khong cho, loi gui mail khong lam hong don)
             return tt == "Online"
                 ? RedirectToAction(nameof(ThanhToanOnline), new { id = maHD })
                 : RedirectToAction(nameof(ThanhCong), new { id = maHD });
         }
-        catch(GiaThanhToanThayDoiException ex)
+        catch (GiaThanhToanThayDoiException ex)
         {
-            vm.Gio=ex.GioMoi;vm.Loi=ex.Message;
-            HttpContext.Session.SetString(QuoteKey,XacNhanGia.DauVanTay(ex.GioMoi));
+            vm.Gio = ex.GioMoi; vm.Loi = ex.Message;
+            HttpContext.Session.SetString(QuoteKey, XacNhanGia.DauVanTay(ex.GioMoi));
         }
         catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
         {
@@ -103,6 +103,6 @@ public class DatHangController : Controller
     {
         var hd = _donHang.LayDonCuaKhach(id, MaKH);
         if (hd == null) return NotFound();
-        return View(new ChiTietDonViewModel { Don = hd, Dong = _donHang.LayChiTietHienThi(id,MaKH) });
+        return View(new ChiTietDonViewModel { Don = hd, Dong = _donHang.LayChiTietHienThi(id, MaKH) });
     }
 }
