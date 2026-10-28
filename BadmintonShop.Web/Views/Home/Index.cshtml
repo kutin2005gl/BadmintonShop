@@ -1,8 +1,351 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using BadmintonShop.Core.Models
+@model IEnumerable<SanPham>
+
+@{
+    ViewData["Title"] = "Trang chủ";
+
+    var danhSachSanPham = Model?.ToList() ?? new List<SanPham>();
+
+    var danhMuc = ViewBag.DanhMuc as IEnumerable<DanhMuc>
+                  ?? Enumerable.Empty<DanhMuc>();
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    .home-hero {
+        background: linear-gradient(120deg, #075b43, #15936c);
+        color: white;
+        border-radius: 18px;
+        padding: 65px 45px;
+        margin-bottom: 40px;
+    }
+
+        .home-hero h1 {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 18px;
+        }
+
+        .home-hero p {
+            font-size: 18px;
+            max-width: 650px;
+            line-height: 1.7;
+        }
+
+    .home-btn {
+        display: inline-block;
+        background: white;
+        color: #075b43;
+        padding: 13px 25px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 700;
+        margin-top: 15px;
+    }
+
+        .home-btn:hover {
+            background: #e5fff4;
+            color: #075b43;
+        }
+
+    .home-section {
+        margin-bottom: 45px;
+    }
+
+    .home-section-title {
+        color: #075b43;
+        font-size: 28px;
+        font-weight: 750;
+        margin-bottom: 22px;
+    }
+
+    .home-category {
+        display: block;
+        padding: 25px 15px;
+        border: 1px solid #e1e7e4;
+        border-radius: 12px;
+        text-align: center;
+        text-decoration: none;
+        color: #174c3b;
+        background: #f8fcfa;
+        height: 100%;
+        transition: 0.2s;
+    }
+
+        .home-category:hover {
+            background: #e7f8ef;
+            border-color: #15936c;
+            transform: translateY(-3px);
+            color: #075b43;
+        }
+
+    .home-category-icon {
+        font-size: 30px;
+        margin-bottom: 12px;
+    }
+
+    .home-category-name {
+        font-size: 17px;
+        font-weight: 650;
+    }
+
+    .home-product {
+        border: 1px solid #e5e5e5;
+        border-radius: 12px;
+        overflow: hidden;
+        height: 100%;
+        background: white;
+        transition: 0.2s;
+    }
+
+        .home-product:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.09);
+            transform: translateY(-3px);
+        }
+
+    .home-product-image {
+        height: 210px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #f5f7f6;
+        overflow: hidden;
+    }
+
+        .home-product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+    .home-product-placeholder {
+        font-size: 55px;
+        color: #a4b5ac;
+    }
+
+    .home-product-body {
+        padding: 18px;
+    }
+
+    .home-product-name {
+        font-size: 16px;
+        font-weight: 650;
+        min-height: 48px;
+        margin-bottom: 10px;
+    }
+
+    .home-product-price {
+        color: #d33b28;
+        font-size: 20px;
+        font-weight: 750;
+        margin-bottom: 15px;
+    }
+
+    .home-product-link {
+        display: block;
+        text-align: center;
+        padding: 10px;
+        background: #087451;
+        color: white;
+        border-radius: 7px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+        .home-product-link:hover {
+            background: #06573d;
+            color: white;
+        }
+
+    .home-benefit {
+        background: #f4faf6;
+        padding: 25px;
+        border-radius: 12px;
+        text-align: center;
+        height: 100%;
+    }
+
+    .home-benefit-icon {
+        font-size: 32px;
+        margin-bottom: 12px;
+    }
+
+    .home-benefit h5 {
+        color: #075b43;
+        font-weight: 700;
+    }
+</style>
+
+<div class="container py-4">
+
+    <!-- GIỚI THIỆU -->
+    <section class="home-hero">
+        <h1>BADMINTON SHOP</h1>
+
+        <p>
+            Chào mừng bạn đến với BadmintonShop –
+            cửa hàng chuyên cung cấp dụng cụ và phụ kiện
+            cầu lông dành cho người yêu thể thao.
+        </p>
+
+        <p>
+            Khám phá vợt cầu lông, giày, áo thi đấu
+            và nhiều phụ kiện với đa dạng mẫu mã.
+        </p>
+
+        <a asp-controller="SanPham"
+           asp-action="Index"
+           class="home-btn">
+            Khám phá sản phẩm →
+        </a>
+    </section>
+
+    <!-- DANH MỤC -->
+    <section class="home-section">
+        <h2 class="home-section-title">
+            Danh mục sản phẩm
+        </h2>
+
+        <div class="row g-3">
+
+            @if (danhMuc.Any())
+            {
+                foreach (var dm in danhMuc)
+                {
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <a asp-controller="SanPham"
+                           asp-action="Index"
+                           asp-route-maDM="@dm.MaDM"
+                           class="home-category">
+
+                            <div class="home-category-icon">
+                                🏸
+                            </div>
+
+                            <div class="home-category-name">
+                                @dm.TenDanhMuc
+                            </div>
+
+                        </a>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12">
+                    <p class="text-muted">
+                        Chưa có danh mục sản phẩm.
+                    </p>
+                </div>
+            }
+
+        </div>
+    </section>
+
+    <!-- SẢN PHẨM NỔI BẬT -->
+    <section class="home-section">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="home-section-title mb-0">
+                Sản phẩm nổi bật
+            </h2>
+
+            <a asp-controller="SanPham"
+               asp-action="Index"
+               class="btn btn-outline-success">
+                Xem tất cả
+            </a>
+        </div>
+
+        <div class="row g-4">
+
+            @if (danhSachSanPham.Any())
+            {
+                foreach (var sp in danhSachSanPham.Take(8))
+                {
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="home-product">
+
+                            <div class="home-product-image">
+                                <div class="home-product-placeholder">
+                                    🏸
+                                </div>
+                            </div>
+
+                            <div class="home-product-body">
+
+                                <div class="home-product-name">
+                                    @sp.TenSP
+                                </div>
+
+                                <div class="home-product-price">
+                                    @sp.DonGiaBan.ToString("N0") đ
+                                </div>
+
+                                <a asp-controller="SanPham"
+                                   asp-action="ChiTiet"
+                                   asp-route-id="@sp.MaSP"
+                                   class="home-product-link">
+                                    Xem chi tiết
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12">
+                    <div class="alert alert-light border text-center py-4">
+                        Chưa có sản phẩm nổi bật để hiển thị.
+                    </div>
+                </div>
+            }
+
+        </div>
+    </section>
+
+    <!-- LỢI ÍCH -->
+    <section class="home-section">
+
+        <h2 class="home-section-title">
+            Vì sao chọn BadmintonShop?
+        </h2>
+
+        <div class="row g-3">
+
+            <div class="col-md-4">
+                <div class="home-benefit">
+                    <div class="home-benefit-icon">🏸</div>
+                    <h5>Đa dạng sản phẩm</h5>
+                    <p class="text-muted mb-0">
+                        Nhiều lựa chọn dành cho người chơi cầu lông.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="home-benefit">
+                    <div class="home-benefit-icon">🛒</div>
+                    <h5>Mua sắm thuận tiện</h5>
+                    <p class="text-muted mb-0">
+                        Dễ dàng tìm kiếm và xem thông tin sản phẩm.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="home-benefit">
+                    <div class="home-benefit-icon">⭐</div>
+                    <h5>Đánh giá sản phẩm</h5>
+                    <p class="text-muted mb-0">
+                        Tham khảo nhận xét của khách hàng
+                        trước khi lựa chọn.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
 </div>
