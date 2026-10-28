@@ -137,7 +137,7 @@ partial class FrmMain
         //
         mnuKhuyenMai.Name = "mnuKhuyenMai";
         mnuKhuyenMai.Text = "Khuyến mãi";
-        mnuKhuyenMai.Click += mnuChuaCo_Click;
+        mnuKhuyenMai.Click += mnuKhuyenMai_Click;
         //
         // mnuBanHang
         //
