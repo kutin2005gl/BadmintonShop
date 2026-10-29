@@ -402,7 +402,107 @@ GO
 /* ---------------------------------------------------------------------
    PHAN SV2: KhachHang (>= 20, kh20@gmail.com bi khoa), them SanPham (>= 40), PhanHoi (>= 30)
    --------------------------------------------------------------------- */
--- TODO SV2
+-- Khach hang (20): mat khau chung Khach@123 (BCrypt). kh20 bi khoa de demo.
+DECLARE @HashKhach VARCHAR(255) = '$2a$11$TpPQ4ebyyJrq1vST5eoba.ugzkM1yyHXN5m4Fp8q4/17Sp20LQwb6';
+INSERT INTO KhachHang (HoTen, SDT, Email, MatKhau, DiaChi, NgayDangKy, TrangThai) VALUES
+ (N'Nguyễn Minh Anh', '0912000001', 'kh01@gmail.com', @HashKhach, N'12 Nguyễn Trãi, Q.5, TP.HCM', '2026-03-05', 1),
+ (N'Trần Quốc Bảo', '0912000002', 'kh02@gmail.com', @HashKhach, N'45 Lê Lợi, Q.1, TP.HCM', '2026-03-18', 1),
+ (N'Lê Thị Cẩm Tú', '0912000003', 'kh03@gmail.com', @HashKhach, N'78 Cách Mạng Tháng 8, Q.3, TP.HCM', '2026-04-02', 1),
+ (N'Phạm Hoàng Dũng', '0912000004', 'kh04@gmail.com', @HashKhach, N'9 Phạm Văn Đồng, TP.Thủ Đức, TP.HCM', '2026-04-20', 1),
+ (N'Võ Thị Ngọc Hà', '0912000005', 'kh05@gmail.com', @HashKhach, N'33 Quang Trung, Gò Vấp, TP.HCM', '2026-05-06', 1),
+ (N'Đặng Văn Hùng', '0912000006', 'kh06@gmail.com', @HashKhach, N'27 Hoàng Văn Thụ, Tân Bình, TP.HCM', '2026-05-22', 1),
+ (N'Bùi Thanh Khoa', '0912000007', 'kh07@gmail.com', @HashKhach, N'101 Lý Thường Kiệt, Q.10, TP.HCM', '2026-06-03', 1),
+ (N'Huỳnh Thị Lan', '0912000008', 'kh08@gmail.com', @HashKhach, N'56 Nguyễn Thị Minh Khai, Q.3, TP.HCM', '2026-06-17', 1),
+ (N'Ngô Đức Long', '0912000009', 'kh09@gmail.com', @HashKhach, N'18 Trần Hưng Đạo, Q.1, TP.HCM', '2026-06-30', 1),
+ (N'Đỗ Thị Mai', '0912000010', 'kh10@gmail.com', @HashKhach, N'240 Lê Văn Sỹ, Phú Nhuận, TP.HCM', '2026-07-08', 1),
+ (N'Dương Văn Nam', '0912000011', 'kh11@gmail.com', @HashKhach, N'72 Nguyễn Văn Cừ, Q.5, TP.HCM', '2026-07-19', 1),
+ (N'Lý Thị Oanh', '0912000012', 'kh12@gmail.com', @HashKhach, N'15 Phan Văn Trị, Bình Thạnh, TP.HCM', '2026-07-28', 1),
+ (N'Phan Thanh Phong', '0912000013', 'kh13@gmail.com', @HashKhach, N'88 Tô Hiến Thành, Q.10, TP.HCM', '2026-08-04', 1),
+ (N'Trương Thị Quỳnh', '0912000014', 'kh14@gmail.com', @HashKhach, N'64 Nguyễn Oanh, Gò Vấp, TP.HCM', '2026-08-15', 1),
+ (N'Hồ Văn Sơn', '0912000015', 'kh15@gmail.com', @HashKhach, N'31 Võ Văn Ngân, TP.Thủ Đức, TP.HCM', '2026-08-27', 1),
+ (N'Mai Thị Thảo', '0912000016', 'kh16@gmail.com', @HashKhach, N'49 Bà Hom, Q.6, TP.HCM', '2026-09-05', 1),
+ (N'Cao Minh Tuấn', '0912000017', 'kh17@gmail.com', @HashKhach, N'120 Âu Cơ, Tân Phú, TP.HCM', '2026-09-14', 1),
+ (N'Vũ Thị Uyên', '0912000018', 'kh18@gmail.com', @HashKhach, N'7 Huỳnh Tấn Phát, Q.7, TP.HCM', '2026-09-25', 1),
+ (N'Đinh Quang Vinh', '0912000019', 'kh19@gmail.com', @HashKhach, N'95 Nguyễn Thị Thập, Q.7, TP.HCM', '2026-10-03', 1),
+ (N'Lương Thị Yến', '0912000020', 'kh20@gmail.com', @HashKhach, N'3 Lê Đức Thọ, Gò Vấp, TP.HCM', '2026-10-10', 0);
+
+-- San pham bo sung (28) -> tong 40. Ton kho = 0, cac phieu nhap ben duoi se tang ton.
+INSERT INTO SanPham (TenSP, MaDM, ThuongHieu, DonGiaBan, DonViTinh, HinhAnh, MoTa) VALUES
+ (N'Vợt Yonex Astrox 99 Pro', 1, N'Yonex', 4590000, N'Cây', 'astrox99pro.jpg', N'4U, thân cứng, thiên công'),
+ (N'Vợt Yonex Arcsaber 11 Pro', 1, N'Yonex', 3990000, N'Cây', 'arc11pro.jpg', N'4U, thân trung bình, kiểm soát tốt'),
+ (N'Vợt Victor Auraspeed 90K', 1, N'Victor', 3490000, N'Cây', 'auraspeed90k.jpg', N'4U, thiên tốc độ'),
+ (N'Vợt Victor Jetspeed S 12', 1, N'Victor', 2790000, N'Cây', 'jetspeeds12.jpg', N'4U, phù hợp người chơi phong trào'),
+ (N'Vợt Li-Ning Windstorm 72', 1, N'Li-Ning', 2890000, N'Cây', 'windstorm72.jpg', N'4U, nhẹ đầu, linh hoạt'),
+ (N'Vợt Kumpoo Power Control 980', 1, N'Kumpoo', 1250000, N'Cây', 'pc980.jpg', N'3U, giá mềm cho người mới'),
+ (N'Cầu Victor Gold No.1', 2, N'Victor', 520000, N'Ống', 'goldno1.jpg', N'Ống 12 quả, lông ngỗng, thi đấu'),
+ (N'Cầu Li-Ning A+300', 2, N'Li-Ning', 480000, N'Ống', 'aplus300.jpg', N'Ống 12 quả, độ bền cao'),
+ (N'Cầu Thành Công 88', 2, N'Thành Công', 310000, N'Ống', 'tc88.jpg', N'Ống 12 quả, tập luyện nâng cao'),
+ (N'Cầu nhựa Yonex Mavis 350', 2, N'Yonex', 290000, N'Ống', 'mavis350.jpg', N'Ống 6 quả, cầu nhựa tập luyện'),
+ (N'Giày Yonex Eclipsion Z3', 3, N'Yonex', 2790000, N'Đôi', 'eclipsionz3.jpg', N'Size 38-44, đế bám sân tốt'),
+ (N'Giày Victor P9200', 3, N'Victor', 3190000, N'Đôi', 'p9200.jpg', N'Size 38-45, hỗ trợ cổ chân'),
+ (N'Giày Li-Ning Saga', 3, N'Li-Ning', 1850000, N'Đôi', 'saga.jpg', N'Size 38-44, êm chân'),
+ (N'Giày Kumpoo KH-E36', 3, N'Kumpoo', 990000, N'Đôi', 'khe36.jpg', N'Size 37-43, giá phổ thông'),
+ (N'Giày Yonex Comfort Z3', 3, N'Yonex', 2390000, N'Đôi', 'comfortz3.jpg', N'Size 36-42, form ôm chân'),
+ (N'Áo thi đấu Yonex 10504', 4, N'Yonex', 420000, N'Cái', 'ao10504.jpg', N'Size S-XXL, thấm hút mồ hôi'),
+ (N'Áo thi đấu Victor T-33001', 4, N'Victor', 380000, N'Cái', 't33001.jpg', N'Size S-XXL'),
+ (N'Váy cầu lông Li-Ning AQXT', 4, N'Li-Ning', 520000, N'Cái', 'aqxt.jpg', N'Size S-XL, kèm quần trong'),
+ (N'Quần short Victor R-3096', 4, N'Victor', 360000, N'Cái', 'r3096.jpg', N'Size S-XL'),
+ (N'Áo thi đấu Kumpoo KW-2102', 4, N'Kumpoo', 290000, N'Cái', 'kw2102.jpg', N'Size S-XXL'),
+ (N'Quần short Li-Ning AKSP', 4, N'Li-Ning', 340000, N'Cái', 'aksp.jpg', N'Size S-XL'),
+ (N'Cước Victor VBS-66N', 5, N'Victor', 170000, N'Sợi', 'vbs66n.jpg', N'0.66mm, nảy tốt'),
+ (N'Cước Li-Ning No.1', 5, N'Li-Ning', 150000, N'Sợi', 'lnno1.jpg', N'0.65mm, bền'),
+ (N'Quấn cán Yonex AC102', 5, N'Yonex', 55000, N'Cái', 'ac102.jpg', N'Quấn cán thấm hút'),
+ (N'Balo Yonex BA82212', 5, N'Yonex', 790000, N'Cái', 'ba82212.jpg', N'Balo đựng vợt và giày'),
+ (N'Túi vợt Victor BR9213', 5, N'Victor', 1290000, N'Cái', 'br9213.jpg', N'Túi 6 cây, 2 ngăn'),
+ (N'Băng trán Yonex', 5, N'Yonex', 90000, N'Cái', 'bangtran.jpg', N'Cotton co giãn'),
+ (N'Vớ Victor SK', 5, N'Victor', 150000, N'Đôi', 'vosk.jpg', N'Vớ dày, chống trượt');
+
+-- Phieu nhap cho cac san pham moi (moi hang 1 phieu, nhan vien kho = 4)
+DECLARE @pn INT;
+INSERT INTO PhieuNhap (NgayNhap, MaNCC, MaNV) VALUES ('2026-10-05', 1, 4);
+SET @pn = SCOPE_IDENTITY();
+INSERT INTO ChiTietPhieuNhap (MaPN, MaSP, SoLuong, DonGia) VALUES
+ (@pn, 13, 12, 3213000),
+ (@pn, 14, 12, 2793000),
+ (@pn, 22, 40, 203000),
+ (@pn, 23, 10, 1953000),
+ (@pn, 27, 10, 1673000),
+ (@pn, 28, 25, 294000),
+ (@pn, 36, 30, 38000),
+ (@pn, 37, 30, 553000),
+ (@pn, 39, 30, 63000);
+INSERT INTO PhieuNhap (NgayNhap, MaNCC, MaNV) VALUES ('2026-10-08', 2, 4);
+SET @pn = SCOPE_IDENTITY();
+INSERT INTO ChiTietPhieuNhap (MaPN, MaSP, SoLuong, DonGia) VALUES
+ (@pn, 15, 12, 2443000),
+ (@pn, 16, 12, 1953000),
+ (@pn, 19, 40, 364000),
+ (@pn, 24, 10, 2233000),
+ (@pn, 29, 25, 266000),
+ (@pn, 31, 25, 252000),
+ (@pn, 34, 30, 119000),
+ (@pn, 38, 30, 903000),
+ (@pn, 40, 30, 105000);
+INSERT INTO PhieuNhap (NgayNhap, MaNCC, MaNV) VALUES ('2026-10-10', 3, 4);
+SET @pn = SCOPE_IDENTITY();
+INSERT INTO ChiTietPhieuNhap (MaPN, MaSP, SoLuong, DonGia) VALUES
+ (@pn, 17, 12, 2023000),
+ (@pn, 20, 40, 336000),
+ (@pn, 25, 10, 1295000),
+ (@pn, 30, 25, 364000),
+ (@pn, 33, 25, 238000),
+ (@pn, 35, 30, 105000);
+INSERT INTO PhieuNhap (NgayNhap, MaNCC, MaNV) VALUES ('2026-10-12', 4, 4);
+SET @pn = SCOPE_IDENTITY();
+INSERT INTO ChiTietPhieuNhap (MaPN, MaSP, SoLuong, DonGia) VALUES
+ (@pn, 18, 12, 875000),
+ (@pn, 26, 10, 693000),
+ (@pn, 32, 25, 203000);
+INSERT INTO PhieuNhap (NgayNhap, MaNCC, MaNV) VALUES ('2026-10-12', 5, 4);
+SET @pn = SCOPE_IDENTITY();
+INSERT INTO ChiTietPhieuNhap (MaPN, MaSP, SoLuong, DonGia) VALUES
+ (@pn, 21, 40, 217000);
+GO
 
 /* ---------------------------------------------------------------------
    PHAN SV3: CTKM (>= 3: 1 SANPHAM, 1 HOADON, 1 VOUCHER), KM_TheoSP, KM_TheoHD,
@@ -609,4 +709,74 @@ USE BadmintonShop;
 GO
 IF COL_LENGTH('dbo.HoaDon','DauVanTayPOS') IS NULL
     ALTER TABLE dbo.HoaDon ADD DauVanTayPOS VARCHAR(64) NULL;
+GO
+
+USE BadmintonShop;
+GO
+
+-- SV2: bang danh gia san pham (khach gui -> Cho duyet -> nhan vien Da duyet / Tu choi)
+-- Chay lai duoc (bo qua neu bang da co). Khop DanhGiaRepository + Models/DanhGia.
+IF OBJECT_ID(N'dbo.DanhGiaSanPham', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.DanhGiaSanPham (
+        MaDG        INT IDENTITY(1,1) PRIMARY KEY,
+        MaSP        INT NOT NULL,
+        MaKH        INT NOT NULL,
+        SoSao       INT NOT NULL CONSTRAINT CK_DanhGiaSanPham_SoSao CHECK (SoSao BETWEEN 1 AND 5),
+        NoiDung     NVARCHAR(1000) NULL,
+        NgayDanhGia DATETIME NOT NULL CONSTRAINT DF_DanhGiaSanPham_Ngay DEFAULT GETDATE(),
+        TrangThai   NVARCHAR(20) NOT NULL CONSTRAINT DF_DanhGiaSanPham_TT DEFAULT N'Chờ duyệt',
+        CONSTRAINT CK_DanhGiaSanPham_TT CHECK (TrangThai IN (N'Chờ duyệt', N'Đã duyệt', N'Từ chối')),
+        CONSTRAINT FK_DanhGiaSanPham_SP FOREIGN KEY (MaSP) REFERENCES dbo.SanPham(MaSP),
+        CONSTRAINT FK_DanhGiaSanPham_KH FOREIGN KEY (MaKH) REFERENCES dbo.KhachHang(MaKH)
+    );
+    CREATE INDEX IX_DanhGiaSanPham_SP ON dbo.DanhGiaSanPham(MaSP, TrangThai);
+END
+GO
+
+-- Danh gia mau (34): 24 'Đã duyệt', 6 'Chờ duyệt', 4 'Từ chối' de demo man hinh duyet binh luan.
+-- Chi chen khi bang con trong; bo qua dong nao khach/san pham chua ton tai.
+IF NOT EXISTS (SELECT 1 FROM dbo.DanhGiaSanPham)
+BEGIN
+    INSERT INTO dbo.DanhGiaSanPham (MaSP, MaKH, SoSao, NoiDung, NgayDanhGia, TrangThai)
+    SELECT v.MaSP, k.MaKH, v.SoSao, v.NoiDung, v.Ngay, v.TrangThai
+    FROM (VALUES
+        (1, 'kh01@gmail.com', 5, N'Rất hài lòng, hàng chính hãng, đóng gói cẩn thận.', '20260712', N'Đã duyệt'),
+        (1, 'kh02@gmail.com', 4, N'Dùng ổn, đúng mô tả. Trừ 1 sao vì hộp bị móp nhẹ.', '20260730', N'Đã duyệt'),
+        (2, 'kh03@gmail.com', 5, N'Dùng rất thích, giao nhanh, nhân viên tư vấn nhiệt tình.', '20260803', N'Đã duyệt'),
+        (5, 'kh04@gmail.com', 5, N'Sản phẩm xịn, đáng đồng tiền. Mình đã giới thiệu cho cả nhóm đánh cùng.', '20260809', N'Đã duyệt'),
+        (5, 'kh05@gmail.com', 4, N'Dùng ổn, đúng mô tả. Trừ 1 sao vì hộp bị móp nhẹ.', '20260814', N'Đã duyệt'),
+        (7, 'kh06@gmail.com', 5, N'Chất lượng tuyệt vời, đúng như mô tả. Sẽ ủng hộ shop tiếp.', '20260818', N'Đã duyệt'),
+        (7, 'kh07@gmail.com', 3, N'Tạm được, dùng bình thường chưa thấy nổi bật.', '20260822', N'Đã duyệt'),
+        (3, 'kh08@gmail.com', 5, N'Sản phẩm xịn, đáng đồng tiền. Mình đã giới thiệu cho cả nhóm đánh cùng.', '20260825', N'Đã duyệt'),
+        (8, 'kh09@gmail.com', 4, N'Chất lượng tốt so với tầm giá, sẽ mua lại.', '20260829', N'Đã duyệt'),
+        (9, 'kh10@gmail.com', 5, N'Chất lượng tuyệt vời, đúng như mô tả. Sẽ ủng hộ shop tiếp.', '20260901', N'Đã duyệt'),
+        (10, 'kh11@gmail.com', 4, N'Dùng ổn, đúng mô tả. Trừ 1 sao vì hộp bị móp nhẹ.', '20260904', N'Đã duyệt'),
+        (11, 'kh12@gmail.com', 5, N'Sản phẩm xịn, đáng đồng tiền. Mình đã giới thiệu cho cả nhóm đánh cùng.', '20260906', N'Đã duyệt'),
+        (12, 'kh13@gmail.com', 4, N'Sản phẩm tốt, giao hàng hơi chậm một chút nhưng chấp nhận được.', '20260908', N'Đã duyệt'),
+        (6, 'kh14@gmail.com', 3, N'Sản phẩm ổn nhưng mình kỳ vọng nhiều hơn.', '20260911', N'Đã duyệt'),
+        (4, 'kh15@gmail.com', 5, N'Dùng rất thích, giao nhanh, nhân viên tư vấn nhiệt tình.', '20260913', N'Đã duyệt'),
+        (13, 'kh16@gmail.com', 5, N'Sản phẩm xịn, đáng đồng tiền. Mình đã giới thiệu cho cả nhóm đánh cùng.', '20260916', N'Đã duyệt'),
+        (19, 'kh17@gmail.com', 4, N'Dùng ổn, đúng mô tả. Trừ 1 sao vì hộp bị móp nhẹ.', '20260918', N'Đã duyệt'),
+        (24, 'kh18@gmail.com', 5, N'Chất lượng tuyệt vời, đúng như mô tả. Sẽ ủng hộ shop tiếp.', '20260921', N'Đã duyệt'),
+        (25, 'kh01@gmail.com', 4, N'Sản phẩm tốt, giao hàng hơi chậm một chút nhưng chấp nhận được.', '20260923', N'Đã duyệt'),
+        (29, 'kh02@gmail.com', 5, N'Sản phẩm xịn, đáng đồng tiền. Mình đã giới thiệu cho cả nhóm đánh cùng.', '20260926', N'Đã duyệt'),
+        (35, 'kh03@gmail.com', 4, N'Chất lượng tốt so với tầm giá, sẽ mua lại.', '20260928', N'Đã duyệt'),
+        (38, 'kh04@gmail.com', 5, N'Chất lượng tuyệt vời, đúng như mô tả. Sẽ ủng hộ shop tiếp.', '20261001', N'Đã duyệt'),
+        (16, 'kh05@gmail.com', 2, N'Hơi thất vọng, chất lượng chưa như quảng cáo.', '20261003', N'Đã duyệt'),
+        (21, 'kh06@gmail.com', 1, N'Sản phẩm bị lỗi, đã liên hệ shop để đổi.', '20261004', N'Đã duyệt'),
+        (2, 'kh07@gmail.com', 5, N'Rất hài lòng, hàng chính hãng, đóng gói cẩn thận.', '20261006', N'Chờ duyệt'),
+        (14, 'kh08@gmail.com', 4, N'Dùng ổn, đúng mô tả. Trừ 1 sao vì hộp bị móp nhẹ.', '20261008', N'Chờ duyệt'),
+        (17, 'kh09@gmail.com', 5, N'Dùng rất thích, giao nhanh, nhân viên tư vấn nhiệt tình.', '20261010', N'Chờ duyệt'),
+        (26, 'kh10@gmail.com', 3, N'Sản phẩm ổn nhưng mình kỳ vọng nhiều hơn.', '20261012', N'Chờ duyệt'),
+        (1, 'kh11@gmail.com', 4, N'Dùng ổn, đúng mô tả. Trừ 1 sao vì hộp bị móp nhẹ.', '20261014', N'Chờ duyệt'),
+        (5, 'kh12@gmail.com', 5, N'Chất lượng tuyệt vời, đúng như mô tả. Sẽ ủng hộ shop tiếp.', '20261016', N'Chờ duyệt'),
+        (22, 'kh13@gmail.com', 5, N'Shop lừa đảo, đừng mua!!! (không có đơn hàng)', '20261005', N'Từ chối'),
+        (27, 'kh14@gmail.com', 1, N'Quảng cáo: cần mua sỉ liên hệ zalo 09xx để được giá tốt.', '20261007', N'Từ chối'),
+        (31, 'kh15@gmail.com', 4, N'Hàng nhái, mua ở shop khác rẻ hơn, vào link để nhận ưu đãi!!!', '20261009', N'Từ chối'),
+        (40, 'kh16@gmail.com', 2, N'Spam spam spam, xem video tại link bên dưới.', '20261011', N'Từ chối')
+    ) v(MaSP, Email, SoSao, NoiDung, Ngay, TrangThai)
+    JOIN dbo.KhachHang k ON k.Email = v.Email
+    JOIN dbo.SanPham   p ON p.MaSP  = v.MaSP;
+END
 GO
