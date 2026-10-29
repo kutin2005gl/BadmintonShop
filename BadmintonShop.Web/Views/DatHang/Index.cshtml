@@ -1,52 +1,58 @@
 ﻿@model DatHangViewModel
 @{ ViewData["Title"] = "Đặt hàng"; var g = Model.Gio; }
 
-<h2 class="mb-3">Xác nhận đơn hàng</h2>
+<div class="container mx-auto px-4 py-12">
+<h1 class="page-title">Xác nhận đơn hàng</h1>
 
-@if (Model.Loi != null) { <div class="alert alert-danger">@Model.Loi</div> }
+@if (Model.Loi != null) { <div class="alert-err">@Model.Loi</div> }
 
-<div class="row g-4">
-    <div class="col-md-7">
-        <form asp-action="XacNhan" method="post">
-            <div class="mb-3">
-                <label class="form-label">Người nhận</label>
-                <input type="text" class="form-control" value="@Model.HoTen" disabled />
+<div class="flex flex-col lg:flex-row gap-12">
+    <div class="w-full lg:w-3/5">
+        <form asp-action="XacNhan" method="post" class="space-y-6">
+            <div>
+                <label class="block text-sm font-bold uppercase tracking-wider mb-2">Người nhận</label>
+                <input type="text" class="input-box bg-gray-50" value="@Model.HoTen" disabled />
             </div>
-            <div class="mb-3">
-                <label for="diaChi" class="form-label">Địa chỉ giao hàng</label>
-                <textarea id="diaChi" name="diaChi" class="form-control" rows="3" maxlength="255" required>@Model.DiaChi</textarea>
+            <div>
+                <label for="diaChi" class="block text-sm font-bold uppercase tracking-wider mb-2">Địa chỉ giao hàng</label>
+                <textarea id="diaChi" name="diaChi" class="input-box" rows="3" maxlength="255" required>@Model.DiaChi</textarea>
             </div>
-            <div class="mb-3">
-                <label class="form-label d-block">Hình thức thanh toán</label>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="hinhThucTT" id="tt-cod" value="COD" checked="@(Model.HinhThucTT == "COD")" />
-                    <label class="form-check-label" for="tt-cod">Thanh toán khi nhận hàng (COD)</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="hinhThucTT" id="tt-online" value="Online" checked="@(Model.HinhThucTT == "Online")" />
-                    <label class="form-check-label" for="tt-online">Thanh toán online (giả lập)</label>
-                </div>
+            <div>
+                <span class="block text-sm font-bold uppercase tracking-wider mb-3">Hình thức thanh toán</span>
+                <label class="flex items-center gap-3 border border-gray-300 p-4 mb-2 cursor-pointer has-[:checked]:border-black">
+                    <input type="radio" name="hinhThucTT" id="tt-cod" value="COD" checked="@(Model.HinhThucTT == "COD")" class="accent-black" />
+                    <span class="text-sm font-medium">Thanh toán khi nhận hàng (COD)</span>
+                </label>
+                <label class="flex items-center gap-3 border border-gray-300 p-4 cursor-pointer has-[:checked]:border-black">
+                    <input type="radio" name="hinhThucTT" id="tt-online" value="Online" checked="@(Model.HinhThucTT == "Online")" class="accent-black" />
+                    <span class="text-sm font-medium">Thanh toán online (giả lập)</span>
+                </label>
             </div>
-            <button type="submit" class="btn btn-primary btn-lg">Đặt hàng</button>
-            <a asp-controller="GioHang" asp-action="Index" class="btn btn-link">Quay lại giỏ hàng</a>
+            <div class="flex items-center gap-6">
+                <button type="submit" class="btn-dark">Đặt hàng</button>
+                <a asp-controller="GioHang" asp-action="Index" class="text-sm font-bold uppercase underline hover:text-primary">Quay lại giỏ hàng</a>
+            </div>
         </form>
     </div>
 
-    <div class="col-md-5">
-        <div class="card">
-            <div class="card-body">
-                <h6 class="card-title">Đơn hàng của bạn</h6>
+    <div class="w-full lg:w-2/5">
+        <div class="bg-gray-50 p-6 md:p-8">
+            <h2 class="text-xl font-extrabold uppercase mb-6 tracking-tight border-b border-gray-200 pb-4">Đơn hàng của bạn</h2>
+            <div class="space-y-3 mb-6 text-sm">
                 @foreach (var d in g.Dong)
                 {
-                    <div class="d-flex justify-content-between small mb-1">
-                        <span>@d.TenSP × @d.SoLuong</span><span>@d.ThanhTien.Dong()</span>
-                    </div>
+                    <div class="flex justify-between gap-4"><span>@d.TenSP × @d.SoLuong</span><span class="font-medium whitespace-nowrap">@d.ThanhTien.Dong()</span></div>
                 }
-                <hr />
-                <div class="d-flex justify-content-between"><span>Tiền hàng sau giảm sản phẩm</span><span>@g.TongTienHang.Dong()</span></div>
-                <div class="d-flex justify-content-between text-success"><span>Giảm hóa đơn / voucher</span><span>-@g.TienGiamHoaDon.Dong()</span></div>
-                <div class="d-flex justify-content-between fw-bold fs-5 mt-2"><span>Tổng cộng</span><span>@g.TongThanhToan.Dong()</span></div>
+            </div>
+            <div class="border-t border-gray-200 pt-4 space-y-3 text-sm font-medium">
+                <div class="flex justify-between"><span class="text-gray-600">Tạm tính</span><span>@g.TongTienHang.Dong()</span></div>
+                <div class="flex justify-between text-secondary"><span>Giảm giá</span><span>-@g.TienGiamHoaDon.Dong()</span></div>
+            </div>
+            <div class="flex justify-between items-end border-t border-gray-200 pt-6 mt-4">
+                <span class="font-bold uppercase tracking-wider text-sm">Tổng cộng</span>
+                <span class="text-2xl font-extrabold tracking-tight">@g.TongThanhToan.Dong()</span>
             </div>
         </div>
     </div>
+</div>
 </div>

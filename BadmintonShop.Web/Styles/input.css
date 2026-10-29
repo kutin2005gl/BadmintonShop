@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body { @apply font-sans text-black bg-white antialiased; }
+  ::selection { @apply bg-black text-white; }
+  :focus-visible { @apply outline outline-2 outline-offset-2 outline-primary; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible { @apply outline-none; }
+  html { scrollbar-color: #9ca3af #f5f5f5; scrollbar-width: thin; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #f5f5f5; }
+  ::-webkit-scrollbar-thumb { background: #9ca3af; }
+  ::-webkit-scrollbar-thumb:hover { background: #000; }
+  input[type="checkbox"] { accent-color: #000; }
+}
+
+@layer components {
+  .btn-dark   { @apply inline-flex items-center justify-center gap-2 bg-black text-white px-6 py-3 font-bold uppercase tracking-wider text-sm hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed; }
+  .btn-accent { @apply inline-flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 font-bold uppercase tracking-wider text-sm hover:bg-blue-700 transition-colors; }
+  .btn-outline{ @apply inline-flex items-center justify-center gap-2 border border-black text-black px-6 py-3 font-bold uppercase tracking-wider text-sm hover:bg-black hover:text-white transition-colors; }
+  .input-box  { @apply w-full border border-gray-300 bg-white px-4 py-3 text-sm focus:outline-none focus:border-black transition-colors placeholder:text-gray-400; }
+  .input-box[readonly] { @apply bg-gray-50 text-gray-500 cursor-not-allowed; }
+  .input-validation-error { @apply border-red-500; }
+  .page-title { @apply text-3xl md:text-4xl font-extrabold uppercase tracking-tight mb-8; }
+  .alert-ok   { @apply bg-green-50 border border-green-200 text-green-800 px-4 py-3 text-sm mb-6; }
+  .alert-err  { @apply bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-sm mb-6; }
+  .alert-warn { @apply bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 text-sm mb-6; }
+  .validation-summary-valid { @apply hidden; }
+  .badge      { @apply inline-block text-[11px] font-bold px-2 py-1 uppercase tracking-wider; }
+
+  /* Form: nhan, goi y, loi (dung chung cho trang tai khoan + danh gia) */
+  .field       { @apply mb-5; }
+  .field-label { @apply block text-xs font-bold uppercase tracking-wider mb-2; }
+  .field-help  { @apply block text-xs text-gray-500 mt-1.5; }
+  .field-error { @apply block text-xs text-red-600 mt-1.5; }
+  .field-error:empty { @apply hidden; }
+
+  /* Khung dang nhap / dang ky / mat khau */
+  .auth-khung  { @apply container mx-auto px-4 py-12 md:py-20 flex justify-center; }
+  .auth-card   { @apply w-full max-w-md border border-gray-200 bg-white p-8 md:p-10; }
+  .auth-title  { @apply text-2xl md:text-3xl font-extrabold uppercase tracking-tight mb-2; }
+  .auth-sub    { @apply text-sm text-gray-600 mb-8 leading-relaxed; }
+  .link-sub    { @apply text-sm font-semibold underline underline-offset-4 decoration-gray-300 hover:text-primary hover:decoration-primary transition-colors; }
+
+  /* Trang san pham */
+  .loc-thanh   { @apply grid grid-cols-1 md:grid-cols-12 gap-3 border-y border-gray-200 py-5 mb-8; }
+  .phan-trang a, .phan-trang span { @apply inline-flex items-center justify-center min-w-[2.5rem] h-10 px-3 border border-gray-200 text-sm font-semibold transition-colors; }
+  .phan-trang a:hover { @apply border-black; }
+  .phan-trang .dang-chon { @apply bg-black text-white border-black; }
+  .phan-trang .tat { @apply text-gray-300 cursor-not-allowed; }
+  .thong-so    { @apply grid grid-cols-[9rem_1fr] border-t border-gray-200; }
+  .thong-so dt { @apply py-3 text-xs font-bold uppercase tracking-wider text-gray-500 border-b border-gray-200; }
+  .thong-so dd { @apply py-3 text-sm font-medium border-b border-gray-200; }
+  .sao         { @apply text-amber-500 tracking-tight; }
+  .nut-sao     { @apply text-3xl leading-none text-gray-300 hover:text-amber-500 transition-colors; }
+  .nut-sao.bat { @apply text-amber-500; }
+}

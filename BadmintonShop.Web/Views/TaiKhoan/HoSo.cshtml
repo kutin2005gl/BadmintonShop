@@ -1,93 +1,54 @@
-﻿@model BadmintonShop.Web.Models.HoSoViewModel
+@model BadmintonShop.Web.Models.HoSoViewModel
 
 @{
     ViewData["Title"] = "Hồ sơ cá nhân";
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-7 col-lg-6">
+<div class="auth-khung">
+    <div class="auth-card !max-w-lg">
+        <h1 class="auth-title">Hồ sơ cá nhân</h1>
+        <p class="auth-sub">Thông tin này được dùng làm mặc định khi bạn đặt hàng.</p>
 
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Hồ sơ cá nhân</h4>
-                </div>
+        @if (TempData["ThongBao"] != null)
+        {
+            <div class="alert-ok">@TempData["ThongBao"]</div>
+        }
 
-                <div class="card-body p-4">
+        <form asp-controller="TaiKhoan" asp-action="HoSo" method="post">
+            @Html.AntiForgeryToken()
 
-                    @if (TempData["ThongBao"] != null)
-                    {
-                        <div class="alert alert-success">
-                            @TempData["ThongBao"]
-                        </div>
-                    }
+            <div asp-validation-summary="ModelOnly" class="alert-err"></div>
 
-                    <form asp-controller="TaiKhoan"
-                          asp-action="HoSo"
-                          method="post">
-
-                        @Html.AntiForgeryToken()
-
-                        <div asp-validation-summary="ModelOnly"
-                             class="text-danger mb-3"></div>
-
-                        <div class="mb-3">
-                            <label asp-for="HoTen"
-                                   class="form-label"></label>
-
-                            <input asp-for="HoTen"
-                                   class="form-control" />
-
-                            <span asp-validation-for="HoTen"
-                                  class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Email"
-                                   class="form-label"></label>
-
-                            <input asp-for="Email"
-                                   class="form-control"
-                                   readonly />
-
-                            <small class="text-muted">
-                                Email không thể thay đổi tại đây.
-                            </small>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="SDT"
-                                   class="form-label"></label>
-
-                            <input asp-for="SDT"
-                                   class="form-control" />
-
-                            <span asp-validation-for="SDT"
-                                  class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="DiaChi"
-                                   class="form-label"></label>
-
-                            <textarea asp-for="DiaChi"
-                                      class="form-control"
-                                      rows="3"></textarea>
-
-                            <span asp-validation-for="DiaChi"
-                                  class="text-danger"></span>
-                        </div>
-
-                        <button type="submit"
-                                class="btn btn-primary w-100">
-                            Lưu thay đổi
-                        </button>
-
-                    </form>
-
-                </div>
+            <div class="field">
+                <label asp-for="HoTen" class="field-label"></label>
+                <input asp-for="HoTen" class="input-box" autocomplete="name" />
+                <span asp-validation-for="HoTen" class="field-error"></span>
             </div>
 
+            <div class="field">
+                <label asp-for="Email" class="field-label"></label>
+                <input asp-for="Email" class="input-box" readonly />
+                <span class="field-help">Email không thể thay đổi tại đây.</span>
+            </div>
+
+            <div class="field">
+                <label asp-for="SDT" class="field-label"></label>
+                <input asp-for="SDT" class="input-box" autocomplete="tel" inputmode="tel" />
+                <span asp-validation-for="SDT" class="field-error"></span>
+            </div>
+
+            <div class="field">
+                <label asp-for="DiaChi" class="field-label"></label>
+                <textarea asp-for="DiaChi" class="input-box" rows="3" autocomplete="street-address"></textarea>
+                <span asp-validation-for="DiaChi" class="field-error"></span>
+            </div>
+
+            <button type="submit" class="btn-dark w-full">Lưu thay đổi</button>
+        </form>
+
+        <div class="border-t border-gray-200 mt-8 pt-6 flex items-center justify-between">
+            <a asp-controller="TaiKhoan" asp-action="DoiMatKhau" class="link-sub">Đổi mật khẩu</a>
+            <a asp-controller="DonHang" asp-action="Index" class="link-sub">Đơn hàng của tôi</a>
         </div>
     </div>
 </div>
