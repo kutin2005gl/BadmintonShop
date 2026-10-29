@@ -1,72 +1,61 @@
-﻿@model BadmintonShop.Web.Models.DangKyViewModel
+@model BadmintonShop.Web.Models.DangKyViewModel
 
 @{
     ViewData["Title"] = "Đăng ký";
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card shadow">
-                <div class="card-body p-4">
-                    <h2 class="text-center mb-4">Đăng ký tài khoản</h2>
+<div class="auth-khung">
+    <div class="auth-card !max-w-lg">
+        <h1 class="auth-title">Đăng ký tài khoản</h1>
+        <p class="auth-sub">Tạo tài khoản để lưu thông tin giao hàng và theo dõi đơn hàng của bạn.</p>
 
-                    <form asp-controller="TaiKhoan"
-                          asp-action="DangKy"
-                          method="post">
+        <form asp-controller="TaiKhoan" asp-action="DangKy" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert-err"></div>
 
-                        <div asp-validation-summary="ModelOnly"
-                             class="text-danger mb-3"></div>
+            <div class="field">
+                <label asp-for="HoTen" class="field-label"></label>
+                <input asp-for="HoTen" class="input-box" autocomplete="name" />
+                <span asp-validation-for="HoTen" class="field-error"></span>
+            </div>
 
-                        <div class="mb-3">
-                            <label asp-for="HoTen" class="form-label"></label>
-                            <input asp-for="HoTen" class="form-control" />
-                            <span asp-validation-for="HoTen" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Email" class="form-label"></label>
-                            <input asp-for="Email" class="form-control" />
-                            <span asp-validation-for="Email" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="SDT" class="form-label"></label>
-                            <input asp-for="SDT" class="form-control" />
-                            <span asp-validation-for="SDT" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="DiaChi" class="form-label"></label>
-                            <input asp-for="DiaChi" class="form-control" />
-                            <span asp-validation-for="DiaChi" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="MatKhau" class="form-label"></label>
-                            <input asp-for="MatKhau" type="password" class="form-control" />
-                            <span asp-validation-for="MatKhau" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="XacNhanMatKhau" class="form-label"></label>
-                            <input asp-for="XacNhanMatKhau" type="password" class="form-control" />
-                            <span asp-validation-for="XacNhanMatKhau" class="text-danger"></span>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100">
-                            Đăng ký
-                        </button>
-                    </form>
-
-                    <p class="text-center mt-3 mb-0">
-                        Đã có tài khoản?
-                        <a asp-controller="TaiKhoan" asp-action="DangNhap">
-                            Đăng nhập
-                        </a>
-                    </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 sm:gap-4">
+                <div class="field">
+                    <label asp-for="Email" class="field-label"></label>
+                    <input asp-for="Email" class="input-box" autocomplete="email" />
+                    <span asp-validation-for="Email" class="field-error"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="SDT" class="field-label"></label>
+                    <input asp-for="SDT" class="input-box" autocomplete="tel" inputmode="tel" />
+                    <span asp-validation-for="SDT" class="field-error"></span>
                 </div>
             </div>
+
+            <div class="field">
+                <label asp-for="DiaChi" class="field-label"></label>
+                <input asp-for="DiaChi" class="input-box" autocomplete="street-address" />
+                <span asp-validation-for="DiaChi" class="field-error"></span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 sm:gap-4">
+                <div class="field">
+                    <label asp-for="MatKhau" class="field-label"></label>
+                    <input asp-for="MatKhau" type="password" class="input-box" autocomplete="new-password" />
+                    <span asp-validation-for="MatKhau" class="field-error"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="XacNhanMatKhau" class="field-label"></label>
+                    <input asp-for="XacNhanMatKhau" type="password" class="input-box" autocomplete="new-password" />
+                    <span asp-validation-for="XacNhanMatKhau" class="field-error"></span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-dark w-full mt-2">Đăng ký</button>
+        </form>
+
+        <div class="border-t border-gray-200 mt-8 pt-6 text-sm text-gray-600 text-center">
+            Đã có tài khoản?
+            <a asp-controller="TaiKhoan" asp-action="DangNhap" class="link-sub ml-1">Đăng nhập</a>
         </div>
     </div>
 </div>

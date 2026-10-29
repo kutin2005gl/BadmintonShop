@@ -1,102 +1,50 @@
-﻿@model BadmintonShop.Web.Models.DangNhapViewModel
+@model BadmintonShop.Web.Models.DangNhapViewModel
 
 @{
     ViewData["Title"] = "Đăng nhập";
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card shadow">
-                <div class="card-body p-4">
+<div class="auth-khung">
+    <div class="auth-card">
+        <h1 class="auth-title">Đăng nhập</h1>
+        <p class="auth-sub">Đăng nhập để đặt hàng, theo dõi đơn và đánh giá sản phẩm.</p>
 
-                    <h3 class="text-center mb-4">
-                        Đăng nhập
-                    </h3>
+        @if (TempData["ThongBao"] != null)
+        {
+            <div class="alert-ok">@TempData["ThongBao"]</div>
+        }
 
-                    @if (TempData["ThongBao"] != null)
-                    {
-                        <div class="alert alert-success">
-                            @TempData["ThongBao"]
-                        </div>
-                    }
+        <form asp-controller="TaiKhoan" asp-action="DangNhap" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+            @Html.AntiForgeryToken()
 
-                    <form asp-controller="TaiKhoan"
-                          asp-action="DangNhap"
-                          asp-route-returnUrl="@ViewData["ReturnUrl"]"
-                          method="post">
+            <div asp-validation-summary="ModelOnly" class="alert-err"></div>
 
-                        @Html.AntiForgeryToken()
-
-                        <div asp-validation-summary="ModelOnly"
-                             class="text-danger mb-3"></div>
-
-                        <div class="mb-3">
-                            <label asp-for="Email"
-                                   class="form-label"></label>
-
-                            <input asp-for="Email"
-                                   class="form-control"
-                                   placeholder="Nhập email"
-                                   autocomplete="email" />
-
-                            <span asp-validation-for="Email"
-                                  class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="MatKhau"
-                                   class="form-label"></label>
-
-                            <input asp-for="MatKhau"
-                                   class="form-control"
-                                   placeholder="Nhập mật khẩu"
-                                   autocomplete="current-password" />
-
-                            <span asp-validation-for="MatKhau"
-                                  class="text-danger"></span>
-                        </div>
-
-                        <div class="form-check mb-3">
-                            <input asp-for="GhiNho"
-                                   class="form-check-input" />
-
-                            <label asp-for="GhiNho"
-                                   class="form-check-label"></label>
-                        </div>
-
-                        <button type="submit"
-                                class="btn btn-primary w-100">
-                            Đăng nhập
-                        </button>
-                    </form>
-
-                    <!-- Quên mật khẩu -->
-                    <div class="text-center mt-3">
-                        <a asp-controller="TaiKhoan"
-                           asp-action="QuenMatKhau"
-                           class="text-decoration-none">
-                            Quên mật khẩu?
-                        </a>
-                    </div>
-
-                    <hr class="my-4" />
-
-                    <!-- Đăng ký tài khoản -->
-                    <div class="text-center">
-                        <span class="text-muted">
-                            Chưa có tài khoản?
-                        </span>
-
-                        <a asp-controller="TaiKhoan"
-                           asp-action="DangKy"
-                           class="text-decoration-none fw-bold">
-                            Đăng ký ngay
-                        </a>
-                    </div>
-
-                </div>
+            <div class="field">
+                <label asp-for="Email" class="field-label"></label>
+                <input asp-for="Email" class="input-box" placeholder="ten@email.com" autocomplete="email" />
+                <span asp-validation-for="Email" class="field-error"></span>
             </div>
+
+            <div class="field">
+                <label asp-for="MatKhau" class="field-label"></label>
+                <input asp-for="MatKhau" class="input-box" placeholder="Nhập mật khẩu" autocomplete="current-password" />
+                <span asp-validation-for="MatKhau" class="field-error"></span>
+            </div>
+
+            <div class="flex items-center justify-between mb-6">
+                <label class="flex items-center gap-2 text-sm cursor-pointer">
+                    <input asp-for="GhiNho" class="w-4 h-4" />
+                    <span>@Html.DisplayNameFor(m => m.GhiNho)</span>
+                </label>
+                <a asp-controller="TaiKhoan" asp-action="QuenMatKhau" class="link-sub">Quên mật khẩu?</a>
+            </div>
+
+            <button type="submit" class="btn-dark w-full">Đăng nhập</button>
+        </form>
+
+        <div class="border-t border-gray-200 mt-8 pt-6 text-sm text-gray-600 text-center">
+            Chưa có tài khoản?
+            <a asp-controller="TaiKhoan" asp-action="DangKy" class="link-sub ml-1">Đăng ký ngay</a>
         </div>
     </div>
 </div>

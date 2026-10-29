@@ -2,28 +2,30 @@
 @using System.Data
 @{ ViewData["Title"] = "Đặt hàng thành công"; var hd = Model.Don; }
 
-<div class="text-center py-4">
-    <h2 class="text-success">Đặt hàng thành công!</h2>
-    <p class="lead">Mã đơn hàng của bạn là <strong>#@hd.MaHD</strong>.</p>
-    @if (TempData["ThongBao"] is string tb) { <div class="alert alert-success d-inline-block">@tb</div> }
+<div class="container mx-auto px-4 py-12">
+<div class="text-center mb-10">
+    <h1 class="text-3xl md:text-4xl font-extrabold uppercase tracking-tight mb-3 text-secondary">Đặt hàng thành công!</h1>
+    <p class="text-gray-600">Mã đơn hàng của bạn là <strong class="text-black">#@hd.MaHD</strong>.</p>
+    @if (TempData["ThongBao"] is string tb) { <div class="alert-ok inline-block mt-4">@tb</div> }
 </div>
 
-<div class="card mx-auto" style="max-width:640px">
-    <div class="card-body">
+<div class="bg-gray-50 p-6 md:p-8 mx-auto max-w-xl">
+    <div class="space-y-3 mb-6 text-sm">
         @foreach (DataRow r in Model.Dong.Rows)
         {
-            <div class="d-flex justify-content-between small mb-1">
-                <span>@r["TenSP"] × @r["SoLuong"]</span><span>@(((decimal)r["ThanhTien"]).Dong())</span>
-            </div>
+            <div class="flex justify-between gap-4"><span>@r["TenSP"] × @r["SoLuong"]</span><span class="font-medium whitespace-nowrap">@(((decimal)r["ThanhTien"]).Dong())</span></div>
         }
-        <hr />
-        <div class="d-flex justify-content-between"><span>Giảm giá</span><span>-@hd.TienGiamGia.Dong()</span></div>
-        <div class="d-flex justify-content-between fw-bold fs-5"><span>Tổng cộng</span><span>@hd.TongTien.Dong()</span></div>
-        <p class="mb-0 mt-2 small text-muted">Giao tới: @hd.DiaChiGiao — Thanh toán: @(hd.HinhThucTT == "COD" ? "khi nhận hàng" : "online")</p>
     </div>
+    <div class="border-t border-gray-200 pt-4 text-sm font-medium flex justify-between"><span class="text-gray-600">Giảm giá</span><span>-@hd.TienGiamGia.Dong()</span></div>
+    <div class="flex justify-between items-end border-t border-gray-200 pt-4 mt-4">
+        <span class="font-bold uppercase tracking-wider text-sm">Tổng cộng</span>
+        <span class="text-2xl font-extrabold tracking-tight">@hd.TongTien.Dong()</span>
+    </div>
+    <p class="mt-4 text-xs text-gray-500">Giao tới: @hd.DiaChiGiao — Thanh toán: @(hd.HinhThucTT == "COD" ? "khi nhận hàng" : "online")</p>
 </div>
 
-<div class="text-center mt-4">
-    <a asp-controller="DonHang" asp-action="ChiTiet" asp-route-id="@hd.MaHD" class="btn btn-primary">Theo dõi đơn hàng</a>
-    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Tiếp tục mua sắm</a>
+<div class="flex flex-wrap justify-center gap-4 mt-8">
+    <a asp-controller="DonHang" asp-action="ChiTiet" asp-route-id="@hd.MaHD" class="btn-dark">Theo dõi đơn hàng</a>
+    <a asp-controller="Home" asp-action="Index" class="btn-outline">Tiếp tục mua sắm</a>
+</div>
 </div>

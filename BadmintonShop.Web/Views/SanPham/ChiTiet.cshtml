@@ -1,4 +1,4 @@
-﻿@model BadmintonShop.Core.Models.SanPham
+@model BadmintonShop.Core.Models.SanPham
 @using BadmintonShop.Core.Models
 
 @{
@@ -6,465 +6,236 @@
 
     bool daDangNhap = User.Identity?.IsAuthenticated == true;
 
-    var danhGia = ViewBag.DanhSachDanhGia as List<DanhGia>
-                  ?? new List<DanhGia>();
-
+    var danhGia = ViewBag.DanhSachDanhGia as List<DanhGia> ?? new List<DanhGia>();
     int tongDanhGia = danhGia.Count;
+    double saoTrungBinh = tongDanhGia > 0 ? danhGia.Average(dg => dg.SoSao) : 0;
+    int saoLamTron = (int)Math.Round(saoTrungBinh, MidpointRounding.AwayFromZero);
 
-    double saoTrungBinh = tongDanhGia > 0
-        ? danhGia.Average(dg => dg.SoSao)
-        : 0;
+    string? tenDanhMuc = null;
+    try { tenDanhMuc = new BadmintonShop.Core.DataAccess.DanhMucRepository().LayTheoMa(Model.MaDM)?.TenDanhMuc; }
+    catch { }
+
+    bool conHang = Model.SoLuongTon > 0;
+    bool sapHet = conHang && Model.SoLuongTon <= 5;
+    string sao(int n) => new string('★', n) + new string('☆', 5 - n);
 }
 
-<div class="container mt-4 mb-5">
+<div class="container mx-auto px-4 py-10">
+    <nav class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-8" aria-label="Điều hướng">
+        <a asp-controller="Home" asp-action="Index" class="hover:text-black">Trang chủ</a>
+        <span class="mx-2">/</span>
+        <a asp-controller="SanPham" asp-action="Index" class="hover:text-black">Sản phẩm</a>
+        @if (!string.IsNullOrEmpty(tenDanhMuc))
+        {
+            <span class="mx-2">/</span>
+            <a asp-controller="SanPham" asp-action="Index" asp-route-maDM="@Model.MaDM" class="hover:text-black">@tenDanhMuc</a>
+        }
+    </nav>
 
-    <div class="mb-4">
-        <a asp-controller="SanPham"
-           asp-action="Index"
-           class="btn btn-outline-secondary">
-            ← Quay lại danh sách sản phẩm
-        </a>
-    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+        <div class="relative bg-gray-50 aspect-square overflow-hidden flex items-center justify-center">
+            <img src="@AnhMinhHoa.TheoDanhMuc(tenDanhMuc)" alt="@Model.TenSP" data-chu="@Model.TenSP.Substring(0, 1)"
+                 class="w-full h-full object-cover mix-blend-multiply" />
+        </div>
 
-    <!-- THÔNG TIN SẢN PHẨM -->
-    <div class="row g-4">
+        <div>
+            <p class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">@(Model.ThuongHieu ?? "Đang cập nhật")</p>
+            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight mb-4 text-balance">@Model.TenSP</h1>
 
-        <div class="col-md-5">
-            <div class="card shadow-sm">
-                <div class="card-body text-center">
+            <a href="#danh-gia" class="inline-flex items-center gap-2 text-sm mb-6 hover:text-primary transition-colors">
+                @if (tongDanhGia > 0)
+                {
+                    <span class="sao text-lg" aria-hidden="true">@sao(saoLamTron)</span>
+                    <span><strong class="tabular-nums">@saoTrungBinh.ToString("0.0")/5</strong> <span class="text-gray-500">(@tongDanhGia đánh giá)</span></span>
+                }
+                else
+                {
+                    <span class="sao text-lg opacity-40" aria-hidden="true">☆☆☆☆☆</span>
+                    <span class="text-gray-500">Chưa có đánh giá</span>
+                }
+            </a>
 
-                    @if (!string.IsNullOrWhiteSpace(Model.HinhAnh))
+            <p class="text-3xl font-extrabold tracking-tight mb-8 tabular-nums">@Model.DonGiaBan.Dong()</p>
+
+            <dl class="thong-so mb-8">
+                <dt>Thương hiệu</dt><dd>@(Model.ThuongHieu ?? "Đang cập nhật")</dd>
+                @if (!string.IsNullOrEmpty(tenDanhMuc))
+                {
+                    <dt>Danh mục</dt><dd>@tenDanhMuc</dd>
+                }
+                <dt>Mã sản phẩm</dt><dd class="tabular-nums">@Model.MaSP</dd>
+                <dt>Đơn vị tính</dt><dd>@Model.DonViTinh</dd>
+                <dt>Tình trạng</dt>
+                <dd>
+                    @if (!conHang)
                     {
-                        <img src="@Url.Content(Model.HinhAnh)"
-                             alt="@Model.TenSP"
-                             class="img-fluid"
-                             style="max-height:400px; object-fit:contain;"
-                             onerror="this.style.display='none'; document.getElementById('anhDuPhong').style.display='flex';" />
-
-                        <div id="anhDuPhong"
-                             class="bg-light align-items-center justify-content-center text-muted"
-                             style="height:350px; display:none;">
-                            Không tải được hình ảnh sản phẩm
-                        </div>
+                        <span class="badge bg-gray-500 text-white">Hết hàng</span>
+                    }
+                    else if (sapHet)
+                    {
+                        <span class="badge bg-red-500 text-white">Sắp hết</span>
+                        <span class="ml-2 text-gray-600 tabular-nums">Còn @Model.SoLuongTon</span>
                     }
                     else
                     {
-                        <div class="bg-light d-flex align-items-center justify-content-center text-muted"
-                             style="height:350px;">
-                            Chưa có hình ảnh sản phẩm
-                        </div>
+                        <span class="badge bg-green-600 text-white">Còn hàng</span>
+                        <span class="ml-2 text-gray-600 tabular-nums">Còn @Model.SoLuongTon</span>
                     }
+                </dd>
+            </dl>
 
-                </div>
-            </div>
-        </div>
+            <form asp-controller="GioHang" asp-action="Them" method="post" class="flex items-stretch gap-3 mb-10">
+                <input type="hidden" name="maSP" value="@Model.MaSP" />
+                <input type="hidden" name="returnUrl" value="@(Context.Request.Path + "#gio")" />
+                <label for="soLuong" class="sr-only">Số lượng</label>
+                <input id="soLuong" type="number" name="soLuong" value="1" min="1" max="@Math.Max(1, Model.SoLuongTon)"
+                       class="input-box !w-24 text-center tabular-nums" disabled="@(!conHang)" />
+                <button type="submit" class="btn-dark flex-1" disabled="@(!conHang)">
+                    @(conHang ? "Thêm vào giỏ hàng" : "Sản phẩm đã hết hàng")
+                </button>
+            </form>
 
-        <div class="col-md-7">
-
-            <h2 class="fw-bold mb-3">
-                @Model.TenSP
-            </h2>
-
-            <p class="text-muted">
-                Thương hiệu:
-                <strong>
-                    @(Model.ThuongHieu ?? "Đang cập nhật")
-                </strong>
-            </p>
-
-            <!-- ĐIỂM ĐÁNH GIÁ -->
-            <div class="mb-3">
-
-                @if (tongDanhGia > 0)
-                {
-                    <span class="text-warning fs-5">
-                        @for (int i = 1; i <= 5; i++)
-                        {
-                            @(i <= Math.Round(saoTrungBinh, MidpointRounding.AwayFromZero) ? "★" : "☆")
-                        }
-                    </span>
-
-                    <span class="ms-2">
-                        <strong>@saoTrungBinh.ToString("0.0")/5</strong>
-                        (@tongDanhGia đánh giá)
-                    </span>
-                }
-                else
-                {
-                    <span class="text-warning fs-5">
-                        ☆☆☆☆☆
-                    </span>
-
-                    <span class="text-muted ms-2">
-                        Chưa có đánh giá
-                    </span>
-                }
-
-            </div>
-
-            <h3 class="text-danger fw-bold mb-4">
-                @Model.DonGiaBan.ToString("N0") đ
-            </h3>
-
-            <hr />
-
-            <p>
-                <strong>Mã sản phẩm:</strong>
-                @Model.MaSP
-            </p>
-
-            <p>
-                <strong>Đơn vị tính:</strong>
-                @Model.DonViTinh
-            </p>
-
-            <p>
-                <strong>Tình trạng:</strong>
-
-                @if (Model.SoLuongTon > 0)
-                {
-                    <span class="badge bg-success">
-                        Còn hàng
-                    </span>
-                }
-                else
-                {
-                    <span class="badge bg-danger">
-                        Hết hàng
-                    </span>
-                }
-            </p>
-
-            <p>
-                <strong>Số lượng tồn kho:</strong>
-                @Model.SoLuongTon
-            </p>
-
-            <hr />
-
-            <h5 class="fw-bold">Mô tả sản phẩm</h5>
-
+            <h2 class="text-sm font-bold uppercase tracking-wider mb-3">Mô tả sản phẩm</h2>
             @if (!string.IsNullOrWhiteSpace(Model.MoTa))
             {
-                <p style="white-space:pre-line;">
-                    @Model.MoTa
-                </p>
+                <p class="text-sm leading-relaxed text-gray-700 max-w-prose whitespace-pre-line">@Model.MoTa</p>
             }
             else
             {
-                <p class="text-muted">
-                    Sản phẩm chưa có mô tả.
-                </p>
+                <p class="text-sm text-gray-500">Sản phẩm chưa có mô tả.</p>
             }
-
-            <div class="mt-4">
-
-                @if (Model.SoLuongTon > 0)
-                {
-                    <button type="button"
-                            class="btn btn-secondary btn-lg"
-                            disabled>
-                        Thêm vào giỏ hàng (sắp ra mắt)
-                    </button>
-                }
-                else
-                {
-                    <button type="button"
-                            class="btn btn-secondary btn-lg"
-                            disabled>
-                        Sản phẩm đã hết hàng
-                    </button>
-                }
-
-            </div>
-
         </div>
     </div>
 
-    <!-- ĐÁNH GIÁ SẢN PHẨM -->
-    <section class="mt-5" id="danh-gia">
-
-        <hr class="mb-4" />
-
-        <h3 class="fw-bold mb-4">
-            Đánh giá và nhận xét sản phẩm
-        </h3>
+    <section class="mt-20 pt-12 border-t border-gray-200" id="danh-gia">
+        <h2 class="text-2xl md:text-3xl font-extrabold uppercase tracking-tight mb-8">Đánh giá sản phẩm</h2>
 
         @if (TempData["ThanhCongDanhGia"] != null)
         {
-            <div class="alert alert-success">
-                @TempData["ThanhCongDanhGia"]
-            </div>
+            <div class="alert-ok">@TempData["ThanhCongDanhGia"]</div>
         }
-
         @if (TempData["LoiDanhGia"] != null)
         {
-            <div class="alert alert-danger">
-                @TempData["LoiDanhGia"]
-            </div>
+            <div class="alert-err">@TempData["LoiDanhGia"]</div>
         }
 
-        <div class="row g-4">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+            <div class="lg:col-span-5">
+                <div class="bg-gray-50 p-6 md:p-8">
+                    <h3 class="text-sm font-bold uppercase tracking-wider mb-5">Viết đánh giá của bạn</h3>
 
-            <!-- FORM GỬI ĐÁNH GIÁ -->
-            <div class="col-lg-5">
+                    @if (daDangNhap)
+                    {
+                        <form asp-controller="SanPham" asp-action="GuiDanhGia" method="post" id="formDanhGia">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="MaSP" value="@Model.MaSP" />
 
-                <div class="card shadow-sm">
-                    <div class="card-body p-4">
-
-                        <h5 class="fw-bold mb-3">
-                            Viết đánh giá của bạn
-                        </h5>
-
-                        @if (daDangNhap)
-                        {
-                            <div class="alert alert-info small">
-                                Bạn đã đăng nhập.
-                                Hãy chọn số sao và nhập nhận xét.
-                            </div>
-
-                            <form asp-controller="SanPham"
-                                  asp-action="GuiDanhGia"
-                                  method="post"
-                                  id="formDanhGia">
-
-                                @Html.AntiForgeryToken()
-
-                                <input type="hidden"
-                                       name="MaSP"
-                                       value="@Model.MaSP" />
-
-                                <div class="mb-3">
-
-                                    <label class="form-label fw-semibold">
-                                        Chất lượng sản phẩm
-                                    </label>
-
-                                    <div class="d-flex gap-2"
-                                         id="chonSoSao">
-
-                                        @for (int i = 1; i <= 5; i++)
-                                        {
-                                            <button type="button"
-                                                    class="btn btn-link p-0 text-decoration-none nut-sao"
-                                                    data-sao="@i"
-                                                    aria-label="Đánh giá @i sao"
-                                                    style="font-size:32px; color:#adb5bd;">
-                                                ★
-                                            </button>
-                                        }
-
-                                    </div>
-
-                                    <input type="hidden"
-                                           id="SoSao"
-                                           name="SoSao"
-                                           value="0" />
-
-                                    <div id="thongBaoSoSao"
-                                         class="form-text">
-                                        Chưa chọn số sao
-                                    </div>
-
-                                </div>
-
-                                <div class="mb-3">
-
-                                    <label for="NoiDung"
-                                           class="form-label fw-semibold">
-                                        Nội dung nhận xét
-                                    </label>
-
-                                    <textarea id="NoiDung"
-                                              name="NoiDung"
-                                              class="form-control"
-                                              rows="5"
-                                              maxlength="1000"
-                                              required
-                                              placeholder="Hãy chia sẻ trải nghiệm của bạn về sản phẩm..."></textarea>
-
-                                    <div class="form-text">
-                                        Tối đa 1000 ký tự.
-                                    </div>
-
-                                </div>
-
-                                <button type="submit"
-                                        class="btn btn-primary w-100">
-                                    Gửi đánh giá
-                                </button>
-
-                                <p class="text-muted small mt-3 mb-0">
-                                    Đánh giá sẽ hiển thị sau khi
-                                    quản trị viên duyệt.
-                                </p>
-
-                            </form>
-                        }
-                        else
-                        {
-                            <div class="alert alert-warning">
-                                Bạn cần đăng nhập để đánh giá sản phẩm.
-                            </div>
-
-                            <a asp-controller="TaiKhoan"
-                               asp-action="DangNhap"
-                               class="btn btn-primary w-100">
-                                Đăng nhập để đánh giá
-                            </a>
-                        }
-
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- DANH SÁCH ĐÁNH GIÁ -->
-            <div class="col-lg-7">
-
-                <div class="card shadow-sm">
-                    <div class="card-body p-4">
-
-                        <h5 class="fw-bold mb-3">
-                            Nhận xét từ khách hàng
-                            (@tongDanhGia)
-                        </h5>
-
-                        @if (tongDanhGia == 0)
-                        {
-                            <div class="text-center py-5">
-
-                                <div class="text-warning fs-2 mb-2">
-                                    ☆☆☆☆☆
-                                </div>
-
-                                <h6>
-                                    Chưa có đánh giá được duyệt
-                                </h6>
-
-                                <p class="text-muted">
-                                    Hãy là người đầu tiên
-                                    đánh giá sản phẩm này.
-                                </p>
-
-                            </div>
-                        }
-                        else
-                        {
-                            @foreach (var dg in danhGia)
-                            {
-                                <div class="border-bottom pb-3 mb-3">
-
-                                    <div class="d-flex justify-content-between">
-
-                                        <strong>
-                                            Khách hàng #@dg.MaKH
-                                        </strong>
-
-                                        <span class="text-muted small">
-                                            @dg.NgayDanhGia.ToString("dd/MM/yyyy HH:mm")
-                                        </span>
-
-                                    </div>
-
-                                    <div class="text-warning fs-5 my-2">
-
-                                        @for (int i = 1; i <= 5; i++)
-                                        {
-                                            @(i <= dg.SoSao ? "★" : "☆")
-                                        }
-
-                                    </div>
-
-                                    @if (!string.IsNullOrWhiteSpace(dg.NoiDung))
+                            <div class="field">
+                                <span class="field-label" id="nhanSao">Chất lượng sản phẩm</span>
+                                <div class="flex gap-1" id="chonSoSao" role="group" aria-labelledby="nhanSao">
+                                    @for (int i = 1; i <= 5; i++)
                                     {
-                                        <p class="mb-0"
-                                           style="white-space:pre-line;">
-                                            @dg.NoiDung
-                                        </p>
+                                        <button type="button" class="nut-sao" data-sao="@i" aria-label="Đánh giá @i sao">★</button>
                                     }
-
                                 </div>
-                            }
-                        }
+                                <input type="hidden" id="SoSao" name="SoSao" value="0" />
+                                <span id="thongBaoSoSao" class="field-help" aria-live="polite">Chưa chọn số sao</span>
+                            </div>
 
-                    </div>
+                            <div class="field">
+                                <label for="NoiDung" class="field-label">Nội dung nhận xét</label>
+                                <textarea id="NoiDung" name="NoiDung" class="input-box" rows="5" maxlength="1000" required
+                                          placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."></textarea>
+                                <span class="field-help">Tối đa 1000 ký tự.</span>
+                            </div>
+
+                            <div id="loiDanhGia" class="alert-err hidden" role="alert"></div>
+
+                            <button type="submit" class="btn-dark w-full">Gửi đánh giá</button>
+                            <p class="text-xs text-gray-500 mt-4">Đánh giá sẽ hiển thị sau khi quản trị viên duyệt.</p>
+                        </form>
+                    }
+                    else
+                    {
+                        <p class="text-sm text-gray-700 mb-5">Bạn cần đăng nhập để đánh giá sản phẩm này.</p>
+                        <a asp-controller="TaiKhoan" asp-action="DangNhap" asp-route-returnUrl="@(Context.Request.Path + "#danh-gia")" class="btn-dark w-full">Đăng nhập để đánh giá</a>
+                    }
                 </div>
-
             </div>
 
+            <div class="lg:col-span-7">
+                <h3 class="text-sm font-bold uppercase tracking-wider mb-5">Nhận xét từ khách hàng (@tongDanhGia)</h3>
+
+                @if (tongDanhGia == 0)
+                {
+                    <div class="border border-gray-200 py-14 text-center">
+                        <p class="font-bold mb-1">Chưa có đánh giá được duyệt</p>
+                        <p class="text-sm text-gray-600">Hãy là người đầu tiên đánh giá sản phẩm này.</p>
+                    </div>
+                }
+                else
+                {
+                    <ul class="divide-y divide-gray-200 border-y border-gray-200">
+                        @foreach (var dg in danhGia)
+                        {
+                            <li class="py-6">
+                                <div class="flex items-center justify-between gap-4 mb-2">
+                                    <span class="sao text-lg" role="img" aria-label="@dg.SoSao trên 5 sao">@sao(dg.SoSao)</span>
+                                    <time class="text-xs text-gray-500 tabular-nums" datetime="@dg.NgayDanhGia.ToString("s")">@dg.NgayDanhGia.ToString("dd/MM/yyyy HH:mm")</time>
+                                </div>
+                                <p class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Khách hàng #@dg.MaKH</p>
+                                @if (!string.IsNullOrWhiteSpace(dg.NoiDung))
+                                {
+                                    <p class="text-sm leading-relaxed text-gray-800 whitespace-pre-line">@dg.NoiDung</p>
+                                }
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
         </div>
-
     </section>
-
 </div>
 
 @section Scripts {
-
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-
             const cacNutSao = document.querySelectorAll(".nut-sao");
             const inputSoSao = document.getElementById("SoSao");
             const thongBaoSoSao = document.getElementById("thongBaoSoSao");
-            const formDanhGia = document.getElementById("formDanhGia");
+            const form = document.getElementById("formDanhGia");
+            const hopLoi = document.getElementById("loiDanhGia");
 
-            if (!inputSoSao || !formDanhGia) {
-                return;
-            }
+            if (!inputSoSao || !form) return;
 
             function capNhatSao(soSao) {
-
                 cacNutSao.forEach(function (nut) {
-
-                    const giaTri = Number(nut.dataset.sao);
-
-                    nut.style.color =
-                        giaTri <= soSao ? "#ffc107" : "#adb5bd";
+                    nut.classList.toggle("bat", Number(nut.dataset.sao) <= soSao);
                 });
-
-                thongBaoSoSao.textContent =
-                    soSao > 0
-                        ? "Bạn đã chọn " + soSao + "/5 sao"
-                        : "Chưa chọn số sao";
+                thongBaoSoSao.textContent = soSao > 0 ? "Bạn đã chọn " + soSao + "/5 sao" : "Chưa chọn số sao";
             }
 
             cacNutSao.forEach(function (nut) {
-
                 nut.addEventListener("click", function () {
-
                     const soSao = Number(this.dataset.sao);
-
                     inputSoSao.value = soSao;
-
                     capNhatSao(soSao);
+                    hopLoi.classList.add("hidden");
                 });
-
             });
 
-            formDanhGia.addEventListener("submit", function (event) {
-
+            form.addEventListener("submit", function (event) {
                 const soSao = Number(inputSoSao.value);
-
-                const noiDung = document
-                    .getElementById("NoiDung")
-                    .value
-                    .trim();
-
-                if (soSao < 1 || soSao > 5) {
+                const noiDung = document.getElementById("NoiDung").value.trim();
+                let loi = "";
+                if (soSao < 1 || soSao > 5) loi = "Vui lòng chọn số sao đánh giá.";
+                else if (noiDung.length === 0) loi = "Vui lòng nhập nội dung nhận xét.";
+                if (loi) {
                     event.preventDefault();
-                    alert("Vui lòng chọn số sao đánh giá.");
-                    return;
+                    hopLoi.textContent = loi;
+                    hopLoi.classList.remove("hidden");
                 }
-
-                if (noiDung.length === 0) {
-                    event.preventDefault();
-                    alert("Vui lòng nhập nội dung nhận xét.");
-                    return;
-                }
-
             });
-
         });
     </script>
 }

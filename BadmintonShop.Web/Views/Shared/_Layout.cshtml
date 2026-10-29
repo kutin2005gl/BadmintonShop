@@ -1,188 +1,286 @@
-﻿
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - BadmintonShop</title>
-
-    <link rel="stylesheet"
-          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-
-    <link rel="stylesheet"
-          href="~/css/site.css"
-          asp-append-version="true" />
-
-    <link rel="stylesheet"
-          href="~/BadmintonShop.Web.styles.css"
-          asp-append-version="true" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/smashpro.css" asp-append-version="true" />
 </head>
 
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
+@{
+    var daDangNhap = User.Identity?.IsAuthenticated == true;
+    var tenController = (string?)ViewContext.RouteData.Values["controller"] ?? "";
+    var coNganKeo = tenController != "GioHang" && tenController != "DatHang";
 
-                <!-- Logo website -->
-                <a class="navbar-brand fw-bold"
-                   asp-area=""
-                   asp-controller="Home"
-                   asp-action="Index">
-                    BadmintonShop
-                </a>
-
-                <!-- Menu trên điện thoại -->
-                <button class="navbar-toggler"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target=".navbar-collapse"
-                        aria-controls="navbarSupportedContent"
-                        aria-expanded="false"
-                        aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-
-                    <!-- Menu bên trái -->
-                    <ul class="navbar-nav flex-grow-1">
-
-                        <!-- Trang chủ -->
-                        <li class="nav-item">
-                            <a class="nav-link text-dark"
-                               asp-area=""
-                               asp-controller="Home"
-                               asp-action="Index">
-                                Trang chủ
-                            </a>
-                        </li>
-
-                        <!-- Danh sách sản phẩm -->
-                        <li class="nav-item">
-                            <a class="nav-link text-dark"
-                               asp-controller="SanPham"
-                               asp-action="Index">
-                                Sản phẩm
-                            </a>
-                        </li>
-
-                        <!-- Trang Privacy -->
-                        <li class="nav-item">
-                            <a class="nav-link text-dark"
-                               asp-area=""
-                               asp-controller="Home"
-                               asp-action="Privacy">
-                                Privacy
-                            </a>
-                        </li>
-
-                    </ul>
-
-                    <!-- Menu tài khoản bên phải -->
-                    <ul class="navbar-nav align-items-sm-center">
-
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <!-- Hồ sơ cá nhân -->
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="TaiKhoan"
-                                   asp-action="HoSo">
-                                    Hồ sơ cá nhân
-                                </a>
-                            </li>
-
-                            <!-- Đổi mật khẩu -->
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="TaiKhoan"
-                                   asp-action="DoiMatKhau">
-                                    Đổi mật khẩu
-                                </a>
-                            </li>
-
-                            <!-- Tên khách hàng -->
-                            <li class="nav-item">
-                                <span class="nav-link text-dark">
-                                    Xin chào, @User.Identity.Name
-                                </span>
-                            </li>
-
-                            <!-- Đăng xuất -->
-                            <li class="nav-item">
-                                <form asp-area=""
-                                      asp-controller="TaiKhoan"
-                                      asp-action="DangXuat"
-                                      method="post"
-                                      class="d-inline">
-
-                                    @Html.AntiForgeryToken()
-
-                                    <button type="submit"
-                                            class="btn btn-outline-danger btn-sm ms-sm-2">
-                                        Đăng xuất
-                                    </button>
-                                </form>
-                            </li>
-                        }
-                        else
-                        {
-                            <!-- Đăng nhập -->
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-area=""
-                                   asp-controller="TaiKhoan"
-                                   asp-action="DangNhap">
-                                    Đăng nhập
-                                </a>
-                            </li>
-
-                            <!-- Đăng ký -->
-                            <li class="nav-item">
-                                <a class="btn btn-primary btn-sm ms-sm-2"
-                                   asp-area=""
-                                   asp-controller="TaiKhoan"
-                                   asp-action="DangKy">
-                                    Đăng ký
-                                </a>
-                            </li>
-                        }
-
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-
-    <!-- Nội dung chính của từng trang -->
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+    // Giao dien: doc gio hang + danh muc de ve header/ngan keo (chi doc, khong doi nghiep vu)
+    BadmintonShop.Core.Models.KetQuaGioHang? gio = null;
+    List<BadmintonShop.Core.Models.DanhMuc> danhMucNav = new();
+    try
+    {
+        gio = new BadmintonShop.Core.Services.GioHangService().TinhTuSession(Context.Session);
+        danhMucNav = new BadmintonShop.Core.DataAccess.DanhMucRepository().LayTatCa();
+    }
+    catch { }
+    var soLuongGio = gio?.TongSoLuong ?? 0;
+}
+<div class="flex flex-col min-h-screen">
+    <div class="bg-black text-white text-center text-xs py-2 font-medium tracking-wide">
+        Miễn phí vận chuyển cho đơn từ 500.000đ
     </div>
 
-    <!-- Footer -->
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - BadmintonShop -
-            <a asp-area=""
-               asp-controller="Home"
-               asp-action="Privacy">
-                Privacy
-            </a>
+    <header class="sticky top-0 z-40 bg-white border-b border-gray-100 transition-all">
+        <div class="container mx-auto px-4 h-20 flex items-center justify-between">
+            <button type="button" id="btn-menu" class="lg:hidden p-2 -ml-2 text-black" aria-label="Menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+            </button>
+
+            <a asp-controller="Home" asp-action="Index" class="text-2xl font-extrabold uppercase tracking-tighter shrink-0">BADMINTONSHOP</a>
+
+            <nav class="hidden lg:flex items-center space-x-8">
+                <a href="/SanPham" class="text-sm font-semibold uppercase tracking-wider hover:text-primary transition-colors py-8 relative group text-black">
+                    Sản phẩm
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-current transition-all duration-300 group-hover:w-full"></span>
+                </a>
+                @foreach (var dm in danhMucNav)
+                {
+                    <a href="/SanPham?maDM=@dm.MaDM" class="text-sm font-semibold uppercase tracking-wider hover:text-primary transition-colors py-8 relative group text-black">
+                        @dm.TenDanhMuc
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-current transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                }
+                <a href="/SanPham" class="text-sm font-semibold uppercase tracking-wider hover:text-red-600 transition-colors py-8 relative group text-red-500">
+                    Giảm giá
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-current transition-all duration-300 group-hover:w-full"></span>
+                </a>
+            </nav>
+
+            <div class="flex items-center space-x-4 sm:space-x-6">
+                <button type="button" id="btn-search" class="hidden sm:block text-black hover:text-primary transition-colors" aria-label="Tìm kiếm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                </button>
+                @if (daDangNhap)
+                {
+                    <a asp-controller="DonHang" asp-action="Index" class="hidden sm:block text-xs font-bold uppercase tracking-wider hover:text-primary transition-colors" title="Đơn hàng của tôi">@User.LayHoTen()</a>
+                    <a asp-controller="TaiKhoan" asp-action="HoSo" class="hidden sm:block text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-primary transition-colors">Hồ sơ</a>
+                    <a asp-controller="TaiKhoan" asp-action="DoiMatKhau" class="hidden sm:block text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-primary transition-colors">Đổi mật khẩu</a>
+                    <form method="post" action="/TaiKhoan/DangXuat" class="hidden sm:block">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-primary transition-colors">Đăng xuất</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="TaiKhoan" asp-action="DangKy" class="hidden sm:block text-xs font-bold uppercase tracking-wider hover:text-primary transition-colors">Đăng ký</a>
+                    <a href="/TaiKhoan/DangNhap" class="hidden sm:block text-black hover:text-primary transition-colors" title="Đăng nhập">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </a>
+                }
+                <button type="button" class="hidden sm:block text-black hover:text-primary transition-colors" aria-label="Yêu thích">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                </button>
+                <a asp-controller="GioHang" asp-action="Index" id="btn-gio" class="text-black hover:text-primary transition-colors relative" title="Giỏ hàng">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                    @if (soLuongGio > 0)
+                    {
+                        <span class="absolute -top-2 -right-2 bg-primary text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">@soLuongGio</span>
+                    }
+                </a>
+            </div>
+        </div>
+
+        <div id="thanh-tim" class="hidden border-t border-gray-100 bg-white">
+            <form action="/SanPham" method="get" class="container mx-auto px-4 py-3 flex gap-2">
+                <input type="text" name="tuKhoa" class="input-box flex-1" placeholder="Tìm sản phẩm, thương hiệu..." />
+                <button type="submit" class="btn-dark">Tìm</button>
+            </form>
+        </div>
+    </header>
+
+    <div id="menu-mobile" class="hidden fixed inset-0 top-[112px] bg-white z-30 lg:hidden overflow-y-auto">
+        <nav class="flex flex-col p-4">
+            <a href="/SanPham" class="py-4 border-b border-gray-100 text-lg font-bold uppercase text-black">Sản phẩm</a>
+            @foreach (var dm in danhMucNav)
+            {
+                <a href="/SanPham?maDM=@dm.MaDM" class="py-4 border-b border-gray-100 text-lg font-bold uppercase text-black">@dm.TenDanhMuc</a>
+            }
+            <a href="/SanPham" class="py-4 border-b border-gray-100 text-lg font-bold uppercase text-red-500">Giảm giá</a>
+            <div class="flex items-center justify-around py-8 text-black">
+                @if (daDangNhap)
+                {
+                    <a asp-controller="DonHang" asp-action="Index" class="flex flex-col items-center text-xs font-semibold">Đơn hàng của tôi</a>
+                    <a asp-controller="TaiKhoan" asp-action="HoSo" class="flex flex-col items-center text-xs font-semibold">Hồ sơ</a>
+                }
+                else
+                {
+                    <a href="/TaiKhoan/DangNhap" class="flex flex-col items-center text-xs font-semibold">Tài khoản</a>
+                }
+                <a asp-controller="GioHang" asp-action="Index" class="flex flex-col items-center text-xs font-semibold">Giỏ hàng</a>
+            </div>
+        </nav>
+    </div>
+
+    <main class="flex-grow">
+        @RenderBody()
+    </main>
+
+    <footer class="bg-black text-white pt-16 pb-8 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <h3 class="text-xl font-extrabold uppercase mb-6 tracking-tight">BADMINTONSHOP</h3>
+                    <p class="text-gray-400 text-sm mb-6 leading-relaxed">Điểm đến số 1 cho người đam mê cầu lông. Cung cấp trang thiết bị chính hãng từ các thương hiệu hàng đầu thế giới.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-primary hover:text-white transition-colors text-xs font-bold">FB</a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-primary hover:text-white transition-colors text-xs font-bold">IG</a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-primary hover:text-white transition-colors text-xs font-bold">YT</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold uppercase mb-6">Sản phẩm</h4>
+                    <ul class="space-y-4">
+                        @foreach (var dm in danhMucNav)
+                        {
+                            <li><a href="/SanPham?maDM=@dm.MaDM" class="text-gray-400 hover:text-white transition-colors text-sm">@dm.TenDanhMuc</a></li>
+                        }
+                        <li><a href="/SanPham" class="text-primary hover:text-white transition-colors text-sm font-semibold">Hàng giảm giá</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold uppercase mb-6">Hỗ trợ</h4>
+                    <ul class="space-y-4">
+                        <li><a asp-controller="DonHang" asp-action="Index" class="text-gray-400 hover:text-white transition-colors text-sm">Theo dõi đơn hàng</a></li>
+                        <li><a asp-controller="GioHang" asp-action="Index" class="text-gray-400 hover:text-white transition-colors text-sm">Giỏ hàng</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors text-sm">Chính sách vận chuyển</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors text-sm">Chính sách đổi trả</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors text-sm">Liên hệ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold uppercase mb-6">Đăng ký nhận tin</h4>
+                    <p class="text-gray-400 text-sm mb-4">Nhận thông tin mới nhất về sản phẩm và khuyến mãi.</p>
+                    <form class="flex" onsubmit="return false;">
+                        <input type="email" placeholder="Email của bạn" class="bg-white/10 text-white px-4 py-3 w-full outline-none focus:bg-white/20 transition-colors text-sm" />
+                        <button type="submit" class="bg-primary hover:bg-blue-700 text-white px-4 py-3 font-bold text-sm uppercase transition-colors">Gửi</button>
+                    </form>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 mt-8 flex flex-col md:flex-row items-center justify-between">
+                <p class="text-gray-500 text-xs mb-4 md:mb-0">&copy; 2026 BADMINTONSHOP. Đã đăng ký bản quyền.</p>
+                <div class="flex space-x-4">
+                    <span class="text-gray-500 text-xs">Visa</span>
+                    <span class="text-gray-500 text-xs">Mastercard</span>
+                    <span class="text-gray-500 text-xs">Momo</span>
+                    <span class="text-gray-500 text-xs">VNPay</span>
+                </div>
+            </div>
         </div>
     </footer>
+</div>
 
-    <!-- JavaScript -->
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+@if (coNganKeo)
+{
+    <div id="gio-overlay" class="hidden fixed inset-0 bg-black/50 z-50"></div>
+    <aside id="gio-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col translate-x-full transition-transform duration-300">
+        <div class="flex items-center justify-between p-6 border-b border-gray-100">
+            <h2 class="text-lg font-extrabold uppercase tracking-tight">Giỏ hàng (@soLuongGio)</h2>
+            <button type="button" id="gio-dong" class="text-2xl leading-none hover:text-primary" aria-label="Đóng">&times;</button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-6">
+            @if (gio == null || gio.Dong.Count == 0)
+            {
+                <p class="text-gray-500 text-sm text-center py-16">Giỏ hàng của bạn đang trống.</p>
+            }
+            else
+            {
+                <div class="space-y-6">
+                @foreach (var d in gio.Dong)
+                {
+                    <div class="flex gap-4">
+                        <div class="w-20 h-20 bg-gray-50 shrink-0 flex items-center justify-center text-2xl font-extrabold text-gray-200">@d.TenSP.Substring(0, 1)</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-bold text-sm line-clamp-2 mb-1">@d.TenSP</div>
+                            <div class="text-sm text-gray-600 mb-2">@d.DonGiaSauGiam.Dong()</div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center border border-black">
+                                    <form asp-controller="GioHang" asp-action="CapNhat" method="post">
+                                        <input type="hidden" name="maSP" value="@d.MaSP" /><input type="hidden" name="soLuong" value="@(d.SoLuong - 1)" />
+                                        <button type="submit" class="w-8 h-8 hover:bg-gray-100 font-bold" aria-label="Giảm">&minus;</button>
+                                    </form>
+                                    <span class="w-8 text-center text-sm font-bold">@d.SoLuong</span>
+                                    <form asp-controller="GioHang" asp-action="CapNhat" method="post">
+                                        <input type="hidden" name="maSP" value="@d.MaSP" /><input type="hidden" name="soLuong" value="@(d.SoLuong + 1)" />
+                                        <button type="submit" class="w-8 h-8 hover:bg-gray-100 font-bold" aria-label="Tăng">+</button>
+                                    </form>
+                                </div>
+                                <form asp-controller="GioHang" asp-action="Xoa" method="post">
+                                    <input type="hidden" name="maSP" value="@d.MaSP" />
+                                    <button type="submit" class="text-xs font-bold uppercase text-gray-400 hover:text-red-500">Xóa</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+                </div>
+            }
+        </div>
+        @if (gio != null && gio.Dong.Count > 0)
+        {
+            <div class="p-6 border-t border-gray-100">
+                <div class="flex justify-between items-end mb-4">
+                    <span class="font-bold uppercase tracking-wider text-sm">Tổng cộng</span>
+                    <span class="text-2xl font-extrabold tracking-tight">@gio.TongThanhToan.Dong()</span>
+                </div>
+                <a asp-controller="GioHang" asp-action="Index" class="btn-dark w-full mb-2">Xem giỏ hàng</a>
+                @if (gio.CoTheDatHang)
+                {
+                    <a asp-controller="DatHang" asp-action="Index" class="btn-outline w-full">Thanh toán</a>
+                }
+            </div>
+        }
+    </aside>
+}
 
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script src="~/js/site.js"
-            asp-append-version="true"></script>
-
-    @await RenderSectionAsync("Scripts", required: false)
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script>
+    // Anh minh hoa lay tu mang: loi thi thay bang chu cai dau tren nen xam (img co data-chu)
+    function anhLoi(t) {
+        if (!t || t.tagName !== 'IMG' || !t.hasAttribute('data-chu') || !t.parentNode) return;
+        var s = document.createElement('span');
+        s.className = 'absolute inset-0 flex items-center justify-center text-7xl font-extrabold text-gray-300 select-none';
+        s.setAttribute('aria-hidden', 'true');
+        s.textContent = t.getAttribute('data-chu');
+        var nen = t.getAttribute('data-nen');
+        if (nen) t.parentNode.classList.add(nen);
+        t.parentNode.insertBefore(s, t);
+        t.remove();
+    }
+    document.addEventListener('error', function (e) { anhLoi(e.target); }, true);
+    window.addEventListener('load', function () {
+        document.querySelectorAll('img[data-chu]').forEach(function (i) { if (i.complete && i.naturalWidth === 0) anhLoi(i); });
+    });
+    (function () {
+        var $ = function (id) { return document.getElementById(id); };
+        $('btn-menu').addEventListener('click', function () { $('menu-mobile').classList.toggle('hidden'); });
+        $('btn-search').addEventListener('click', function () {
+            $('thanh-tim').classList.toggle('hidden');
+            var o = document.querySelector('#thanh-tim input'); if (o) o.focus();
+        });
+        var drawer = $('gio-drawer'), overlay = $('gio-overlay');
+        if (drawer) {
+            var mo = function (e) { if (e) e.preventDefault(); drawer.classList.remove('translate-x-full'); overlay.classList.remove('hidden'); };
+            var dong = function () { drawer.classList.add('translate-x-full'); overlay.classList.add('hidden'); };
+            $('btn-gio').addEventListener('click', mo);
+            $('gio-dong').addEventListener('click', dong);
+            overlay.addEventListener('click', dong);
+            if (location.hash === '#gio') mo();
+        }
+    })();
+</script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

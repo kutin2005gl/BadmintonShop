@@ -18,21 +18,11 @@ public class HomeController : Controller
         _logger = logger;
     }
 
-    [HttpGet]
+    // Giao dien: trang chu hien thi san pham dang ban va danh muc (chi doc, khong doi nghiep vu)
     public IActionResult Index()
     {
-        var danhMuc = _danhMucRepository.LayTatCa();
-
-        var sanPham = _sanPhamRepository
-            .LayTatCa(null, null)
-            .Where(sp => sp.TrangThai == "Đang bán")
-            .OrderByDescending(sp => sp.MaSP)
-            .Take(8)
-            .ToList();
-
-        ViewBag.DanhMuc = danhMuc;
-
-        return View(sanPham);
+        var sp = new SanPhamRepository().LayTatCa().Where(x => x.TrangThai == "Đang bán").ToList();
+        return View(new TrangChuViewModel { SanPham = sp, DanhMuc = new DanhMucRepository().LayTatCa() });
     }
 
     public IActionResult Privacy()

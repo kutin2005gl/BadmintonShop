@@ -2,34 +2,41 @@
 @using System.Data
 @{ ViewData["Title"] = "Đơn hàng của tôi"; }
 
-<h2 class="mb-3">Đơn hàng của tôi</h2>
+<div class="container mx-auto px-4 py-12">
+<h1 class="page-title">Đơn hàng của tôi</h1>
 
 @if (Model.Rows.Count == 0)
 {
-    <p class="lead">Bạn chưa có đơn hàng nào.</p>
-    <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Mua sắm ngay</a>
+    <div class="flex flex-col items-center text-center py-16">
+        <p class="text-gray-500 mb-8">Bạn chưa có đơn hàng nào.</p>
+        <a asp-controller="Home" asp-action="Index" class="btn-dark">Mua sắm ngay</a>
+    </div>
 }
 else
 {
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
             <thead>
-                <tr><th>Mã đơn</th><th>Ngày đặt</th><th>Thanh toán</th><th class="text-end">Tổng tiền</th><th>Trạng thái</th><th></th></tr>
+                <tr class="border-b border-black text-left text-xs font-bold uppercase tracking-wider text-gray-500">
+                    <th class="py-3 pr-4">Mã đơn</th><th class="py-3 pr-4">Ngày đặt</th><th class="py-3 pr-4">Thanh toán</th>
+                    <th class="py-3 pr-4 text-right">Tổng tiền</th><th class="py-3 pr-4">Trạng thái</th><th></th>
+                </tr>
             </thead>
             <tbody>
             @foreach (DataRow r in Model.Rows)
             {
                 var tt = (string)r["TrangThai"];
-                <tr>
-                    <td>#@r["MaHD"]</td>
-                    <td>@(((DateTime)r["NgayLap"]).ToString("dd/MM/yyyy HH:mm"))</td>
-                    <td>@r["HinhThucTT"]</td>
-                    <td class="text-end">@(((decimal)r["TongTien"]).Dong())</td>
-                    <td><span class="badge @DinhDang.MauTrangThai(tt)">@tt</span></td>
-                    <td class="text-end"><a asp-action="ChiTiet" asp-route-id="@r["MaHD"]" class="btn btn-sm btn-outline-primary">Xem</a></td>
+                <tr class="border-b border-gray-200 hover:bg-gray-50">
+                    <td class="py-4 pr-4 font-bold">#@r["MaHD"]</td>
+                    <td class="py-4 pr-4">@(((DateTime)r["NgayLap"]).ToString("dd/MM/yyyy HH:mm"))</td>
+                    <td class="py-4 pr-4">@r["HinhThucTT"]</td>
+                    <td class="py-4 pr-4 text-right font-bold">@(((decimal)r["TongTien"]).Dong())</td>
+                    <td class="py-4 pr-4"><span class="badge @DinhDang.MauTrangThai(tt)">@tt</span></td>
+                    <td class="py-4 text-right"><a asp-action="ChiTiet" asp-route-id="@r["MaHD"]" class="text-xs font-bold uppercase underline hover:text-primary">Xem</a></td>
                 </tr>
             }
             </tbody>
         </table>
     </div>
 }
+</div>

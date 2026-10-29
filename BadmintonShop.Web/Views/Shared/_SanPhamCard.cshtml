@@ -1,0 +1,32 @@
+@model BadmintonShop.Web.Models.TheSanPham
+@{ var sp = Model.SanPham; }
+<div class="sp-card group relative flex flex-col bg-white" data-dm="@sp.MaDM" data-ten="@((sp.TenSP + " " + sp.ThuongHieu).ToLowerInvariant())">
+    <div class="absolute top-2 left-2 z-10 flex flex-col gap-2">
+        @if (sp.SoLuongTon <= 0) { <span class="bg-gray-500 text-white text-[10px] font-bold px-2 py-1 tracking-wider uppercase">Hết hàng</span> }
+        else if (sp.SoLuongTon <= 5) { <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-1 tracking-wider uppercase">Sắp hết</span> }
+        @if (!string.IsNullOrEmpty(Model.Nhan)) { <span class="bg-primary text-white text-[10px] font-bold px-2 py-1 tracking-wider uppercase">@Model.Nhan</span> }
+    </div>
+    <button type="button" class="absolute top-2 right-2 z-10 p-2 text-gray-400 hover:text-red-500 transition-colors" aria-label="Yêu thích">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+    </button>
+
+    <a asp-controller="SanPham" asp-action="ChiTiet" asp-route-id="@sp.MaSP" tabindex="-1" aria-hidden="true"
+       class="relative bg-gray-50 aspect-square overflow-hidden mb-4 flex items-center justify-center">
+        <img src="@AnhMinhHoa.TheoDanhMuc(Model.TenDanhMuc)" alt="" loading="lazy" data-chu="@sp.TenSP.Substring(0, 1)"
+             class="w-full h-full object-cover mix-blend-multiply transition-transform duration-500 group-hover:scale-110" />
+    </a>
+
+    <div class="flex flex-col flex-grow">
+        <a asp-controller="SanPham" asp-action="ChiTiet" asp-route-id="@sp.MaSP" class="font-bold text-sm mb-1 line-clamp-2 hover:text-primary transition-colors">@sp.TenSP</a>
+        <div class="text-xs text-gray-500 mb-2 uppercase font-medium">@Model.TenDanhMuc@(sp.ThuongHieu != null ? " · " + sp.ThuongHieu : "")</div>
+        <div class="mt-auto flex items-center gap-2 mb-3">
+            <span class="font-extrabold text-sm">@sp.DonGiaBan.Dong()</span>
+        </div>
+        <form asp-controller="GioHang" asp-action="Them" method="post">
+            <input type="hidden" name="maSP" value="@sp.MaSP" />
+            <input type="hidden" name="soLuong" value="1" />
+            <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString + "#gio")" />
+            <button type="submit" class="btn-dark w-full" disabled="@(sp.SoLuongTon <= 0)">Thêm vào giỏ</button>
+        </form>
+    </div>
+</div>
