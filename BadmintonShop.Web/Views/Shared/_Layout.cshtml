@@ -45,32 +45,39 @@
                     Sản phẩm
                     <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-current transition-all duration-300 group-hover:w-full"></span>
                 </a>
-                @foreach (var dm in danhMucNav)
+                @if (daDangNhap)
                 {
-                    <a href="/SanPham?maDM=@dm.MaDM" class="text-sm font-semibold uppercase tracking-wider hover:text-primary transition-colors py-8 relative group text-black">
-                        @dm.TenDanhMuc
+                    <a asp-controller="DonHang" asp-action="Index" class="text-sm font-semibold uppercase tracking-wider hover:text-primary transition-colors py-8 relative group text-black">
+                        Đơn hàng của tôi
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-current transition-all duration-300 group-hover:w-full"></span>
                     </a>
                 }
-                <a href="/SanPham" class="text-sm font-semibold uppercase tracking-wider hover:text-red-600 transition-colors py-8 relative group text-red-500">
-                    Giảm giá
-                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-current transition-all duration-300 group-hover:w-full"></span>
-                </a>
             </nav>
 
             <div class="flex items-center space-x-4 sm:space-x-6">
-                <button type="button" id="btn-search" class="hidden sm:block text-black hover:text-primary transition-colors" aria-label="Tìm kiếm">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                </button>
+                @if (tenController != "SanPham")
+                {
+                    <button type="button" id="btn-search" class="hidden sm:block text-black hover:text-primary transition-colors" aria-label="Tìm kiếm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </button>
+                }
                 @if (daDangNhap)
                 {
-                    <a asp-controller="DonHang" asp-action="Index" class="hidden sm:block text-xs font-bold uppercase tracking-wider hover:text-primary transition-colors" title="Đơn hàng của tôi">@User.LayHoTen()</a>
-                    <a asp-controller="TaiKhoan" asp-action="HoSo" class="hidden sm:block text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-primary transition-colors">Hồ sơ</a>
-                    <a asp-controller="TaiKhoan" asp-action="DoiMatKhau" class="hidden sm:block text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-primary transition-colors">Đổi mật khẩu</a>
-                    <form method="post" action="/TaiKhoan/DangXuat" class="hidden sm:block">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-primary transition-colors">Đăng xuất</button>
-                    </form>
+                    <div class="hidden sm:block relative menu-tk-wrap">
+                        <button type="button" class="flex items-center gap-1 text-xs font-bold uppercase tracking-wider hover:text-primary transition-colors py-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <span class="ten-tk">@User.LayHoTen()</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                        </button>
+                        <div class="menu-tk">
+                            <a asp-controller="TaiKhoan" asp-action="HoSo">Hồ sơ</a>
+                            <a asp-controller="TaiKhoan" asp-action="DoiMatKhau">Đổi mật khẩu</a>
+                            <form method="post" action="/TaiKhoan/DangXuat">
+                                @Html.AntiForgeryToken()
+                                <button type="submit">Đăng xuất</button>
+                            </form>
+                        </div>
+                    </div>
                 }
                 else
                 {
@@ -79,9 +86,6 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     </a>
                 }
-                <button type="button" class="hidden sm:block text-black hover:text-primary transition-colors" aria-label="Yêu thích">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-                </button>
                 <a asp-controller="GioHang" asp-action="Index" id="btn-gio" class="text-black hover:text-primary transition-colors relative" title="Giỏ hàng">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                     @if (soLuongGio > 0)
@@ -103,11 +107,10 @@
     <div id="menu-mobile" class="hidden fixed inset-0 top-[112px] bg-white z-30 lg:hidden overflow-y-auto">
         <nav class="flex flex-col p-4">
             <a href="/SanPham" class="py-4 border-b border-gray-100 text-lg font-bold uppercase text-black">Sản phẩm</a>
-            @foreach (var dm in danhMucNav)
+            @if (daDangNhap)
             {
-                <a href="/SanPham?maDM=@dm.MaDM" class="py-4 border-b border-gray-100 text-lg font-bold uppercase text-black">@dm.TenDanhMuc</a>
+                <a asp-controller="DonHang" asp-action="Index" class="py-4 border-b border-gray-100 text-lg font-bold uppercase text-black">Đơn hàng của tôi</a>
             }
-            <a href="/SanPham" class="py-4 border-b border-gray-100 text-lg font-bold uppercase text-red-500">Giảm giá</a>
             <div class="flex items-center justify-around py-8 text-black">
                 @if (daDangNhap)
                 {
@@ -265,7 +268,7 @@
     (function () {
         var $ = function (id) { return document.getElementById(id); };
         $('btn-menu').addEventListener('click', function () { $('menu-mobile').classList.toggle('hidden'); });
-        $('btn-search').addEventListener('click', function () {
+        if ($('btn-search')) $('btn-search').addEventListener('click', function () {
             $('thanh-tim').classList.toggle('hidden');
             var o = document.querySelector('#thanh-tim input'); if (o) o.focus();
         });
