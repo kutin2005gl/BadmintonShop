@@ -13,7 +13,7 @@ public class SanPhamRepository
     // SV4: danh sách JOIN phục vụ lưới và bộ lọc; giữ nguyên các API đọc của SV1.
     public DataTable LayDanhSachHienThi() => DbHelper.ExecuteQuery(@"
         SELECT sp.MaSP,sp.TenSP,dm.TenDanhMuc,sp.ThuongHieu,sp.DonGiaBan,sp.DonViTinh,
-               sp.SoLuongTon,sp.TrangThai,sp.MaDM,
+               sp.SoLuongTon,sp.TrangThai,sp.MaDM,sp.HinhAnh,
                CASE WHEN sp.SoLuongTon=0 THEN N'Hết hàng' WHEN sp.SoLuongTon<=5 THEN N'Sắp hết (≤5)' ELSE N'Còn hàng' END AS CanhBao
         FROM SanPham sp JOIN DanhMuc dm ON dm.MaDM=sp.MaDM ORDER BY sp.TenSP");
 

@@ -11,7 +11,7 @@ namespace BadmintonShop.Desktop;
 
 public static class XuatTaiLieu
 {
-    private const string QuyTac="Doanh thu và số bán: chỉ đơn Hoàn thành. Số đơn: tất cả trạng thái. Giảm cấp hóa đơn phân bổ theo tỷ trọng thành tiền, phần dư lớn nhất; tổng khớp đến đồng.";
+    private const string QuyTac="Đơn vị: đồng. Thu: đơn Hoàn thành theo ngày lập; chi: tiền nhập hàng theo ngày nhập. Chênh lệch thu–chi không phải lợi nhuận kế toán. Số đơn: mọi trạng thái. Giảm hóa đơn phân bổ theo thành tiền sản phẩm, phần dư lớn nhất, hòa chọn mã SP tăng dần. Chỉ tính trong khoảng lọc; không cộng hàng Tất cả lần hai.";
 
     // SV4: XLSX OpenXML thật, số giữ kiểu numeric; dữ liệu lấy cùng kết quả đang hiển thị.
     public static void Excel(string path,KetQuaBaoCao kq)
@@ -33,7 +33,7 @@ public static class XuatTaiLieu
             ws.Range(6,1,6,dt.Columns.Count).Style.Fill.BackgroundColor=XLColor.LightGreen;
             ws.Range(6,1,6,dt.Columns.Count).Style.Font.Bold=true;ws.SheetView.FreezeRows(6);
             ws.Columns(1,dt.Columns.Count).Width=28;ws.Column(1).Width=32;
-            ws.Range(4,1,4,Math.Max(2,dt.Columns.Count)).Merge().Style.Alignment.WrapText=true;ws.Row(4).Height=45;
+            ws.Range(4,1,4,Math.Max(2,dt.Columns.Count)).Merge().Style.Alignment.WrapText=true;ws.Row(4).Height=90;
             if(dt.Rows.Count==0)ws.Cell(7,1).Value="Không có dữ liệu trong khoảng lọc.";
         }
         wb.SaveAs(path);
@@ -45,12 +45,34 @@ public static class XuatTaiLieu
         var doc=TaoDocument();
         foreach(var (ten,dt) in kq.Bang)
         {
+            var parts=ChiaBangPdf(dt).ToArray();
+            for(int part=0;part<parts.Length;part++)
+            {
             var s=doc.AddSection();CauHinhTrang(s);
-            s.AddParagraph("BADMINTONSHOP — "+ten,"Heading1");
+            s.AddParagraph("BADMINTONSHOP — "+ten+(parts.Length>1?$" (phần {part+1}/{parts.Length})":""),"Heading1");
             s.AddParagraph($"{kq.TuNgay:dd/MM/yyyy} – {kq.DenNgay:dd/MM/yyyy}; loại bán: {kq.LoaiBan}");
-            s.AddParagraph($"Tổng doanh thu: {kq.TongDoanhThu:N0} đồng");s.AddParagraph(QuyTac);ThemBang(s,dt);
+            s.AddParagraph($"Tổng doanh thu: {kq.TongDoanhThu:N0} đồng");s.AddParagraph(QuyTac);
+            if(parts.Length>1)s.AddParagraph("Các năm chia thành nhiều phần; mã/tên và Tổng toàn kỳ lặp lại để đối chiếu. Không cộng lại tổng giữa các phần.");
+            ThemBang(s,parts[part]);
+            }
         }
         LuuPdf(doc,path);
+    }
+
+    private static IEnumerable<DataTable> ChiaBangPdf(DataTable source)
+    {
+        if(source.Columns.Count<=7) { yield return source;yield break; }
+        // Employee/customer pivots: two identity columns, year columns, full-period total.
+        var years=source.Columns.Cast<DataColumn>().Where(c=>int.TryParse(c.ColumnName,out var year) && year is >=1753 and <=9998).ToArray();
+        if(years.Length!=source.Columns.Count-3) { yield return source;yield break; }
+        foreach(var group in years.Chunk(3))
+        {
+            var columns=new[]{source.Columns[0],source.Columns[1]}.Concat(group).Append(source.Columns[^1]).ToArray();
+            var part=new DataTable();
+            foreach(var column in columns)part.Columns.Add(column==source.Columns[^1]?"Tổng toàn kỳ":column.ColumnName,column.DataType);
+            foreach(DataRow row in source.Rows)part.Rows.Add(columns.Select(column=>row[column]).ToArray());
+            yield return part;
+        }
     }
 
     // SV4: xuất lại theo giá/giảm lịch sử lưu CSDL; không tính lại khuyến mãi hoặc giảm lần hai.
@@ -92,14 +114,20 @@ public static class XuatTaiLieu
     private static void ThemBang(Section s,DataTable dt)
     {
         if(dt.Rows.Count==0) { s.AddParagraph("Không có dữ liệu trong khoảng lọc.");return; }
-        var table=s.AddTable();table.Borders.Width=0.4;
-        foreach(DataColumn _ in dt.Columns)table.AddColumn(Unit.FromCentimeter(26.5/dt.Columns.Count));
+        var table=s.AddTable();table.Borders.Width=0.4;table.Format.Font.Size=9;
+        var widths=dt.Columns.Cast<DataColumn>().Select(c=>c.DataType==typeof(string)?5.2:3.6).ToArray();
+        if(dt.Columns.Count>=6 && dt.Columns[0].DataType==typeof(int))widths[0]=1.3;
+        var sum=widths.Sum();
+        for(int i=0;i<dt.Columns.Count;i++)table.AddColumn(Unit.FromCentimeter(26.5*widths[i]/sum));
         var head=table.AddRow();head.HeadingFormat=true;head.Shading.Color=Colors.LightGray;head.Format.Font.Bold=true;
         var tenCot=new Dictionary<string,string> { ["MaSP"]="Mã SP",["TenSP"]="Sản phẩm",["SoLuong"]="Số lượng",["DonGia"]="Đơn giá (đ)",["GiamGia"]="Giảm (%)",["ThanhTien"]="Thành tiền (đ)" };
         for(int i=0;i<dt.Columns.Count;i++)head.Cells[i].AddParagraph(tenCot.GetValueOrDefault(dt.Columns[i].ColumnName,dt.Columns[i].ColumnName));
         foreach(DataRow r in dt.Rows)
         {
             var row=table.AddRow();
+            if(dt.Columns.Contains("Tổng") || dt.Columns.Contains("Tổng toàn kỳ"))
+                if(r.ItemArray.Any(value=>value is string text && text=="Tất cả")) { row.Format.Font.Bold=true;row.Shading.Color=Colors.LightGray; }
+            for(int i=0;i<dt.Columns.Count;i++)if(dt.Columns[i].DataType!=typeof(string))row.Cells[i].Format.Alignment=ParagraphAlignment.Right;
             for(int i=0;i<dt.Columns.Count;i++)row.Cells[i].AddParagraph(r[i] switch
             { decimal n=>n.ToString(dt.Columns[i].ColumnName=="GiamGia"?"0.##":"N0",CultureInfo.GetCultureInfo("vi-VN")),_=>Convert.ToString(r[i],CultureInfo.GetCultureInfo("vi-VN"))??"" });
         }

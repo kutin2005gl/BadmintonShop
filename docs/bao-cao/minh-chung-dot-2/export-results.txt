@@ -1,0 +1,3 @@
+PASS demo-report: 13 XLSX tables and 13 PDF pages; every displayed cell matches; all columns covered; horizontal bounds valid
+PASS wide-pivots: 2 XLSX tables and 16 PDF pages; every displayed cell matches; all columns covered; horizontal bounds valid
+PASS ui-report: 11 XLSX tables and 11 PDF pages; every displayed cell matches; all columns covered; horizontal bounds valid

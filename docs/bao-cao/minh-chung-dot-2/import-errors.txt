@@ -1,0 +1,4 @@
+Dòng 2, MaSP: phải để trống; chỉ thêm mới, không ghi đè mã đã có
+Dòng 2, MaDM: mã danh mục không tồn tại
+Dòng 2, DonGiaBan: phải là số nguyên đồng không âm, tối đa 18 chữ số
+Dòng 3, TenSP: không chấp nhận công thức

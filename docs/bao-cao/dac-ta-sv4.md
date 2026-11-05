@@ -71,3 +71,17 @@ Chỉ điều chỉnh Core/Web cần thiết cho tính lại giá trong transact
 ## Rà cuối trước PR, sau chuyển ổ D
 
 Worktree sử dụng: `D:\CodexWorktrees\BadmintonShop-sv4`, nhánh `feature/sv4-final-integration`. [Kết quả và commit mới](../final-integration/pr-review/README.md) có 74/74 integration, 15/15 install, kiểm độc lập 12 bộ lọc và demo cửa sổ thật. Đã sửa chiều cao tóm tắt POS để không cắt dòng giảm giá và giữ thông tin hóa đơn gần nhất sau tải lại. 1920×1080, DPI Windows thật, browser E2E và kiểm chéo SV2 vẫn chưa xác minh. Được phép commit/push/mở PR theo yêu cầu mới, không merge.
+
+## Đối chiếu yêu cầu giảng viên — 05/11/2026
+
+Các chức năng/kết quả ở trên mô tả phạm vi triển khai SV4, chưa đồng nghĩa đạt đủ yêu cầu môn học. Báo cáo hiện có sáu bảng; chưa có thu–chi–lợi nhuận theo quý, nhân viên × năm, khách hàng × năm, sản phẩm × quý/năm và nhập Excel cho người dùng. Tìm kiếm dùng bộ nhớ ở một số form nhưng chưa có cơ chế làm mới 5–10 phút đồng bộ. Các phần này là yêu cầu cần hoàn thiện, không chuyển hết sang hướng phát triển tùy chọn. Xem [báo cáo rà soát](ra-soat-yeu-cau-2026-11-05.md). Không sửa logic trong lượt review này.
+
+## Bổ sung đợt 2 — 05/11/2026
+
+Danh sách sản phẩm/hóa đơn và báo cáo có bộ nhớ theo điều kiện, quyền, TTL và tín hiệu ghi; Web chỉ chia sẻ catalog công khai. Đơn hàng có bộ lọc hai điều kiện AND/OR/NOT với sáu phép so sánh. Màn sản phẩm có nhập XLSX mới, xem trước, lỗi dòng/cột, quyền và rollback toàn file; không nhập tồn kho hoặc ghi đè mã. PDF nhân viên/khách hàng nhiều năm chia phần và lặp tổng toàn kỳ. Quy tắc tạm, kiểm chứng và phần chưa nghiệm thu: [đợt 2](quy-tac-va-tien-do-dot-2.md).
+
+## Cập nhật nghiệm thu đợt 3 — 05/11/2026
+
+Đọc [biên bản đợt 3](quy-tac-va-tien-do-dot-3.md) và [kịch bản bảo vệ](kich-ban-bao-ve-dot-3.md) trước khi demo. Main–sub Web tạm mở rộng cho Đơn hàng của tôi: chọn ô/Enter/Space nạp chi tiết cùng trang, kiểm tra chủ sở hữu và không cache dữ liệu cá nhân. Không có màn phiếu nhập Web cho khách.
+
+Đã kiểm tra hộp lưu/chọn file Windows, preview lỗi/đúng và xác nhận nhập qua MessageBox trên DB thử; mở báo cáo bằng Excel và PDF Chrome. Tích hợp hai tiến trình tự động đạt, chưa thay nghiệm thu UI trọn Web → Desktop → báo cáo. TTL, phạm vi cuối và chính sách nhập thêm mới vẫn chờ chốt. Đợt này không đổi schema nghiệp vụ; setup DB acceptance bổ sung DDL migration 07 để trang sản phẩm đọc được bảng đánh giá.

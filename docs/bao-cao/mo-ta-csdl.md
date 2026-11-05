@@ -5,7 +5,7 @@
 
 ## 1. Quy ước
 
-CSDL **BadmintonShop** chạy trên SQL Server, gồm 15 bảng. Các ký hiệu dùng trong cột "Ràng buộc":
+CSDL **BadmintonShop** chạy trên SQL Server. Lược đồ nền 01 có 15 bảng; cài đủ script hiện tại có 16 bảng, gồm bảng bổ sung `DanhGiaSanPham` ở 07. Các ký hiệu dùng trong cột "Ràng buộc":
 
 - **PK**: khóa chính; **FK → Bảng**: khóa ngoại tham chiếu tới bảng đó; **UNIQUE**: giá trị không được trùng.
 - **IDENTITY**: số tự tăng bắt đầu từ 1, do SQL Server tự cấp khi thêm dòng.
@@ -209,3 +209,32 @@ Ngoài chỉ mục tự tạo cho khóa chính và UNIQUE, CSDL có thêm các c
 | trg_CTHD_GiamTon | Trigger trên ChiTietHoaDon | Thêm chi tiết hóa đơn thì trừ tồn kho; không đủ hàng thì báo lỗi và hủy giao tác; tính lại TongTien hóa đơn |
 | trg_HoaDon_CapNhat | Trigger trên HoaDon | Hóa đơn chuyển sang "Đã hủy" thì trả hàng về kho; không cho mở lại đơn đã hủy; đổi TienGiamGia thì tính lại TongTien |
 | sp_KiemTraTonKho | Thủ tục | Kiểm tra một sản phẩm còn đủ số lượng để bán hay không (dùng trước khi đặt hàng) |
+
+## Bổ sung theo script hiện tại — 05/11/2026
+
+Phần bảng nền phía trên mô tả bản 15/10. Script tổng hiện có 16 bảng người dùng; ứng dụng đánh giá dùng `DanhGiaSanPham`, không dùng bảng `PhanHoi` cũ. Bản Word chưa xuất lại sau lần cập nhật Markdown này.
+
+### DanhGiaSanPham (script 07)
+
+| Cột | Kiểu | Ràng buộc / ý nghĩa |
+|---|---|---|
+| MaDG | INT | PK, IDENTITY |
+| MaSP | INT | NOT NULL, FK → SanPham |
+| MaKH | INT | NOT NULL, FK → KhachHang |
+| SoSao | INT | NOT NULL, CHECK 1–5 |
+| NoiDung | NVARCHAR(1000) | NULL |
+| NgayDanhGia | DATETIME | NOT NULL, DEFAULT GETDATE() |
+| TrangThai | NVARCHAR(20) | NOT NULL, mặc định Chờ duyệt; CHECK Chờ duyệt / Đã duyệt / Từ chối |
+
+Chỉ mục `IX_DanhGiaSanPham_SP(MaSP, TrangThai)` hỗ trợ đọc đánh giá theo sản phẩm và trạng thái.
+
+### Bổ sung HoaDon (script 04/06)
+
+| Cột | Kiểu | Ý nghĩa |
+|---|---|---|
+| LyDoHuy | NVARCHAR(500) NULL | Lý do nhân viên hủy đơn |
+| MaYeuCauPOS | UNIQUEIDENTIFIER NULL | Token chống ghi trùng POS |
+| TienKhachDua | DECIMAL(18,0) NULL | Số tiền nhận tại quầy |
+| DauVanTayPOS | VARCHAR(64) NULL | SHA-256 yêu cầu POS đã xác nhận |
+
+Unique filtered index `UX_HoaDon_MaYeuCauPOS` áp dụng khi MaYeuCauPOS khác NULL. Các cột bổ sung không thay thế schema nền. Số lượng bảng/cột ở đây được đối chiếu tĩnh với SQL repo, chưa truy vấn lại CSDL đang chạy ngày 05/11.

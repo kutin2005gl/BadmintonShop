@@ -1,0 +1,13 @@
+﻿DBName
+------
+BadmintonShop_SV4_Test_20261105161022_7f4ab55a
+MaHD NgayLap TongTien TrangThai
+---- ------- -------- ---------
+11 2026-11-05 16:10:31.550 100 Hoàn thành
+12 2026-11-05 16:18:14.467 100 Hoàn thành
+Thu2025_2026
+------------
+711
+Thu2026DenNgayDemo
+------------------
+300

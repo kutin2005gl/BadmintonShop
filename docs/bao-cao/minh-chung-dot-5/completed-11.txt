@@ -1,0 +1,198 @@
+Window: "BadmintonShop - Quản lý cửa hàng", App: BadmintonShop.SV4.Checks.exe.
+	0 window BadmintonShop - Quản lý cửa hàng Secondary Actions: Raise ID: FrmMain
+		8 pane
+			9 window Quản lý đơn hàng Secondary Actions: Raise
+				10 pane
+					11 pane
+						12 data grid
+							13 scroll bar (settable, float) Horizontal Value: 0
+								14 button Column left
+								15 thumb Position
+								16 button Page right
+								17 button Column right
+							18 scroll bar (settable, float) Vertical Value: 0
+								19 button Line up
+								20 thumb Position
+								21 button Page down
+								22 button Line down
+							23 custom Top Row
+								203 header Mã HĐ ID: 428413469
+								204 header Ngày lập ID: 428612359
+								205 header Khách hàng ID: 4210402369
+								206 header Điện thoại ID: 4226512460
+								207 header Email ID: 4237285554
+								208 header Địa chỉ khách hàng ID: 4225666
+								209 header Loại bán ID: 42230999
+								210 header Thanh toán ID: 422078992
+								211 header Giảm HĐ (đ) ID: 4218710936
+								212 header Tổng tiền (đ) ID: 4234180703
+								213 header Trạng thái ID: 4239190879
+								214 header Lý do hủy ID: 4217173591
+							215 custom Row 0
+								216 item Mã HĐ Row 0, Not sorted. Value: 11 ID: 4243678569
+								217 item Ngày lập Row 0, Not sorted. Value: 05/11/2026 17:07 ID: 4257562809
+								218 item Khách hàng Row 0, Not sorted. Value: Khách nghiệm thu ID: 4248303235
+								219 item Điện thoại Row 0, Not sorted. Value: (null) ID: 4232075938
+								220 item Email Row 0, Not sorted. Value: acceptance@example.invalid ID: 4220247990
+								221 item Địa chỉ khách hàng Row 0, Not sorted. Value: (null) ID: 4248014184
+								222 item Loại bán Row 0, Not sorted. Value: Online ID: 4229474473
+								223 item Thanh toán Row 0, Not sorted. Value: COD ID: 4263943666
+								224 item Giảm HĐ (đ) Row 0, Not sorted. Value: 0 đ ID: 4238622084
+								225 item Tổng tiền (đ) Row 0, Not sorted. Value: 100 đ ID: 4212054440
+								226 item Trạng thái Row 0, Not sorted. Value: Hoàn thành ID: 4241381104
+								227 item Lý do hủy Row 0, Not sorted. Value: (null) ID: 4236885620
+							228 custom Row 1
+								229 item Mã HĐ Row 1, Not sorted. Value: 7 ID: 4239312736
+								230 item Ngày lập Row 1, Not sorted. Value: 01/07/2026 00:00 ID: 4218270305
+								231 item Khách hàng Row 1, Not sorted. Value: Khách vãng lai ID: 4230215023
+								232 item Điện thoại Row 1, Not sorted. Value: (null) ID: 423499754
+								233 item Email Row 1, Not sorted. Value: (null) ID: 4231497787
+								234 item Địa chỉ khách hàng Row 1, Not sorted. Value: (null) ID: 4215044627
+								235 item Loại bán Row 1, Not sorted. Value: Online ID: 421183915
+								236 item Thanh toán Row 1, Not sorted. Value: COD ID: 4210655236
+								237 item Giảm HĐ (đ) Row 1, Not sorted. Value: 0 đ ID: 4228788263
+								238 item Tổng tiền (đ) Row 1, Not sorted. Value: 30 đ ID: 4257767782
+								239 item Trạng thái Row 1, Not sorted. Value: Hoàn thành ID: 4250147992
+								240 item Lý do hủy Row 1, Not sorted. Value: (null) ID: 4248678752
+							241 custom Row 2
+								242 item Mã HĐ Row 2, Not sorted. Value: 9 ID: 4253402119
+								243 item Ngày lập Row 2, Not sorted. Value: 01/04/2026 00:00 ID: 4210857028
+								244 item Khách hàng Row 2, Not sorted. Value: Khách vãng lai ID: 4230604389
+								245 item Điện thoại Row 2, Not sorted. Value: (null) ID: 427004053
+								246 item Email Row 2, Not sorted. Value: (null) ID: 4263036484
+								247 item Địa chỉ khách hàng Row 2, Not sorted. Value: (null) ID: 4230457452
+								248 item Loại bán Row 2, Not sorted. Value: Online ID: 425681612
+								249 item Thanh toán Row 2, Not sorted. Value: COD ID: 4251134510
+								250 item Giảm HĐ (đ) Row 2, Not sorted. Value: 0 đ ID: 4257557412
+								251 item Tổng tiền (đ) Row 2, Not sorted. Value: 888 đ ID: 4248254661
+								252 item Trạng thái Row 2, Not sorted. Value: Chờ xác nhận ID: 4231638772
+								253 item Lý do hủy Row 2, Not sorted. Value: (null) ID: 4216313497
+							254 custom Row 3
+								255 item Mã HĐ Row 3, Not sorted. Value: 8 ID: 4232242465
+								256 item Ngày lập Row 3, Not sorted. Value: 01/04/2026 00:00 ID: 4221746729
+								257 item Khách hàng Row 3, Not sorted. Value: Khách vãng lai ID: 4261502840
+								258 item Điện thoại Row 3, Not sorted. Value: (null) ID: 4216654654
+								259 item Email Row 3, Not sorted. Value: (null) ID: 4215674164
+								260 item Địa chỉ khách hàng Row 3, Not sorted. Value: (null) ID: 426849756
+								261 item Loại bán Row 3, Not sorted. Value: Online ID: 4261647805
+								262 item Thanh toán Row 3, Not sorted. Value: COD ID: 4217959338
+								263 item Giảm HĐ (đ) Row 3, Not sorted. Value: 0 đ ID: 4227416314
+								264 item Tổng tiền (đ) Row 3, Not sorted. Value: 999 đ ID: 4245420240
+								265 item Trạng thái Row 3, Not sorted. Value: Đã hủy ID: 426128980
+								266 item Lý do hủy Row 3, Not sorted. Value: (null) ID: 4255160823
+							267 custom Row 4
+								268 item Mã HĐ Row 4, Not sorted. Value: 6 ID: 4211177013
+								269 item Ngày lập Row 4, Not sorted. Value: 01/01/2026 00:00 ID: 4233484259
+								270 item Khách hàng Row 4, Not sorted. Value: Khách 1 ID: 4232922880
+								271 item Điện thoại Row 4, Not sorted. Value: (null) ID: 4227870469
+								272 item Email Row 4, Not sorted. Value: report1@example.invalid ID: 4249507636
+								273 item Địa chỉ khách hàng Row 4, Not sorted. Value: (null) ID: 4242915540
+								274 item Loại bán Row 4, Not sorted. Value: Online ID: 4250695543
+								275 item Thanh toán Row 4, Not sorted. Value: COD ID: 4253606711
+								276 item Giảm HĐ (đ) Row 4, Not sorted. Value: 0 đ ID: 4212698356
+								277 item Tổng tiền (đ) Row 4, Not sorted. Value: 70 đ ID: 4247176343
+								278 item Trạng thái Row 4, Not sorted. Value: Hoàn thành ID: 4221933905
+								279 item Lý do hủy Row 4, Not sorted. Value: (null) ID: 4263187419
+							280 custom Row 5
+								281 item Mã HĐ Row 5, Not sorted. Value: 5 ID: 4217907308
+								282 item Ngày lập Row 5, Not sorted. Value: 31/12/2025 23:59 ID: 4226948044
+								283 item Khách hàng Row 5, Not sorted. Value: Khách 2 ID: 4241205809
+								284 item Điện thoại Row 5, Not sorted. Value: (null) ID: 4235307962
+								285 item Email Row 5, Not sorted. Value: report2@example.invalid ID: 4249336210
+								286 item Địa chỉ khách hàng Row 5, Not sorted. Value: (null) ID: 4241372713
+								287 item Loại bán Row 5, Not sorted. Value: Online ID: 4236810105
+								288 item Thanh toán Row 5, Not sorted. Value: COD ID: 4262855489
+								289 item Giảm HĐ (đ) Row 5, Not sorted. Value: 0 đ ID: 4228828491
+								290 item Tổng tiền (đ) Row 5, Not sorted. Value: 40 đ ID: 4258129833
+								291 item Trạng thái Row 5, Not sorted. Value: Hoàn thành ID: 4253406450
+								292 item Lý do hủy Row 5, Not sorted. Value: (null) ID: 4210896009
+					114 pane
+						115 data grid
+							116 custom Top Row
+								293 header Mã SP ID: 4220344593
+								294 header Sản phẩm ID: 4248883615
+								295 header Số lượng ID: 4237299352
+								296 header Đơn giá (đ) ID: 42149855
+								297 header Giảm (%) ID: 421348700
+								298 header Thành tiền (đ) ID: 4212138304
+							299 custom Row 0
+								300 item Mã SP Row 0, Not sorted. Value: 1 ID: 4210161546
+								301 item Sản phẩm Row 0, Not sorted. Value: Vợt thử ID: 4224345054
+								302 item Số lượng Row 0, Not sorted. Value: 1 ID: 4217778899
+								303 item Đơn giá (đ) Row 0, Not sorted. Value: 100 đ ID: 4225792371
+								304 item Giảm (%) Row 0, Not sorted. Value: 0 ID: 4230804749
+								305 item Thành tiền (đ) Row 0, Not sorted. Value: 100 đ ID: 428807292
+						130 text HĐ 11 | Hoàn thành | Giảm hóa đơn / voucher: 0 đ | Tổng thanh toán: 100 đ Lý do hủy:
+				131 pane
+					132 text Từ
+					133 date and time picker (settable, string) Value: 05/11/2025
+					134 text đến
+					135 date and time picker (settable, string) Value: 05/11/2026
+					136 combo box (settable, string) Mọi trạng thái Value: Mọi trạng thái
+						137 text
+						138 button Open
+					139 combo box (settable, string) Mọi loại bán Value: Mọi loại bán
+						140 text
+						141 button Open
+					142 edit (settable, string) Description: Mã đơn / tên / SĐT / email
+					143 button Tải / lọc
+					144 button (disabled) Xác nhận
+					145 button (disabled) Giao hàng
+					146 button (disabled) Hoàn thành
+					147 button (disabled) Hủy + lý do
+					148 button Xuất PDF hóa đơn
+					149 button Làm mới
+					150 button Tìm nâng cao
+					151 button Bỏ lọc nâng cao
+					152 text Chưa áp dụng bộ lọc nâng cao
+				153 text Đã cập nhật lúc 19:08:21
+			191 scroll bar (settable, float) Vertical Value: 0 ID: NonClientVerticalScrollBar
+				192 button Line up ID: UpButton
+				193 thumb Position ID: ScrollbarThumb
+				194 button Page down ID: DownPageButton
+				195 button Line down ID: DownButton
+			196 scroll bar (settable, float) Horizontal Value: 0 ID: NonClientHorizontalScrollBar
+				197 button Column left ID: UpButton
+				198 thumb Position ID: ScrollbarThumb
+				199 button Page right ID: DownPageButton
+				200 button Column right ID: DownButton
+			201 thumb Size box
+		154 pane
+			155 text Quản lý đơn hàng
+			156 text Nghiệm thu DB thử Quản trị viên
+			157 button Đăng xuất
+		158 pane
+			159 pane
+				160 text CỬA HÀNG
+				161 button ◈ Tổng quan
+				162 button ▦ Sản phẩm
+				163 button ▤ Danh mục
+				164 button ◇ Khuyến mãi
+				165 text BÁN HÀNG
+				166 button ▤ Đơn hàng
+				167 button ▣ Bán tại quầy
+				168 text NHẬP HÀNG
+				169 button ▥ Phiếu nhập
+				170 button ◇ Nhà cung cấp
+				171 text BÁO CÁO
+				172 button ▥ Thống kê
+				173 button ★ Quản lý đánh giá
+				174 text HỆ THỐNG
+				175 button ◇ Nhân viên, tài khoản
+				176 button ◇ Đổi mật khẩu
+				177 button ▤ Sao lưu, phục hồi
+				178 button ↪ Thoát
+				179 scroll bar (settable, float) Vertical Value: 0 ID: NonClientVerticalScrollBar
+					180 button Line up ID: UpButton
+					181 thumb Position ID: ScrollbarThumb
+					182 button Page down ID: DownPageButton
+					183 button Line down ID: DownButton
+			184 text BADMINTON SHOP / QUẢN LÝ
+		185 title bar (settable, string) Value: BadmintonShop - Quản lý cửa hàng
+			186 menu bar System ID: MenuBar
+				202 menu item System
+			188 button Minimize
+			189 button Maximize
+			190 button Close
+
+The focused UI element is 142 edit (settable, string) Description: Mã đơn / tên / SĐT / email.

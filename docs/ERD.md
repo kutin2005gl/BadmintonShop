@@ -177,3 +177,9 @@ erDiagram
 - Thêm `ChiTietHoaDon` → trừ tồn; **không đủ tồn thì báo lỗi và rollback** (bắt `SqlException` để hiện thông báo).
 - Hóa đơn chuyển sang `Đã hủy` → trả hàng về kho; đơn đã hủy **không được mở lại**.
 - `HoaDon.TongTien` = tổng `ThanhTien` − `TienGiamGia`.
+
+## Bổ sung lược đồ hiện tại — 05/11/2026
+
+Sơ đồ nền phía trên là bản 15 bảng. Cài đủ script hiện tại có **16 bảng**: script 07 bổ sung `DanhGiaSanPham(MaDG PK, MaSP FK, MaKH FK, SoSao, NoiDung, NgayDanhGia, TrangThai)`. Quan hệ: SanPham 1–N DanhGiaSanPham và KhachHang 1–N DanhGiaSanPham. Web/Desktop dùng bảng này để gửi/duyệt đánh giá; `PhanHoi` vẫn tồn tại để giữ schema cũ.
+
+Script 04/06 bổ sung HoaDon: LyDoHuy, MaYeuCauPOS, TienKhachDua, DauVanTayPOS và unique filtered index token khác NULL. Chi tiết kiểu/ràng buộc xem [mô tả CSDL](bao-cao/mo-ta-csdl.md). Hình ERD PNG/Word nền chưa được xuất lại trong lượt review này; cần đồng bộ trước khi ghép báo cáo cuối.

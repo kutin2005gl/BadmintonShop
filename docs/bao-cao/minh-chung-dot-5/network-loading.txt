@@ -1,0 +1,91 @@
+- generic: Miễn phí vận chuyển cho đơn từ 500.000đ
+- banner:
+  - link "BADMINTONSHOP":
+    - /url: /
+  - navigation:
+    - link "Sản phẩm":
+      - /url: /SanPham
+      - text: Sản phẩm
+    - link "Đơn hàng của tôi":
+      - /url: /DonHang
+      - text: Đơn hàng của tôi
+  - button "Tìm kiếm":
+  - button "Khách nghiệm thu":
+    - generic: Khách nghiệm thu
+  - link "Giỏ hàng":
+    - /url: /GioHang
+- main:
+  - heading "Đơn hàng của tôi" [level=1]
+  - table:
+    - rowgroup:
+      - row "Mã đơn Ngày đặt Thanh toán Tổng tiền Trạng thái":
+        - columnheader "Mã đơn"
+        - columnheader "Ngày đặt"
+        - columnheader "Thanh toán"
+        - columnheader "Tổng tiền"
+        - columnheader "Trạng thái"
+        - columnheader
+    - rowgroup:
+      - row "Xem đơn hàng 12":
+        - cell "#12"
+        - cell "05/11/2026 19:11"
+        - cell "COD"
+        - cell "100 ₫"
+        - cell "Chờ xác nhận":
+          - generic: Chờ xác nhận
+        - cell "Xem":
+          - link "Xem":
+            - /url: /DonHang/ChiTiet/12
+      - row "Xem đơn hàng 11" [active]:
+        - cell "#11"
+        - cell "05/11/2026 17:07"
+        - cell "COD"
+        - cell "100 ₫"
+        - cell "Hoàn thành":
+          - generic: Hoàn thành
+        - cell "Xem":
+          - link "Xem":
+            - /url: /DonHang/ChiTiet/11
+  - region "Chi tiết đơn được chọn": Đang tải chi tiết…
+- contentinfo:
+  - heading "BADMINTONSHOP" [level=3]
+  - paragraph: Điểm đến số 1 cho người đam mê cầu lông. Cung cấp trang thiết bị chính hãng từ các thương hiệu hàng đầu thế giới.
+  - link "FB":
+    - /url: "#"
+  - link "IG":
+    - /url: "#"
+  - link "YT":
+    - /url: "#"
+  - heading "Sản phẩm" [level=4]
+  - list:
+    - link "SV4 TEST Cầu":
+      - /url: /SanPham?maDM=2
+    - link "SV4 TEST Vợt":
+      - /url: /SanPham?maDM=1
+    - link "Hàng giảm giá":
+      - /url: /SanPham
+  - heading "Hỗ trợ" [level=4]
+  - list:
+    - link "Theo dõi đơn hàng":
+      - /url: /DonHang
+    - link "Giỏ hàng":
+      - /url: /GioHang
+    - link "Chính sách vận chuyển":
+      - /url: "#"
+    - link "Chính sách đổi trả":
+      - /url: "#"
+    - link "Liên hệ":
+      - /url: "#"
+  - heading "Đăng ký nhận tin" [level=4]
+  - paragraph: Nhận thông tin mới nhất về sản phẩm và khuyến mãi.
+  - textbox "Email của bạn"
+  - button "Gửi"
+  - paragraph: © 2026 BADMINTONSHOP. Đã đăng ký bản quyền.
+  - generic: Visa
+  - generic: Mastercard
+  - generic: Momo
+  - generic: VNPay
+- complementary:
+  - heading "Giỏ hàng (0)" [level=2]
+  - button "Đóng": ×
+  - paragraph: Giỏ hàng của bạn đang trống.

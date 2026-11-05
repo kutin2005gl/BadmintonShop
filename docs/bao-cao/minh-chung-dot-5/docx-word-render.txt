@@ -1,0 +1,3 @@
+PASS Word -> bundled render_docx.py -> Poppler: bao-cao-7-nhom.docx: 2 pages
+PASS Word -> bundled render_docx.py -> Poppler: huong-dan-ban-giao.docx: 1 pages
+PASS Word -> bundled render_docx.py -> Poppler: kich-ban-bao-ve.docx: 2 pages

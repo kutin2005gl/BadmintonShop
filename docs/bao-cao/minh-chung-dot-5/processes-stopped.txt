@@ -1,0 +1,3 @@
+Web PID 30416: stopped after evidence saved
+Desktop test host PID 31296: stopped after evidence saved
+Loopback proxy PID 31340: stopped after evidence saved

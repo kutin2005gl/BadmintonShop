@@ -43,7 +43,7 @@ partial class FrmDanhSachPhieuNhap
         split.Dock = DockStyle.Fill; split.Orientation = Orientation.Horizontal; split.SplitterDistance = 270;
         split.Panel1.Controls.Add(dgvPhieu); split.Panel1.Controls.Add(lblTongKet);
         split.Panel2.Controls.Add(grpChiTiet);
-        CauHinhLuoi(dgvPhieu); dgvPhieu.SelectionChanged += dgvPhieu_SelectionChanged;
+        CauHinhLuoi(dgvPhieu); dgvPhieu.CurrentCellChanged += dgvPhieu_SelectionChanged;
         lblTongKet.Dock = DockStyle.Bottom; lblTongKet.Height = 26; lblTongKet.TextAlign = ContentAlignment.MiddleRight;
         lblTongKet.Font = new Font(Font.FontFamily, 10F, FontStyle.Bold); lblTongKet.Padding = new Padding(0, 0, 10, 0);
         grpChiTiet.Dock = DockStyle.Fill; grpChiTiet.Text = "Chi tiết phiếu nhập"; grpChiTiet.Controls.Add(dgvChiTiet);

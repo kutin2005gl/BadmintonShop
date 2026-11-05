@@ -36,7 +36,7 @@ internal static class Sv4Ui
         var ten=new Dictionary<string,string> { ["MaSP"]="Mã SP",["TenSP"]="Sản phẩm",["TenDanhMuc"]="Danh mục",["ThuongHieu"]="Thương hiệu",
             ["DonGiaBan"]="Giá bán (đ)",["DonViTinh"]="Đơn vị",["SoLuongTon"]="Tồn kho",["TrangThai"]="Trạng thái",["CanhBao"]="Cảnh báo",
             ["MaDM"]="Mã DM",["MoTa"]="Mô tả",["MaHD"]="Mã HĐ",["NgayLap"]="Ngày lập",["KhachHang"]="Khách hàng",["SDT"]="Điện thoại",
-            ["LoaiBan"]="Loại bán",["HinhThucTT"]="Thanh toán",["TienGiamGia"]="Giảm HĐ (đ)",["TongTien"]="Tổng tiền (đ)",
+            ["DiaChiKhachHang"]="Địa chỉ khách hàng",["LoaiBan"]="Loại bán",["HinhThucTT"]="Thanh toán",["TienGiamGia"]="Giảm HĐ (đ)",["TongTien"]="Tổng tiền (đ)",
             ["LyDoHuy"]="Lý do hủy",["SoLuong"]="Số lượng",["DonGia"]="Đơn giá (đ)",["GiamGia"]="Giảm (%)",["ThanhTien"]="Thành tiền (đ)" };
         foreach(DataGridViewColumn c in grid.Columns)
         {

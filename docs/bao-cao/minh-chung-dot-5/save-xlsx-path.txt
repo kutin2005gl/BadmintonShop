@@ -1,0 +1,337 @@
+Window: "BadmintonShop - Quản lý cửa hàng", App: BadmintonShop.SV4.Checks.exe.
+	0 window BadmintonShop - Quản lý cửa hàng Secondary Actions: Raise ID: FrmMain
+		1201 dialog Save As Secondary Actions: Raise
+			1202 pane
+				1203 tool bar Command Module ID: FolderBandModuleInner
+					1204 button &Help Description: Get help. ID: HelpButton
+					1205 split button Details Description: Change your view. ID: ViewControl
+						1206 button View Slider Description: More options ID: SplitMenuButton
+					1207 button Organize Description: Organize this folder's contents. ID: {7DDC1264-7E4D-4F74-BBC0-D191987C8D0F}
+					1208 button New folder Description: Create a new folder. ID: {E44616AD-6DF1-4B94-85A4-E465AE8A19DB}
+				1209 pane Control Host ID: ProperTreeHost
+					1210 tree Navigation Pane ID: 100
+						1211 scroll bar (settable, float) Vertical Value: 93 ID: NonClientVerticalScrollBar
+							1212 button Line up ID: UpButton
+							1213 button Page up ID: UpPageButton
+							1214 thumb Position ID: ScrollbarThumb
+							1215 button Page down ID: DownPageButton
+							1216 button Line down ID: DownButton
+						1217 tree item (selectable, settable, string) Desktop (OneDrive) Value: Desktop (OneDrive)
+							1218 tree item (selectable, settable, string) Home Value: Home
+							1219 tree item (selectable, settable, string) Gallery Value: Gallery
+							1220 tree item (selectable, settable, string) Huỳnh Phúc Hoàng - Personal (OneDrive) Value: Huỳnh Phúc Hoàng - Personal (OneDrive)
+							1221 tree item (selectable, settable, string) Start of Quick Access - Desktop (pinned) Value: Start of Quick Access - Desktop (pinned)
+							1222 tree item (selectable, settable, string) Downloads (pinned) Value: Downloads (pinned)
+							1223 tree item (selectable, settable, string) Documents (pinned) Value: Documents (pinned)
+							1224 tree item (selectable, settable, string) Pictures (pinned) Value: Pictures (pinned)
+							1225 tree item (selectable, settable, string) Music (pinned) Value: Music (pinned)
+							1226 tree item (selectable, settable, string) Videos (pinned) Value: Videos (pinned)
+							1227 tree item (selectable, settable, string) TV4_BaoCao Value: TV4_BaoCao
+							1228 tree item (selectable, settable, string) plans Value: plans
+							1229 tree item (selectable, settable, string) slides Value: slides
+							1230 tree item (selectable, settable, string) End of Quick Access - minh-chung-dot-3 Value: End of Quick Access - minh-chung-dot-3
+							1231 tree item (selectable, settable, string) This PC Value: This PC
+								1232 tree item (selectable, settable, string) OS (C:) Value: OS (C:)
+								1233 tree item (selectable, settable, string) New Volume (D:) Value: New Volume (D:)
+								1234 tree item (selectable, settable, string) Local Disk (E:) Value: Local Disk (E:)
+							1235 tree item (selectable, settable, string) Network Value: Network
+				1236 pane Shell Folder View ID: listview
+					1237 list Items View
+						1238 scroll bar (settable, float) Horizontal Value: 0 ID: HorizontalScrollBar
+							1239 button Column left ID: UpButton
+							1240 thumb Position ID: ScrollbarThumb
+							1241 button Page right ID: DownPageButton
+							1242 button Column right ID: DownButton
+						1243 header Header
+							1244 split button Name ID: System.ItemNameDisplay
+								1245 button Filter dropdown ID: DropDown
+							1246 split button Date modified ID: System.DateModified
+								1247 button Filter dropdown ID: DropDown
+							1248 split button Type ID: System.ItemTypeText
+								1249 button Filter dropdown ID: DropDown
+							1250 split button Size ID: System.Size
+								1251 button Filter dropdown ID: DropDown
+						1252 list item (selectable, settable, string) acceptance-report.xlsx Value: acceptance-report.xlsx ID: 0
+							1253 edit (settable, string) Name Value: acceptance-report.xlsx ID: System.ItemNameDisplay
+							1254 edit Date modified Value: ‎11/‎05/‎2026 ‏‎4:10 PM ID: System.DateModified
+							1255 edit Type Value: Microsoft Excel Worksheet ID: System.ItemTypeText
+							1256 edit Size Value: 21 KB ID: System.Size
+						1257 list item (selectable, settable, string) ui-invalid.xlsx Value: ui-invalid.xlsx ID: 1
+							1258 edit (settable, string) Name Value: ui-invalid.xlsx ID: System.ItemNameDisplay
+							1259 edit Date modified Value: ‎11/‎05/‎2026 ‏‎4:06 PM ID: System.DateModified
+							1260 edit Type Value: Microsoft Excel Worksheet ID: System.ItemTypeText
+							1261 edit Size Value: 8 KB ID: System.Size
+						1262 list item (selectable, settable, string) ui-template.xlsx Value: ui-template.xlsx ID: 2
+							1263 edit (settable, string) Name Value: ui-template.xlsx ID: System.ItemNameDisplay
+							1264 edit Date modified Value: ‎11/‎05/‎2026 ‏‎4:06 PM ID: System.DateModified
+							1265 edit Type Value: Microsoft Excel Worksheet ID: System.ItemTypeText
+							1266 edit Size Value: 9 KB ID: System.Size
+						1267 list item (selectable, settable, string) ui-valid.xlsx Value: ui-valid.xlsx ID: 3
+							1268 edit (settable, string) Name Value: ui-valid.xlsx ID: System.ItemNameDisplay
+							1269 edit Date modified Value: ‎11/‎05/‎2026 ‏‎4:06 PM ID: System.DateModified
+							1270 edit Type Value: Microsoft Excel Worksheet ID: System.ItemTypeText
+							1271 edit Size Value: 8 KB ID: System.Size
+				1272 text File name: Description: File name: ID: SaveDialogLabel
+				1273 combo box (settable, string) File name: Value: D:/DoAn_CNPM/BadmintonShop/docs/bao-cao/minh-chung-dot-5/ui-snapshot-300.xlsx ID: FileNameControlHost
+					1274 edit (settable, string) File name: Value: D:/DoAn_CNPM/BadmintonShop/docs/bao-cao/minh-chung-dot-5/ui-snapshot-300.xlsx ID: 1001
+					1275 button Open ID: DropDown
+				1276 text Save as type: Description: Save as type: ID: SaveDialogLabel
+				1277 combo box (settable, string) Save as type: Value: Excel (*.xlsx) ID: FileTypeControlHost
+					1278 text (settable, string) Value: Excel (*.xlsx)
+					1279 button Open ID: DropDown
+				1280 tree Save Fields ID: SaveDialogPreviewMetadataInner
+				1281 tree Application Controls ID: AppControlsModuleInner
+			1282 tool bar
+				1283 button Hide Folders
+			1284 button Save ID: 1
+			1285 button Cancel ID: 2
+			1286 thumb (settable, float) Value: 0
+			1287 pane ID: 40965
+				1288 pane
+					1289 tool bar Navigation buttons
+						1290 button (disabled) Back (Alt + Left Arrow)
+						1291 button (disabled) Forward (Alt + Right Arrow)
+						1292 button (disabled) Recent locations
+				1293 pane
+					1294 tool bar Up band
+						1295 button Up to "bao-cao" (Alt + Up Arrow)
+				1296 pane ID: 41477
+					1297 progress bar Loading Value: 0
+						1298 pane
+							1299 tool bar Address: D:\DoAn_CNPM\BadmintonShop\docs\bao-cao\minh-chung-dot-3 ID: 1001
+								1300 split button All locations
+								1301 split button ‎docs
+								1302 split button ‎bao-cao
+								1303 menu item ‎minh-chung-dot-3
+						1304 tool bar Address band
+							1305 button Previous Locations
+							1306 button Refresh "minh-chung-dot-3" (F5)
+				1307 pane
+					1308 pane
+						1309 pane
+							1310 edit (settable, string) Search Box Description: Search minh-chung-dot-3 ID: SearchEditBox
+							1311 button Search ID: SearchBoxSearchButton
+			1312 title bar (settable, string) Value: Save As
+				1313 menu bar System ID: MenuBar
+					1314 menu item System
+				1315 button Close
+		8 pane
+			1080 window Thống kê — báo cáo Secondary Actions: Raise
+				1081 tab
+					1172 pane Theo ngày
+						1173 pane
+							1174 pane
+								1175 data grid
+									1176 custom Top Row
+										1177 header Kỳ ID: 4266660559
+										1178 header Doanh thu ID: 4263074124
+									1179 custom Row 0
+										1180 item Kỳ Row 0, Not sorted. Value: 2026-01-01 ID: 428730397
+										1181 item Doanh thu Row 0, Not sorted. Value: 70 đ ID: 4211464716
+									1182 custom Row 1
+										1183 item Kỳ Row 1, Not sorted. Value: 2026-07-01 ID: 4258079852
+										1184 item Doanh thu Row 1, Not sorted. Value: 30 đ ID: 4252956621
+									1185 custom Row 2
+										1186 item Kỳ Row 2, Not sorted. Value: 2026-11-05 ID: 4261627937
+										1187 item Doanh thu Row 2, Not sorted. Value: 200 đ ID: 4217780525
+							1188 pane
+								1189 pane ID: 461898
+					1190 tab item (selectable) Theo ngày
+					1191 tab item (selectable) Theo tháng
+					1192 tab item (selectable) Theo năm
+					1193 tab item (selectable) Theo quý
+					1194 tab item (selectable) Bán chạy
+					1195 tab item (selectable) Theo danh mục
+					1196 tab item (selectable) Trạng thái đơn
+					1197 tab item (selectable) Nhân viên × năm
+					1198 tab item (selectable) Khách hàng × năm
+					1199 tab item (selectable) Sản phẩm × quý 2026
+					1200 tab item (selectable) Thu–chi 2026
+				1111 pane
+					1112 pane
+						1113 text 300 đ
+						1114 text DOANH THU HOÀN THÀNH
+					1115 pane DOANH THU HOÀN THÀNH
+						1116 text 6
+						1117 text TỔNG SỐ ĐƠN
+					1118 pane TỔNG SỐ ĐƠN
+						1119 text 4
+						1120 text SỐ SẢN PHẨM ĐÃ BÁN
+				1121 pane SỐ SẢN PHẨM ĐÃ BÁN
+					1122 text Từ
+					1123 date and time picker (settable, string) Value: 01/01/2026
+					1124 text đến
+					1125 date and time picker (settable, string) Value: 05/11/2026
+					1126 combo box (settable, string) Tất cả loại bán Value: Tất cả loại bán
+						1127 text
+						1128 button Open
+					1129 button Xem báo cáo
+					1130 button Làm mới
+					1131 button Xuất Excel
+					1132 button Xuất PDF
+					1133 text 01/01/2026–05/11/2026 | Tất cả | Doanh thu: 300 đ
+					1134 text Năm
+					1135 spinner Năm
+						1136 spinner UpDown
+							1137 button (disabled) Up
+							1138 button (disabled) Down
+						1139 edit (settable, string) Năm Value: 2026
+					1140 button Xem cả năm
+					1141 text Đơn Hoàn thành; ngày lập trong khoảng lọc; đơn vị: đồng. Thu–chi (tiền nhập hàng): chọn Tất cả loại bán.
+				1142 text Đã cập nhật lúc 19:19:00
+		154 pane
+			155 text Thống kê — báo cáo
+			156 text Nghiệm thu DB thử Quản trị viên
+			157 button Đăng xuất
+		158 pane
+			159 pane
+				160 text CỬA HÀNG
+				161 button ◈ Tổng quan
+				162 button ▦ Sản phẩm
+				163 button ▤ Danh mục
+				164 button ◇ Khuyến mãi
+				165 text BÁN HÀNG
+				166 button ▤ Đơn hàng
+				167 button ▣ Bán tại quầy
+				168 text NHẬP HÀNG
+				169 button ▥ Phiếu nhập
+				170 button ◇ Nhà cung cấp
+				171 text BÁO CÁO
+				172 button ▥ Thống kê
+				173 button ★ Quản lý đánh giá
+				174 text HỆ THỐNG
+				175 button ◇ Nhân viên, tài khoản
+				176 button ◇ Đổi mật khẩu
+				177 button ▤ Sao lưu, phục hồi
+				178 button ↪ Thoát
+				179 scroll bar (settable, float) Vertical Value: 0 ID: NonClientVerticalScrollBar
+					180 button Line up ID: UpButton
+					181 thumb Position ID: ScrollbarThumb
+					182 button Page down ID: DownPageButton
+					183 button Line down ID: DownButton
+			184 text BADMINTON SHOP / QUẢN LÝ
+		185 title bar (settable, string) Value: BadmintonShop - Quản lý cửa hàng
+			186 menu bar System ID: MenuBar
+				202 menu item System
+			188 button Minimize
+			189 button Restore
+			190 button Close
+		1201 dialog Save As Secondary Actions: Raise
+			1202 pane
+				1203 tool bar Command Module ID: FolderBandModuleInner
+					1204 button &Help Description: Get help. ID: HelpButton
+					1205 split button Details Description: Change your view. ID: ViewControl
+						1206 button View Slider Description: More options ID: SplitMenuButton
+					1207 button Organize Description: Organize this folder's contents. ID: {7DDC1264-7E4D-4F74-BBC0-D191987C8D0F}
+					1208 button New folder Description: Create a new folder. ID: {E44616AD-6DF1-4B94-85A4-E465AE8A19DB}
+				1209 pane Control Host ID: ProperTreeHost
+					1210 tree Navigation Pane ID: 100
+						1211 scroll bar (settable, float) Vertical Value: 93 ID: NonClientVerticalScrollBar
+							1212 button Line up ID: UpButton
+							1213 button Page up ID: UpPageButton
+							1214 thumb Position ID: ScrollbarThumb
+							1215 button Page down ID: DownPageButton
+							1216 button Line down ID: DownButton
+						1217 tree item (selectable, settable, string) Desktop (OneDrive) Value: Desktop (OneDrive)
+							1218 tree item (selectable, settable, string) Home Value: Home
+							1219 tree item (selectable, settable, string) Gallery Value: Gallery
+							1220 tree item (selectable, settable, string) Huỳnh Phúc Hoàng - Personal (OneDrive) Value: Huỳnh Phúc Hoàng - Personal (OneDrive)
+							1221 tree item (selectable, settable, string) Start of Quick Access - Desktop (pinned) Value: Start of Quick Access - Desktop (pinned)
+							1222 tree item (selectable, settable, string) Downloads (pinned) Value: Downloads (pinned)
+							1223 tree item (selectable, settable, string) Documents (pinned) Value: Documents (pinned)
+							1224 tree item (selectable, settable, string) Pictures (pinned) Value: Pictures (pinned)
+							1225 tree item (selectable, settable, string) Music (pinned) Value: Music (pinned)
+							1226 tree item (selectable, settable, string) Videos (pinned) Value: Videos (pinned)
+							1227 tree item (selectable, settable, string) TV4_BaoCao Value: TV4_BaoCao
+							1228 tree item (selectable, settable, string) plans Value: plans
+							1229 tree item (selectable, settable, string) slides Value: slides
+							1230 tree item (selectable, settable, string) End of Quick Access - minh-chung-dot-3 Value: End of Quick Access - minh-chung-dot-3
+							1231 tree item (selectable, settable, string) This PC Value: This PC
+								1232 tree item (selectable, settable, string) OS (C:) Value: OS (C:)
+								1233 tree item (selectable, settable, string) New Volume (D:) Value: New Volume (D:)
+								1234 tree item (selectable, settable, string) Local Disk (E:) Value: Local Disk (E:)
+							1235 tree item (selectable, settable, string) Network Value: Network
+				1236 pane Shell Folder View ID: listview
+					1237 list Items View
+						1238 scroll bar (settable, float) Horizontal Value: 0 ID: HorizontalScrollBar
+							1239 button Column left ID: UpButton
+							1240 thumb Position ID: ScrollbarThumb
+							1241 button Page right ID: DownPageButton
+							1242 button Column right ID: DownButton
+						1243 header Header
+							1244 split button Name ID: System.ItemNameDisplay
+								1245 button Filter dropdown ID: DropDown
+							1246 split button Date modified ID: System.DateModified
+								1247 button Filter dropdown ID: DropDown
+							1248 split button Type ID: System.ItemTypeText
+								1249 button Filter dropdown ID: DropDown
+							1250 split button Size ID: System.Size
+								1251 button Filter dropdown ID: DropDown
+						1252 list item (selectable, settable, string) acceptance-report.xlsx Value: acceptance-report.xlsx ID: 0
+							1253 edit (settable, string) Name Value: acceptance-report.xlsx ID: System.ItemNameDisplay
+							1254 edit Date modified Value: ‎11/‎05/‎2026 ‏‎4:10 PM ID: System.DateModified
+							1255 edit Type Value: Microsoft Excel Worksheet ID: System.ItemTypeText
+							1256 edit Size Value: 21 KB ID: System.Size
+						1257 list item (selectable, settable, string) ui-invalid.xlsx Value: ui-invalid.xlsx ID: 1
+							1258 edit (settable, string) Name Value: ui-invalid.xlsx ID: System.ItemNameDisplay
+							1259 edit Date modified Value: ‎11/‎05/‎2026 ‏‎4:06 PM ID: System.DateModified
+							1260 edit Type Value: Microsoft Excel Worksheet ID: System.ItemTypeText
+							1261 edit Size Value: 8 KB ID: System.Size
+						1262 list item (selectable, settable, string) ui-template.xlsx Value: ui-template.xlsx ID: 2
+							1263 edit (settable, string) Name Value: ui-template.xlsx ID: System.ItemNameDisplay
+							1264 edit Date modified Value: ‎11/‎05/‎2026 ‏‎4:06 PM ID: System.DateModified
+							1265 edit Type Value: Microsoft Excel Worksheet ID: System.ItemTypeText
+							1266 edit Size Value: 9 KB ID: System.Size
+						1267 list item (selectable, settable, string) ui-valid.xlsx Value: ui-valid.xlsx ID: 3
+							1268 edit (settable, string) Name Value: ui-valid.xlsx ID: System.ItemNameDisplay
+							1269 edit Date modified Value: ‎11/‎05/‎2026 ‏‎4:06 PM ID: System.DateModified
+							1270 edit Type Value: Microsoft Excel Worksheet ID: System.ItemTypeText
+							1271 edit Size Value: 8 KB ID: System.Size
+				1272 text File name: Description: File name: ID: SaveDialogLabel
+				1273 combo box (settable, string) File name: Value: D:/DoAn_CNPM/BadmintonShop/docs/bao-cao/minh-chung-dot-5/ui-snapshot-300.xlsx ID: FileNameControlHost
+					1274 edit (settable, string) File name: Value: D:/DoAn_CNPM/BadmintonShop/docs/bao-cao/minh-chung-dot-5/ui-snapshot-300.xlsx ID: 1001
+					1275 button Open ID: DropDown
+				1276 text Save as type: Description: Save as type: ID: SaveDialogLabel
+				1277 combo box (settable, string) Save as type: Value: Excel (*.xlsx) ID: FileTypeControlHost
+					1278 text (settable, string) Value: Excel (*.xlsx)
+					1279 button Open ID: DropDown
+				1280 tree Save Fields ID: SaveDialogPreviewMetadataInner
+				1281 tree Application Controls ID: AppControlsModuleInner
+			1282 tool bar
+				1283 button Hide Folders
+			1284 button Save ID: 1
+			1285 button Cancel ID: 2
+			1286 thumb (settable, float) Value: 0
+			1287 pane ID: 40965
+				1288 pane
+					1289 tool bar Navigation buttons
+						1290 button (disabled) Back (Alt + Left Arrow)
+						1291 button (disabled) Forward (Alt + Right Arrow)
+						1292 button (disabled) Recent locations
+				1293 pane
+					1294 tool bar Up band
+						1295 button Up to "bao-cao" (Alt + Up Arrow)
+				1296 pane ID: 41477
+					1297 progress bar Loading Value: 0
+						1298 pane
+							1299 tool bar Address: D:\DoAn_CNPM\BadmintonShop\docs\bao-cao\minh-chung-dot-3 ID: 1001
+								1300 split button All locations
+								1301 split button ‎docs
+								1302 split button ‎bao-cao
+								1303 menu item ‎minh-chung-dot-3
+						1304 tool bar Address band
+							1305 button Previous Locations
+							1306 button Refresh "minh-chung-dot-3" (F5)
+				1307 pane
+					1308 pane
+						1309 pane
+							1310 edit (settable, string) Search Box Description: Search minh-chung-dot-3 ID: SearchEditBox
+							1311 button Search ID: SearchBoxSearchButton
+			1312 title bar (settable, string) Value: Save As
+				1313 menu bar System ID: MenuBar
+					1314 menu item System
+				1315 button Close
+
+Document text: ```
+2026
+```

@@ -1,0 +1,71 @@
+ M BadmintonShop.Core/DataAccess/BaoCaoRepository.cs
+ M BadmintonShop.Core/DataAccess/DanhMucRepository.cs
+ M BadmintonShop.Core/DataAccess/DbHelper.cs
+ M BadmintonShop.Core/DataAccess/HoaDonRepository.cs
+ M BadmintonShop.Core/DataAccess/SanPhamRepository.cs
+ M BadmintonShop.Core/Services/BaoCaoService.cs
+ M BadmintonShop.Desktop/App.config
+ M BadmintonShop.Desktop/BieuDoCot.cs
+ M BadmintonShop.Desktop/FrmDanhSachPhieuNhap.Designer.cs
+ M BadmintonShop.Desktop/FrmDanhSachPhieuNhap.cs
+ M BadmintonShop.Desktop/FrmDonHang.cs
+ M BadmintonShop.Desktop/FrmSanPham.cs
+ M BadmintonShop.Desktop/FrmThongKe.cs
+ M BadmintonShop.Desktop/Sv4Ui.cs
+ M BadmintonShop.Desktop/XuatTaiLieu.cs
+ M BadmintonShop.Web/Controllers/DonHangController.cs
+ M BadmintonShop.Web/Controllers/SanPhamController.cs
+ M BadmintonShop.Web/Program.cs
+ M BadmintonShop.Web/Views/DonHang/Index.cshtml
+ M BadmintonShop.Web/Views/SanPham/Index.cshtml
+ M BadmintonShop.Web/appsettings.json
+ M README.md
+ M docs/ERD.md
+ M docs/bao-cao/chuong-kien-truc.md
+ M docs/bao-cao/dac-ta-sv4.md
+ M docs/bao-cao/huong-dan-cai-dat.md
+ M docs/bao-cao/mo-ta-csdl.md
+ M docs/bao-cao/tong-ket-sv4.md
+ M tests/BadmintonShop.SV4.Checks/Program.cs
+ M tests/BadmintonShop.SV4.Checks/WebHttpChecks.cs
+?? BadmintonShop.Core/DataAccess/NhapSanPhamRepository.cs
+?? BadmintonShop.Core/Models/DuLieuBaoCao.cs
+?? BadmintonShop.Core/Services/BoNhoPhien.cs
+?? BadmintonShop.Core/Services/LocNangCao.cs
+?? BadmintonShop.Core/Services/TinHieuDuLieu.cs
+?? BadmintonShop.Desktop/FrmLocNangCao.cs
+?? BadmintonShop.Desktop/FrmNhapSanPhamExcel.cs
+?? BadmintonShop.Desktop/NhapSanPhamExcel.cs
+?? BadmintonShop.Web/Services/
+?? BadmintonShop.Web/wwwroot/js/order-main-sub.js
+?? PRODUCT.md
+?? docs/bao-cao/bao-cao-ky-thuat-7-nhom.md
+?? docs/bao-cao/checklist-tien-do-4-thanh-vien.md
+?? docs/bao-cao/huong-dan-ban-giao-dot-4.md
+?? docs/bao-cao/ke-hoach-hoan-thien-yeu-cau-mon-hoc.md
+?? docs/bao-cao/kich-ban-bao-ve-dot-3.md
+?? docs/bao-cao/minh-chung-dot-1/
+?? docs/bao-cao/minh-chung-dot-2/
+?? docs/bao-cao/minh-chung-dot-3/
+?? docs/bao-cao/minh-chung-dot-4/
+?? docs/bao-cao/minh-chung-dot-5/
+?? docs/bao-cao/quy-tac-va-tien-do-dot-1.md
+?? docs/bao-cao/quy-tac-va-tien-do-dot-2.md
+?? docs/bao-cao/quy-tac-va-tien-do-dot-3.md
+?? docs/bao-cao/quy-tac-va-tien-do-dot-4.md
+?? docs/bao-cao/ra-soat-yeu-cau-2026-11-05.md
+?? docs/bao-cao/yeu-cau-mon-hoc-bien-tap.md
+?? tests/BadmintonShop.SV4.Checks/AcceptanceChecks.cs
+?? tests/BadmintonShop.SV4.Checks/AdvancedSearchChecks.cs
+?? tests/BadmintonShop.SV4.Checks/AdvancedSearchIntegrationChecks.cs
+?? tests/BadmintonShop.SV4.Checks/CacheChecks.cs
+?? tests/BadmintonShop.SV4.Checks/CrossProcessCacheChecks.cs
+?? tests/BadmintonShop.SV4.Checks/DesktopCacheChecks.cs
+?? tests/BadmintonShop.SV4.Checks/ExportProgressChecks.cs
+?? tests/BadmintonShop.SV4.Checks/ImportChecks.cs
+?? tests/BadmintonShop.SV4.Checks/ReportDatabaseChecks.cs
+?? tests/BadmintonShop.SV4.Checks/ReportProgressChecks.cs
+?? tests/BadmintonShop.SV4.Checks/WebCatalogChecks.cs
+?? tests/BadmintonShop.SV4.Checks/order-main-sub.checks.cjs
+?? tests/BadmintonShop.SV4.Checks/prepare_ui_import.py
+?? tests/BadmintonShop.SV4.Checks/verify_progress_exports.py

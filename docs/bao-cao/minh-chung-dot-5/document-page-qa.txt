@@ -1,0 +1,5 @@
+Final review by Codex on 05/11/2026: all 5 final page PNGs inspected individually.
+Report 1-2; handover 1; defense 1-2: Vietnamese text, headings, numbering, question table, page footers readable; no clipped/overlapping content.
+Earlier blue title border and nearly empty trailing pages corrected before final render.
+Programmatic checks: page counts, PNG coverage, footer numbering, horizontal text bounds and absence of paragraph/style borders passed.
+These are technical review copies, not member acceptance or final scope approval.

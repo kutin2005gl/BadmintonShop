@@ -1,0 +1,29 @@
+[
+  {
+    "output": "bao-cao-7-nhom",
+    "source": "bao-cao-ky-thuat-7-nhom.md",
+    "source_sha256": "32377b38ba7d946f2c20eb8781d0d296c50d1da98579ef9f1059c3f9eefde385",
+    "docx_sha256": "f603555f6faaecf151778375ae72f77f008c8746631cd779c21e38cec0999223",
+    "pdf_sha256": "9304396aed5ccd2b52bcf3783cee6dd1ae90ec03a82ce8a18c6c48a68439a1d4",
+    "pages": 2,
+    "renderer": "Installed Word object model + bundled render_docx.py rasterize + Poppler"
+  },
+  {
+    "output": "huong-dan-ban-giao",
+    "source": "huong-dan-ban-giao-dot-4.md",
+    "source_sha256": "02943762b8bebf3f5ff9f7db03d131e7f2e145bfcd8b3aa88bff8bbbeae7c1c3",
+    "docx_sha256": "0e69dfeb8b3cf97a6ad5917328c7412f4d8d00025db4c0414d5ef41e3fc87c04",
+    "pdf_sha256": "45719d77e7bc08cb911228bb19f7075b4c534f64b2b3797dc074f0c70e9fdc8d",
+    "pages": 1,
+    "renderer": "Installed Word object model + bundled render_docx.py rasterize + Poppler"
+  },
+  {
+    "output": "kich-ban-bao-ve",
+    "source": "kich-ban-bao-ve-dot-3.md",
+    "source_sha256": "0d12a12e4fb71971bb373db0a0c976d983af9e65d6be346e7e9b1afdf7941278",
+    "docx_sha256": "e38eafb478ba8a45c12d91490e046a14aff49d219757cd6b552f032987372461",
+    "pdf_sha256": "b0d7c5b69708937bf21e755d1b85860e96b34307097ed1f53c77bb622ac785a2",
+    "pages": 2,
+    "renderer": "Installed Word object model + bundled render_docx.py rasterize + Poppler"
+  }
+]

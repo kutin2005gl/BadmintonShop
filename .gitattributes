@@ -9,3 +9,11 @@
 *.pdf binary
 *.xlsx binary
 *.jpeg binary
+*.zip binary
+
+# Preserve hashed evidence and review-document sources byte-for-byte on every checkout.
+docs/bao-cao/minh-chung-dot-*/** -text -whitespace
+docs/bao-cao/ban-ra-soat-dot-5/** -text whitespace=cr-at-eol
+docs/bao-cao/bao-cao-ky-thuat-7-nhom.md -text whitespace=cr-at-eol
+docs/bao-cao/huong-dan-ban-giao-dot-4.md -text whitespace=cr-at-eol
+docs/bao-cao/kich-ban-bao-ve-dot-3.md -text whitespace=cr-at-eol

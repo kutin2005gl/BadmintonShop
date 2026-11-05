@@ -10,6 +10,7 @@ namespace BadmintonShop.Core.DataAccess;
 /// </summary>
 public class DanhMucRepository
 {
+    public DataTable LayDanhSachHienThi()=>DbHelper.ExecuteQuery("SELECT MaDM,TenDanhMuc FROM DanhMuc ORDER BY MaDM");
     // SV4: thêm/sửa trên repository dùng chung, kiểm tên trùng trong transaction có khóa khoảng.
     public int Luu(DanhMuc dm)
     {

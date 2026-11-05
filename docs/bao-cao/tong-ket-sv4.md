@@ -32,3 +32,7 @@ Doanh thu hiện phân kỳ theo NgayLap của đơn đang Hoàn thành; chưa c
 ## Rà cuối trước PR, sau chuyển ổ D
 
 Worktree sử dụng: `D:\CodexWorktrees\BadmintonShop-sv4`, nhánh `feature/sv4-final-integration`. [Kết quả và commit mới](../final-integration/pr-review/README.md) có 74/74 integration, 15/15 install, kiểm độc lập 12 bộ lọc và demo cửa sổ thật. Đã sửa chiều cao tóm tắt POS để không cắt dòng giảm giá và giữ thông tin hóa đơn gần nhất sau tải lại. 1920×1080, DPI Windows thật, browser E2E và kiểm chéo SV2 vẫn chưa xác minh. Được phép commit/push/mở PR theo yêu cầu mới, không merge.
+
+## Đối chiếu yêu cầu giảng viên — 05/11/2026
+
+Các chức năng/kết quả ở trên mô tả phạm vi triển khai SV4, chưa đồng nghĩa đạt đủ yêu cầu môn học. Báo cáo hiện có sáu bảng; chưa có thu–chi–lợi nhuận theo quý, nhân viên × năm, khách hàng × năm, sản phẩm × quý/năm và nhập Excel cho người dùng. Tìm kiếm dùng bộ nhớ ở một số form nhưng chưa có cơ chế làm mới 5–10 phút đồng bộ. Các phần này là yêu cầu cần hoàn thiện, không chuyển hết sang hướng phát triển tùy chọn. Xem [báo cáo rà soát](ra-soat-yeu-cau-2026-11-05.md). Không sửa logic trong lượt review này.

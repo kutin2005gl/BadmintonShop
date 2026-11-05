@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using BadmintonShop.Core.DataAccess;
 using BadmintonShop.Core.Services;
 
@@ -9,6 +9,8 @@ public class FrmSanPham : Form
     private DataGridView grid=null!;private TextBox tim=null!;private ComboBox dm=null!,thuongHieu=null!,tt=null!,ton=null!;
     private DataTable? data; private PictureBox preview=null!;private Label anhNhan=null!;private int previewVersion;
     private const ChucNang Quyen=ChucNang.SanPhamDanhMucKhuyenMai;
+    private readonly BoNhoPhien<int,DataTable> boNho=new(BoNhoPhien<int,int>.ThoiHanMacDinh);
+    private string PhamVi=>$"{DbHelper.ConnectionString}|{PhienDangNhap.MaTK}|{PhienDangNhap.VaiTro}|{DbHelper.DauHieuDuLieu}";
     public FrmSanPham() { InitializeComponent(); }
     private void InitializeComponent()
     {
@@ -18,7 +20,7 @@ public class FrmSanPham : Form
         ton=Sv4Ui.Chon("Mọi mức tồn","Hết hàng","Sắp hết (1–5)","Còn hàng (>5)");
         var bar=Sv4Ui.ThanhCongCu(120);
         bar.Controls.AddRange([tim,dm,thuongHieu,tt,ton,Sv4Ui.Nut("Lọc",Loc),Sv4Ui.Nut("Tải lại",()=>Chay(Nap)),
-            Sv4Ui.Nut("Thêm",()=>Sua(0)),Sv4Ui.Nut("Sửa",()=>Chay(()=>Sua(Sv4Ui.MaDong(grid,"MaSP")??throw new ArgumentException("Hãy chọn sản phẩm cần sửa.")))),
+            Sv4Ui.Nut("Thêm",()=>Sua(0)),Sv4Ui.Nut("Nhập Excel",()=>Chay(()=> { using var form=new FrmNhapSanPhamExcel();form.ShowDialog(this);if(form.DaNhap)Nap(); })),Sv4Ui.Nut("Sửa",()=>Chay(()=>Sua(Sv4Ui.MaDong(grid,"MaSP")??throw new ArgumentException("Hãy chọn sản phẩm cần sửa.")))),
             Sv4Ui.Nut("Ngừng bán",()=>Chay(Ngung)),Sv4Ui.Nhan("Cảnh báo: hết hàng = 0; sắp hết = 1–5. Bấm tiêu đề cột để sắp xếp.")]);
         var pane=new Panel { Dock=DockStyle.Right,Width=200,Padding=new Padding(12),BackColor=Color.White };
         preview=new PictureBox { Dock=DockStyle.Top,Height=185,SizeMode=PictureBoxSizeMode.Zoom };
@@ -34,15 +36,23 @@ public class FrmSanPham : Form
     // SV4: bộ lọc dùng LINQ, tránh ghép biểu thức DataView từ chuỗi người dùng.
     private async void Nap()
     {
-        await ShopTheme.Load(this,()=>new SanPhamRepository().LayDanhSachHienThi(),rows=>
+        boNho.Xoa();var scope=PhamVi;
+        await ShopTheme.Load(this,()=>boNho.Lay(0,scope,()=>new SanPhamRepository().LayDanhSachHienThi()),rows=>
         {
         data=rows;
         dm.Items.Clear();dm.Items.Add("Mọi danh mục");dm.Items.AddRange(data.AsEnumerable().Select(r=>r.Field<string>("TenDanhMuc")!).Distinct().Order().ToArray());dm.SelectedIndex=0;
         thuongHieu.Items.Clear();thuongHieu.Items.Add("Mọi thương hiệu");thuongHieu.Items.AddRange(data.AsEnumerable().Select(r=>r.Field<string?>("ThuongHieu")??"").Distinct().Order().ToArray());thuongHieu.SelectedIndex=0;
-        Loc();
+        GanBoLoc();
         },rows=>rows.Rows.Count==0);
     }
-    private void Loc()
+    private async void Loc()
+    {
+        if(data==null)return;
+        var scope=PhamVi;
+        await ShopTheme.Load(this,()=>boNho.Lay(0,scope,()=>new SanPhamRepository().LayDanhSachHienThi()),rows=>
+        { data=rows;GanBoLoc(); });
+    }
+    private void GanBoLoc()
     {
         if(data==null)return;
         var view=data.Clone();var keyword=tim.Text.Trim();
@@ -54,27 +64,30 @@ public class FrmSanPham : Form
             (ton.SelectedIndex==0 || ton.SelectedIndex==1 && r.Field<int>("SoLuongTon")==0 ||
              ton.SelectedIndex==2 && r.Field<int>("SoLuongTon") is >0 and <=QuyTacBanHang.NguongSapHet ||
              ton.SelectedIndex==3 && r.Field<int>("SoLuongTon")>QuyTacBanHang.NguongSapHet))) view.ImportRow(r);
-        grid.DataSource=view;grid.Columns["MaDM"].Visible=false;grid.Columns["DonGiaBan"].DefaultCellStyle.Format="#,##0 'đ'";
+        grid.DataSource=view;grid.Columns["MaDM"].Visible=false;grid.Columns["HinhAnh"].Visible=false;grid.Columns["DonGiaBan"].DefaultCellStyle.Format="#,##0 'đ'";
     }
     private async void XemAnh()
     {
         var version=++previewVersion;
         preview.Image?.Dispose();preview.Image=null;
         if(Sv4Ui.MaDong(grid,"MaSP") is not int ma) { anhNhan.Text="Chưa có sản phẩm được chọn";return; }
+        // Capture the selected snapshot before awaiting; selecting/filtering never re-queries SQL.
+        var row=((DataRowView)grid.CurrentRow!.DataBoundItem).Row;
+        var name=row.Field<string>("TenSP");var price=row.Field<decimal>("DonGiaBan");
+        var stock=row.Field<int>("SoLuongTon");var imageKey=row.Field<string?>("HinhAnh");
         anhNhan.Text="Đang tải ảnh…";
         try
         {
             var result=await Task.Run(()=>
             {
-                var sp=new SanPhamRepository().LayTheoMa(ma);
                 Bitmap? image=null;
-                try { var path=KhoAnhSanPham.DuongDanDayDu(sp?.HinhAnh);if(path!=null && File.Exists(path))image=AnhSanPham.Doc(path); }
+                try { var path=KhoAnhSanPham.DuongDanDayDu(imageKey);if(path!=null && File.Exists(path))image=AnhSanPham.Doc(path); }
                 catch(Exception ex) when(ex is ArgumentException or IOException or OutOfMemoryException) { /* Older/missing media never hides product information. */ }
-                return (sp,image);
+                return image;
             });
-            if(IsDisposed || version!=previewVersion) { result.image?.Dispose();return; }
-            preview.Image=result.image;
-            anhNhan.Text=$"{result.sp?.TenSP}\n\n{result.sp?.DonGiaBan:N0} đ\nTồn: {result.sp?.SoLuongTon:N0}\n\n"+(result.image==null?"Chưa có ảnh hợp lệ trong kho ảnh chung":"");
+            if(IsDisposed || version!=previewVersion) { result?.Dispose();return; }
+            preview.Image=result;
+            anhNhan.Text=$"{name}\n\n{price:N0} đ\nTồn: {stock:N0}\n\n"+(result==null?"Chưa có ảnh hợp lệ trong kho ảnh chung":"");
         }
         catch(Exception) { if(!IsDisposed && version==previewVersion)anhNhan.Text="Không tải được ảnh. Chọn lại sản phẩm để thử lại."; }
     }

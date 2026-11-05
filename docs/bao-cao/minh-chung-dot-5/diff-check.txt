@@ -1,0 +1,5 @@
+warning: in the working copy of 'BadmintonShop.Desktop/FrmDanhSachPhieuNhap.Designer.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'BadmintonShop.Desktop/FrmDanhSachPhieuNhap.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/bao-cao/dac-ta-sv4.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/bao-cao/huong-dan-cai-dat.md', LF will be replaced by CRLF the next time Git touches it

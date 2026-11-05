@@ -95,7 +95,7 @@ Luồng bán hàng làm theo cách tương tự nhưng theo chiều ngược l�
 
 ### 7.1. Sơ đồ thực thể – liên kết (ERD)
 
-CSDL gồm 15 bảng, chia thành 5 nhóm: nhân sự và tài khoản; danh mục, sản phẩm, nhà cung cấp, khách hàng; nhập hàng; khuyến mãi; bán hàng và phản hồi. Khóa chính đơn đều là số nguyên tự tăng (`INT IDENTITY`). Hai bảng chi tiết dùng khóa chính ghép gồm mã phiếu (hoặc mã hóa đơn) và mã sản phẩm, nên một sản phẩm chỉ xuất hiện một lần trong mỗi phiếu.
+Lược đồ nền gồm 15 bảng, chia thành 5 nhóm: nhân sự và tài khoản; danh mục, sản phẩm, nhà cung cấp, khách hàng; nhập hàng; khuyến mãi; bán hàng và phản hồi. Khóa chính đơn đều là số nguyên tự tăng (`INT IDENTITY`). Hai bảng chi tiết dùng khóa chính ghép gồm mã phiếu (hoặc mã hóa đơn) và mã sản phẩm, nên một sản phẩm chỉ xuất hiện một lần trong mỗi phiếu.
 
 ![Sơ đồ thực thể – liên kết của CSDL BadmintonShop](../diagrams/png/02-erd.png)
 
@@ -142,3 +142,9 @@ Quy ước: khóa chính <ins>gạch chân</ins>, khóa ngoại _in nghiêng_; c
 | PhanHoi | MaSP | SanPham | Không | Chặn |
 
 Bảng mô tả chi tiết từng cột (kiểu dữ liệu, ràng buộc, ý nghĩa) của cả 15 bảng được trình bày ở phần Mô tả cơ sở dữ liệu.
+
+## Cập nhật kiến trúc dữ liệu — 05/11/2026
+
+Cài đủ SQL hiện tại tạo 16 bảng người dùng: 15 bảng nền và `DanhGiaSanPham` (script 07). Bổ sung lược đồ quan hệ: DanhGiaSanPham(<ins>MaDG</ins>, _MaSP_, _MaKH_, SoSao, NoiDung, NgayDanhGia, TrangThai); hai FK tham chiếu SanPham và KhachHang. Ứng dụng đánh giá sử dụng bảng mới này, giữ PhanHoi nền. HoaDon bổ sung bốn cột/index POS và hủy đơn theo 04/06. Xem phần cập nhật trong [mô tả CSDL](mo-ta-csdl.md). Sơ đồ PNG và bản Word là bản nền, cần xuất lại trước khi nộp.
+
+Tái sử dụng Core/Repository hoặc cache Form chưa tự chứng minh đạt yêu cầu tái sử dụng dữ liệu tìm kiếm trong 5–10 phút. Phần đối chiếu yêu cầu giảng viên nằm trong [báo cáo rà soát](ra-soat-yeu-cau-2026-11-05.md).

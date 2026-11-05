@@ -1,0 +1,21 @@
+
+Algorithm : SHA256
+Hash      : 09B690A35A732872661BD4A290987EB3C469740717CE51780EEA089792D34815
+Path      : D:\DoAn_CNPM\BadmintonShop\BadmintonShop.Web\wwwroot\js\order-main-sub.js
+
+Algorithm : SHA256
+Hash      : 4C03D031125D4BD4621651EF57B87AA6390FA2F4B496A51027D4B00655ACA9AB
+Path      : D:\DoAn_CNPM\BadmintonShop\BadmintonShop.Web\Views\DonHang\Index.cshtml
+
+Algorithm : SHA256
+Hash      : C9C486EACB3EC25652705D02158AB11099263B9CD9C79CF0FD156B9ABD53A6CD
+Path      : D:\DoAn_CNPM\BadmintonShop\BadmintonShop.Web\Controllers\DonHangController.cs
+
+Algorithm : SHA256
+Hash      : 92E74E40C89EA717B13033B8BA36D7254A4CCCCFD962204989FAEEC58F66A79A
+Path      : D:\DoAn_CNPM\BadmintonShop\tests\BadmintonShop.SV4.Checks\Program.cs
+
+Algorithm : SHA256
+Hash      : 8A919BA671B196829B76A90028F782E595AB0295A54AB1507C20BFCD16B2DF70
+Path      : D:\DoAn_CNPM\BadmintonShop\tests\BadmintonShop.SV4.Checks\AcceptanceChecks.cs
+

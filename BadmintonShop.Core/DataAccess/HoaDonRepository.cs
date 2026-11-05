@@ -26,7 +26,7 @@ public class HoaDonRepository
         var hasReason = Convert.ToInt32(DbHelper.ExecuteScalar("SELECT CASE WHEN COL_LENGTH('dbo.HoaDon','LyDoHuy') IS NULL THEN 0 ELSE 1 END")) == 1;
         var reasonColumn = hasReason ? "h.LyDoHuy" : "CAST(NULL AS nvarchar(500)) AS LyDoHuy";
         var result = DbHelper.ExecuteQuery($@"
-            SELECT h.MaHD,h.NgayLap,COALESCE(k.HoTen,N'Khách vãng lai') AS KhachHang,k.SDT,k.Email,
+            SELECT h.MaHD,h.NgayLap,COALESCE(k.HoTen,N'Khách vãng lai') AS KhachHang,k.SDT,k.Email,k.DiaChi AS DiaChiKhachHang,
                    h.LoaiBan,h.HinhThucTT,h.TienGiamGia,h.TongTien,h.TrangThai,{reasonColumn}
             FROM HoaDon h LEFT JOIN KhachHang k ON h.MaKH=k.MaKH
             WHERE h.NgayLap>=@tu AND h.NgayLap<DATEADD(day,1,@den)

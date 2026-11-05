@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "D:\DoAn_CNPM\BadmintonShop\tools\XuatBaoCao\render_review_documents.py", line 30, in <module>
+    paths = renderer.rasterize(str(docx), str(out), 130, True, True)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\nhatt\.codex\plugins\cache\openai-primary-runtime\documents\26.1030.10813\skills\documents\render_docx.py", line 423, in rasterize
+    raise RuntimeError(
+RuntimeError: Failed to produce PDF for rasterization (direct and ODT fallback).
+Word PDF renderer completed: C:\Users\nhatt\AppData\Local\Temp\soffice_convert_lym15cma\bao-cao-7-nhom.pdf
+D:\DoAn_CNPM\BadmintonShop\tools\XuatBaoCao\render_with_word.ps1 : Argument: '1' should be a 
+System.Management.Automation.PSReference. Use [ref].
+    + CategoryInfo          : NotSpecified: (:) [render_with_word.ps1], MethodException
+    + FullyQualifiedErrorId : NonRefArgumentToRefParameterMsg,render_with_word.ps1
+ 
+

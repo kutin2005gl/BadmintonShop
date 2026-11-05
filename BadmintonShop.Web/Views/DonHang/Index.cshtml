@@ -26,7 +26,8 @@ else
             @foreach (DataRow r in Model.Rows)
             {
                 var tt = (string)r["TrangThai"];
-                <tr class="border-b border-gray-200 hover:bg-gray-50">
+                <tr class="border-b border-gray-200 hover:bg-gray-50 cursor-pointer" tabindex="0"
+                    data-order-detail="@Url.Action("ChiTietDong", new { id = r["MaHD"] })" aria-label="Xem đơn hàng @r["MaHD"]">
                     <td class="py-4 pr-4 font-bold">#@r["MaHD"]</td>
                     <td class="py-4 pr-4">@(((DateTime)r["NgayLap"]).ToString("dd/MM/yyyy HH:mm"))</td>
                     <td class="py-4 pr-4">@r["HinhThucTT"]</td>
@@ -38,5 +39,12 @@ else
             </tbody>
         </table>
     </div>
+    <section id="order-detail" class="mt-8" aria-label="Chi tiết đơn được chọn" aria-live="polite">
+        <p class="text-gray-500">Chọn một ô trên dòng đơn hàng để xem chi tiết.</p>
+    </section>
 }
 </div>
+
+@section Scripts {
+<script src="~/js/order-main-sub.js" asp-append-version="true"></script>
+}

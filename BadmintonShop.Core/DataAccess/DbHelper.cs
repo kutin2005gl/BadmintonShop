@@ -14,6 +14,14 @@ namespace BadmintonShop.Core.DataAccess;
 public static class DbHelper
 {
     private static string? _connectionString;
+    private static long revision;
+    public static long PhienBanDuLieu => Interlocked.Read(ref revision);
+    public static string DauHieuDuLieu=>$"{PhienBanDuLieu}|{Services.TinHieuDuLieu.Doc(ConnectionString)}";
+    public static void BaoDuLieuThayDoi()
+    {
+        Interlocked.Increment(ref revision);
+        if(_connectionString!=null)Services.TinHieuDuLieu.Ghi(_connectionString);
+    }
 
     public static string ConnectionString
     {
@@ -43,7 +51,9 @@ public static class DbHelper
         using var cmd = new SqlCommand(sql, conn);
         cmd.Parameters.AddRange(thamSo);
         conn.Open();
-        return cmd.ExecuteNonQuery();
+        var result=cmd.ExecuteNonQuery();
+        BaoDuLieuThayDoi();
+        return result;
     }
 
     /// <summary>Lay 1 gia tri (COUNT, SCOPE_IDENTITY...).</summary>
@@ -54,6 +64,9 @@ public static class DbHelper
         cmd.Parameters.AddRange(thamSo);
         conn.Open();
         var kq = cmd.ExecuteScalar();
+        // Scalar is also used for INSERT ... SELECT identity. Conservatively invalidate
+        // for non-SELECT batches; no user text is parsed or executed here.
+        if(!sql.TrimStart().StartsWith("SELECT",StringComparison.OrdinalIgnoreCase))BaoDuLieuThayDoi();
         return kq == DBNull.Value ? null : kq;
     }
 
@@ -62,7 +75,7 @@ public static class DbHelper
     /// HoaDon + ChiTietHoaDon). Loi o bat ky buoc nao -> rollback toan bo.
     /// </summary>
     public static T ExecuteTransaction<T>(Func<SqlConnection, SqlTransaction, T> congViec,
-        IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, bool thayDoiDuLieu = true)
     {
         using var conn = TaoKetNoi();
         conn.Open();
@@ -71,6 +84,7 @@ public static class DbHelper
         {
             var kq = congViec(conn, tran);
             tran.Commit();
+            if(thayDoiDuLieu)BaoDuLieuThayDoi();
             return kq;
         }
         catch

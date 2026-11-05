@@ -1,0 +1,1 @@
+PASS package: 3 DOCX + 3 PDF + 5 page PNGs + source hashes; D:\DoAn_CNPM\BadmintonShop\docs\bao-cao\ban-ra-soat-dot-5.zip

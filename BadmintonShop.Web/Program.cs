@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // OTP mô phỏng
 builder.Services.AddSingleton<OtpService>();
+builder.Services.AddSingleton<DanhMucCongKhai>();
 
 // Kết nối SQL Server
 DbHelper.ConnectionString =

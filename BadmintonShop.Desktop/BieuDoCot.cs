@@ -13,7 +13,10 @@ public sealed class BieuDoCot : Control
         base.OnPaint(e);var g=e.Graphics;g.SmoothingMode=SmoothingMode.AntiAlias;
         if(DuLieu==null || DuLieu.Rows.Count==0) { g.DrawString("Không có dữ liệu trong khoảng lọc.",Font,Brushes.DimGray,20,20);return; }
         var dt=DuLieu;int label=dt.Columns.Count>2?1:0;
-        var values=dt.AsEnumerable().Select(r=>(Ten:Convert.ToString(r[label])??"",GiaTri:Convert.ToDecimal(r[dt.Columns.Count-1]))).ToList();
+        // Bảng chéo có hàng tổng với mã NULL; không vẽ lại tổng như một sản phẩm.
+        var values=dt.AsEnumerable().Where(r=>!(dt.Columns.Count>2 && r.IsNull(0) && Convert.ToString(r[1])=="Tất cả"))
+            .Select(r=>(Ten:Convert.ToString(r[label])??"",GiaTri:Convert.ToDecimal(r[dt.Columns.Count-1]))).ToList();
+        if(values.Count==0) { g.DrawString("Không có dữ liệu trong khoảng lọc.",Font,Brushes.DimGray,20,20);return; }
         decimal total=values.Sum(x=>x.GiaTri);
         int capacity=Math.Clamp((Height-50)/24,1,12);
         if(values.Count>capacity)values=[..values.Take(capacity-1),("Các dòng còn lại",values.Skip(capacity-1).Sum(x=>x.GiaTri))];

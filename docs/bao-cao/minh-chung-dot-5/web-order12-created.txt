@@ -1,0 +1,72 @@
+- generic: Miễn phí vận chuyển cho đơn từ 500.000đ
+- banner:
+  - link "BADMINTONSHOP":
+    - /url: /
+  - navigation:
+    - link "Sản phẩm":
+      - /url: /SanPham
+      - text: Sản phẩm
+    - link "Đơn hàng của tôi":
+      - /url: /DonHang
+      - text: Đơn hàng của tôi
+  - button "Tìm kiếm":
+  - button "Khách nghiệm thu":
+    - generic: Khách nghiệm thu
+  - link "Giỏ hàng":
+    - /url: /GioHang
+- main:
+  - heading "Đặt hàng thành công!" [level=1]
+  - paragraph:
+    - text: Mã đơn hàng của bạn là
+    - strong: "#12"
+    - text: .
+  - generic: Đã thêm “Vợt thử” vào giỏ hàng.
+  - generic: Vợt thử × 1
+  - generic: 100 ₫
+  - generic: Giảm giá
+  - generic: "-0 ₫"
+  - generic: Tổng cộng
+  - generic: 100 ₫
+  - paragraph: "Giao tới: Địa chỉ giả lập lượt liên tục đợt 5 — Thanh toán: khi nhận hàng"
+  - link "Theo dõi đơn hàng":
+    - /url: /DonHang/ChiTiet/12
+  - link "Tiếp tục mua sắm":
+    - /url: /
+- contentinfo:
+  - heading "BADMINTONSHOP" [level=3]
+  - paragraph: Điểm đến số 1 cho người đam mê cầu lông. Cung cấp trang thiết bị chính hãng từ các thương hiệu hàng đầu thế giới.
+  - link "FB":
+    - /url: "#"
+  - link "IG":
+    - /url: "#"
+  - link "YT":
+    - /url: "#"
+  - heading "Sản phẩm" [level=4]
+  - list:
+    - link "SV4 TEST Cầu":
+      - /url: /SanPham?maDM=2
+    - link "SV4 TEST Vợt":
+      - /url: /SanPham?maDM=1
+    - link "Hàng giảm giá":
+      - /url: /SanPham
+  - heading "Hỗ trợ" [level=4]
+  - list:
+    - link "Theo dõi đơn hàng":
+      - /url: /DonHang
+    - link "Giỏ hàng":
+      - /url: /GioHang
+    - link "Chính sách vận chuyển":
+      - /url: "#"
+    - link "Chính sách đổi trả":
+      - /url: "#"
+    - link "Liên hệ":
+      - /url: "#"
+  - heading "Đăng ký nhận tin" [level=4]
+  - paragraph: Nhận thông tin mới nhất về sản phẩm và khuyến mãi.
+  - textbox "Email của bạn"
+  - button "Gửi"
+  - paragraph: © 2026 BADMINTONSHOP. Đã đăng ký bản quyền.
+  - generic: Visa
+  - generic: Mastercard
+  - generic: Momo
+  - generic: VNPay

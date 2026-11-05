@@ -1,0 +1,1 @@
+PASS acceptance-report: 13 XLSX tables and 13 PDF pages; every displayed cell matches; all columns covered; horizontal bounds valid

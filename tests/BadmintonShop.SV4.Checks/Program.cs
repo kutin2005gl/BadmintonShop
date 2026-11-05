@@ -20,6 +20,7 @@ internal static partial class Program
     private static int Main(string[] args)
     {
         Console.OutputEncoding=Encoding.UTF8;
+        if(args.Contains("--cache-signal-child"))return CacheSignalChild();
         System.Globalization.CultureInfo.DefaultThreadCurrentCulture=System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
         System.Globalization.CultureInfo.DefaultThreadCurrentUICulture=System.Globalization.CultureInfo.GetCultureInfo("vi-VN");
         root=Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,"../../../../../"));
@@ -30,7 +31,25 @@ internal static partial class Program
         Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);
         // Keep one STA UI context while opening/closing many independent test forms, as Application.Run does.
         SynchronizationContext.SetSynchronizationContext(new WindowsFormsSynchronizationContext());
+        if(args.Contains("--acceptance-desktop-review"))return AcceptanceDesktopReview();
+        if(args.Contains("--acceptance") || args.Contains("--acceptance-ui-setup"))return Acceptance(args);
         Unit();
+        ReportProgressChecks();
+        CacheChecks();
+        AdvancedSearchChecks();
+        ExportProgressChecks();
+        if(args.Contains("--report-integration") || args.Contains("--report-demo-only"))
+        {
+            int index=Array.IndexOf(args,"--server");
+            if(index<0 || index+1>=args.Length)throw new ArgumentException("Report integration requires --server; creates a separate database.");
+            try
+            {
+                TaoCsdlTest(args[index+1]);ReportDatabaseChecks();
+                if(!args.Contains("--report-demo-only"))
+                { DesktopCacheChecks();WebCatalogChecks();MainSubChecks();ImportChecks();AdvancedSearchIntegrationChecks();CrossProcessCacheChecks(); }
+            }
+            catch(Exception ex) { failed++;Ghi("FAIL REPORT SETUP: "+ex); }
+        }
         if(args.Contains("--install-checks"))
         {
             int serverIndex=Array.IndexOf(args,"--server");
@@ -63,7 +82,8 @@ internal static partial class Program
     {
         var t=new DataTable();foreach(var (n,ty) in new (string,Type)[]{("MaHD",typeof(int)),("NgayLap",typeof(DateTime)),("LoaiBan",typeof(string)),
             ("TrangThai",typeof(string)),("TongTien",typeof(decimal)),("MaSP",typeof(int)),("TenSP",typeof(string)),("MaDM",typeof(int)),
-            ("TenDanhMuc",typeof(string)),("SoLuong",typeof(int)),("ThanhTien",typeof(decimal))})t.Columns.Add(n,ty);
+            ("TenDanhMuc",typeof(string)),("SoLuong",typeof(int)),("ThanhTien",typeof(decimal)),
+            ("MaNV",typeof(int)),("TenNhanVien",typeof(string)),("MaKH",typeof(int)),("TenKhachHang",typeof(string))})t.Columns.Add(n,ty);
         return t;
     }
     private static KetQuaBaoCao Fixture()
@@ -99,11 +119,11 @@ internal static partial class Program
         Test("U09 empty report",()=> { var k=BaoCaoService.Tao(Source(),DateTime.Today,DateTime.Today,null);Eq(0m,k.TongDoanhThu);Eq(0,k.Bang["Theo ngày"].Rows.Count);Eq(5,k.Bang["Trạng thái đơn"].Rows.Count); });
         Test("U10 constructors safe without DB or login",()=> { foreach(var f in Forms())using(f)True(!f.IsDisposed); });
         Test("U11 XLSX roundtrip and OpenXML schema",()=>
-        { var path=Path.Combine(output,"report.xlsx");XuatTaiLieu.Excel(path,Fixture());using(var wb=new XLWorkbook(path)) { Eq(6,wb.Worksheets.Count);Eq(161m,wb.Worksheet("Theo tháng").Cell(3,2).GetValue<decimal>());Eq(161m,wb.Worksheet("Theo tháng").Range("B7:B8").Cells().Sum(c=>c.GetValue<decimal>())); }
+        { var path=Path.Combine(output,"report.xlsx");XuatTaiLieu.Excel(path,Fixture());using(var wb=new XLWorkbook(path)) { Eq(Fixture().Bang.Count,wb.Worksheets.Count);Eq(161m,wb.Worksheet("Theo tháng").Cell(3,2).GetValue<decimal>());Eq(161m,wb.Worksheet("Theo tháng").Range("B7:B8").Cells().Sum(c=>c.GetValue<decimal>())); }
           using var doc=SpreadsheetDocument.Open(path,false);var errors=new OpenXmlValidator().Validate(doc).ToList();True(errors.Count==0); });
         Test("U12 PDF report / invoice / empty / multipage reopen",()=>
         {
-            var k=Fixture();var path=Path.Combine(output,"report.pdf");XuatTaiLieu.BaoCaoPdf(path,k);using(var p=PdfReader.Open(path,PdfDocumentOpenMode.Import))Eq(6,p.PageCount);
+            var k=Fixture();var path=Path.Combine(output,"report.pdf");XuatTaiLieu.BaoCaoPdf(path,k);using(var p=PdfReader.Open(path,PdfDocumentOpenMode.Import))Eq(k.Bang.Count,p.PageCount);
             var lines=new DataTable();lines.Columns.Add("Sản phẩm");lines.Columns.Add("ThanhTien",typeof(decimal));
             for(int i=0;i<180;i++)lines.Rows.Add("Vợt kiểm thử tiếng Việt "+i,100m);
             path=Path.Combine(output,"invoice.pdf");XuatTaiLieu.HoaDonPdf(path,new HoaDon { MaHD=123,NgayLap=new DateTime(2026,1,1),LoaiBan="Tại quầy",HinhThucTT="Tiền mặt",TrangThai="Hoàn thành",TongTien=18000,TienKhachDua=20000 },lines);
@@ -129,7 +149,7 @@ internal static partial class Program
     {
         string name="BadmintonShop_SV4_Test_"+DateTime.Now.ToString("yyyyMMddHHmmss")+"_"+Guid.NewGuid().ToString("N")[..8];
         var b=new SqlConnectionStringBuilder { DataSource=server,InitialCatalog="master",IntegratedSecurity=true,TrustServerCertificate=true,ConnectTimeout=30 };
-        using(var c=new SqlConnection(b.ConnectionString)) { c.Open();using var cmd=new SqlCommand($"CREATE DATABASE [{name}]",c);cmd.ExecuteNonQuery(); }
+        using(var c=new SqlConnection(b.ConnectionString)) { c.Open();using var cmd=new SqlCommand($"CREATE DATABASE [{name}]",c) { CommandTimeout=120 };cmd.ExecuteNonQuery(); }
         b.InitialCatalog=name;DbHelper.ConnectionString=b.ConnectionString;Ghi("Isolated test database: "+name);
         var schema=File.ReadAllText(Path.Combine(root,"database/01_CreateDatabase.sql"));schema=schema[schema.IndexOf("-- ====== DANH MUC",StringComparison.Ordinal)..];Batches(schema);
         foreach(var file in new[]{"02_Triggers.sql","04_SV4_Migration.sql","04_SV4_Migration.sql","06_SV4_POS_Request.sql","06_SV4_POS_Request.sql"})Batches(File.ReadAllText(Path.Combine(root,"database",file)).Replace("USE BadmintonShop;",$"USE [{name}];",StringComparison.Ordinal));

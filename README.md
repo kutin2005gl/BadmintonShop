@@ -15,13 +15,13 @@ POS đã tích hợp khuyến mãi dùng chung SV3 (sản phẩm, hóa đơn, vo
 - **BadmintonShop.Core** – Class Library dùng chung: Models, DataAccess (ADO.NET), Services (SV1)
 - **BadmintonShop.Web** – ASP.NET Core MVC cho khách hàng (SV2, SV3)
 - **BadmintonShop.Desktop** – WinForms cho nhân viên / quản lý (SV1, SV4)
-- **database/** – `BadmintonShop.sql` (file bàn giao, chạy 1 lần trên máy trống) = nối `01_CreateDatabase.sql` → `02_Triggers.sql` → `03_SampleData.sql` → migration `04` → `06`
+- **database/** – `BadmintonShop.sql` (file bàn giao, chạy 1 lần trên máy trống) = nối `01_CreateDatabase.sql` → `02_Triggers.sql` → `03_SampleData.sql` → migration `04` → `06` → `07`
 - **docs/** – ERD, phân công; **[hướng dẫn cài đặt](docs/bao-cao/huong-dan-cai-dat.md)** (bản mới nhất), các chương báo cáo trong `docs/bao-cao/`
 
 ## Chạy nhanh
 
-1. SSMS: mở và chạy `database/BadmintonShop.sql` (hoặc chạy lần lượt 3 file 01 → 02 → 03).
-   Ai sửa 01/02/03/04/06 thì ghép lại file tổng (Git Bash): `cd database && { cat 01_CreateDatabase.sql; sed '1s/^\xEF\xBB\xBF//' 02_Triggers.sql; sed '1s/^\xEF\xBB\xBF//' 03_SampleData.sql; cat 04_SV4_Migration.sql; cat 06_SV4_POS_Request.sql; } > BadmintonShop.sql`
+1. SSMS: mở và chạy `database/BadmintonShop.sql` (hoặc chạy lần lượt 01 → 02 → 03 → 04 → 06 → 07 trên CSDL mới).
+   Ai sửa 01/02/03/04/06/07 thì ghép lại file tổng (Git Bash): `cd database && { cat 01_CreateDatabase.sql; sed '1s/^\xEF\xBB\xBF//' 02_Triggers.sql; sed '1s/^\xEF\xBB\xBF//' 03_SampleData.sql; cat 04_SV4_Migration.sql; cat 06_SV4_POS_Request.sql; cat 07_SV2_DanhGiaSanPham.sql; } > BadmintonShop.sql`
    (hoặc nhắn SV1 ghép).
 2. Sửa `Server=` trong `BadmintonShop.Web/appsettings.json` và `BadmintonShop.Desktop/App.config` cho khớp máy mình (`localhost` hoặc `.\SQLEXPRESS`). **Không commit** phần sửa này nếu có mật khẩu.
 3. Mở `BadmintonShop.sln` → Build → chạy Web hoặc Desktop.
@@ -104,3 +104,11 @@ Chạy script bằng `sqlcmd` nhớ thêm `-I` (bật QUOTED_IDENTIFIER), vd `sq
 ## Bàn giao SV4 26/10/2026
 
 [Kết quả kiểm thử và giới hạn mới nhất](docs/final-integration/README.md), [kịch bản demo 5–7 phút](docs/bao-cao/huong-dan-su-dung-sv4.md), [checklist SV2 kiểm chéo](docs/bao-cao/checklist-sv2-desktop.md). `--schema-readonly` chỉ kiểm metadata CSDL cấu hình, không tự migration. CSDL máy kiểm tra còn thiếu 04/06 nên không nhận POS cửa hàng đã hoạt động trước khi được SV1 cập nhật.
+
+## Đối chiếu yêu cầu môn học — 05/11/2026
+
+Xem [báo cáo rà soát](docs/bao-cao/ra-soat-yeu-cau-2026-11-05.md). Các kết quả kiểm thử cũ chỉ chứng minh phạm vi đã kiểm, chưa chứng minh đủ 7 nhóm yêu cầu của giảng viên. Những phần bắt buộc còn thiếu cần được bổ sung trước khi coi là hoàn tất đồ án.
+
+### Tiến độ yêu cầu môn học — đợt 2 (05/11/2026)
+
+Đã bổ sung DB demo riêng, bộ nhớ/làm mới và tín hiệu giữa tiến trình, main–sub Desktop, tìm nâng cao, nhập Excel có xem trước/rollback, PDF nhiều năm chia phần. Phạm vi nghiệm thu, giả định và log kiểm tra nằm trong [báo cáo đợt 2](docs/bao-cao/quy-tac-va-tien-do-dot-2.md) và [checklist](docs/bao-cao/checklist-tien-do-4-thanh-vien.md). Không chạy lại script xóa/tạo DB hiện có để thử chức năng; dùng chế độ tạo DB thử có tên mới được hướng dẫn trong báo cáo.

@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using BadmintonShop.Core.DataAccess;
 using BadmintonShop.Core.Services;
 
@@ -9,6 +9,7 @@ public class FrmThongKe : Form
     private DateTimePicker tu=null!,den=null!;private ComboBox loai=null!;private Label tong=null!;private TabControl tabs=null!;
     private KetQuaBaoCao? ketQua;private Label revenue=null!,count=null!,sold=null!;
     private const ChucNang Quyen=ChucNang.ThongKeBinhLuan;
+    private readonly BoNhoPhien<(DateTime,DateTime,string?),KetQuaBaoCao> boNho=new(BoNhoPhien<int,int>.ThoiHanMacDinh);
     public FrmThongKe() { InitializeComponent(); }
     private void InitializeComponent()
     {
@@ -16,9 +17,12 @@ public class FrmThongKe : Form
         tu=new DateTimePicker { Format=DateTimePickerFormat.Custom,CustomFormat="dd/MM/yyyy",Width=130,Value=new DateTime(DateTime.Today.Year,1,1) };
         den=new DateTimePicker { Format=DateTimePickerFormat.Custom,CustomFormat="dd/MM/yyyy",Width=130 };loai=Sv4Ui.Chon("Tất cả loại bán","Online","Tại quầy");
         tong=new Label { AutoSize=true,Margin=new Padding(8),Font=new Font("Segoe UI",11,FontStyle.Bold) };
+        var nam=new NumericUpDown { Minimum=1753,Maximum=9998,Value=DateTime.Today.Year,Width=75 };
         var bar=Sv4Ui.ThanhCongCu(130);bar.Controls.AddRange([Sv4Ui.Nhan("Từ"),tu,Sv4Ui.Nhan("đến"),den,loai,
-            Sv4Ui.Nut("Xem báo cáo",()=>Chay(Nap)),Sv4Ui.Nut("Xuất Excel",()=>Chay(()=>Xuat(false))),Sv4Ui.Nut("Xuất PDF",()=>Chay(()=>Xuat(true))),tong,
-            Sv4Ui.Nhan("Chỉ đơn Hoàn thành tính doanh thu/số bán. Số đơn đếm mọi trạng thái. Sau đổi bộ lọc, bấm Xem báo cáo.")]);
+            Sv4Ui.Nut("Xem báo cáo",()=>Chay(Nap)),Sv4Ui.Nut("Làm mới",()=>Chay(()=> { boNho.Xoa();Nap(); })),Sv4Ui.Nut("Xuất Excel",()=>Chay(()=>Xuat(false))),Sv4Ui.Nut("Xuất PDF",()=>Chay(()=>Xuat(true))),tong,
+            Sv4Ui.Nhan("Năm"),nam,Sv4Ui.Nut("Xem cả năm",()=>Chay(()=>
+            { tu.Value=new DateTime((int)nam.Value,1,1);den.Value=new DateTime((int)nam.Value,12,31);Nap(); })),
+            Sv4Ui.Nhan("Đơn Hoàn thành; ngày lập trong khoảng lọc; đơn vị: đồng. Thu–chi (tiền nhập hàng): chọn Tất cả loại bán.")]);
         tabs=new TabControl { Dock=DockStyle.Fill };
         var cards=new TableLayoutPanel { Dock=DockStyle.Top,Height=100,ColumnCount=3,Padding=new Padding(8) };
         revenue=ShopTheme.Title("—",18);count=ShopTheme.Title("—",18);sold=ShopTheme.Title("—",18);
@@ -32,8 +36,10 @@ public class FrmThongKe : Form
     // SV4: nạp thành công mới thay kết quả, bảng và biểu đồ cùng dùng snapshot này.
     private async void Nap()
     {
-        var from=tu.Value;var to=den.Value;var saleType=Sv4Ui.Loc(loai);
-        await ShopTheme.Load(this,()=>BaoCaoService.Tao(new BaoCaoRepository().LayDuLieu(from,to,saleType),from,to,saleType),kq=>
+        var from=tu.Value.Date;var to=den.Value.Date;var saleType=Sv4Ui.Loc(loai);
+        var scope=$"{DbHelper.ConnectionString}|{PhienDangNhap.MaTK}|{PhienDangNhap.VaiTro}|{DbHelper.DauHieuDuLieu}";
+        await ShopTheme.Load(this,()=>boNho.Lay((from,to,saleType),scope,
+            ()=>BaoCaoService.Tao(new BaoCaoRepository().LayDuLieuBaoCao(from,to,saleType),from,to,saleType)),kq=>
         {
         revenue.Text=$"{kq.TongDoanhThu:N0} đ";
         count.Text=kq.Bang["Trạng thái đơn"].AsEnumerable().Sum(r=>r.Field<int>("Số đơn")).ToString("N0");
@@ -41,12 +47,20 @@ public class FrmThongKe : Form
         ketQua=kq;while(tabs.TabPages.Count>0) { var old=tabs.TabPages[0];tabs.TabPages.RemoveAt(0);old.Dispose(); }
         foreach(var (ten,dt) in kq.Bang)
         {
+            if(ten.StartsWith("Thu–chi ",StringComparison.Ordinal))
+            {
+                // Các chỉ tiêu thu, chi, chênh lệch không được cộng thành một tổng trên biểu đồ.
+                var chiPage=new TabPage(ten);var chiGrid=Sv4Ui.Luoi();chiGrid.DataSource=dt;
+                chiPage.Controls.Add(chiGrid);tabs.TabPages.Add(chiPage);continue;
+            }
             var page=new TabPage(ten);var split=new SplitContainer { Dock=DockStyle.Fill,Orientation=Orientation.Horizontal,Size=new Size(1100,600),SplitterDistance=290 };
             var grid=Sv4Ui.Luoi();grid.DataSource=dt;split.Panel1.Controls.Add(grid);split.Panel2.Controls.Add(new BieuDoCot { DuLieu=dt });
             page.Controls.Add(split);tabs.TabPages.Add(page);
         }
         tong.Text=$"{kq.TuNgay:dd/MM/yyyy}–{kq.DenNgay:dd/MM/yyyy} | {kq.LoaiBan} | Doanh thu: {kq.TongDoanhThu:N0} đ";
-        },kq=>kq.Bang["Theo ngày"].Rows.Count==0);
+        },kq=>kq.Bang["Theo ngày"].Rows.Count==0 && !kq.Bang
+            .Where(b=>b.Key.StartsWith("Thu–chi ",StringComparison.Ordinal))
+            .Any(b=>b.Value.Rows[1].Field<decimal>("Tổng")!=0));
     }
     private void Xuat(bool pdf)
     {

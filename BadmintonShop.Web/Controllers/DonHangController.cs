@@ -27,6 +27,15 @@ public class DonHangController : Controller
         return View(new ChiTietDonViewModel { Don = hd, Dong = _donHang.LayChiTietHienThi(id,MaKH) });
     }
 
+    // Main–sub uses the same ownership checks as the full detail page; never cache personal orders.
+    [HttpGet, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public IActionResult ChiTietDong(int id)
+    {
+        var hd = _donHang.LayDonCuaKhach(id, MaKH);
+        if (hd == null) return NotFound();
+        return PartialView("ChiTiet", new ChiTietDonViewModel { Don = hd, Dong = _donHang.LayChiTietHienThi(id, MaKH) });
+    }
+
     // TV3: khach huy don khi con "Cho xac nhan"
     [HttpPost, ValidateAntiForgeryToken]
     public IActionResult Huy(int id)

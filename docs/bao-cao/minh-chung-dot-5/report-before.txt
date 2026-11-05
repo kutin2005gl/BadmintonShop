@@ -1,0 +1,104 @@
+Window: "BadmintonShop - Quản lý cửa hàng", App: BadmintonShop.SV4.Checks.exe.
+	0 window BadmintonShop - Quản lý cửa hàng Secondary Actions: Raise ID: FrmMain
+		1 pane
+			77 window Thống kê — báo cáo Secondary Actions: Raise
+				78 tab
+					79 pane Theo ngày
+						80 pane
+							81 pane
+								82 data grid
+									83 custom Top Row
+										84 header Kỳ ID: 4221202951
+										85 header Doanh thu ID: 4256608836
+									86 custom Row 0
+										87 item Kỳ Row 0, Not sorted. Value: 2026-01-01 ID: 4221913016
+										88 item Doanh thu Row 0, Not sorted. Value: 70 đ ID: 4262999416
+									89 custom Row 1
+										90 item Kỳ Row 1, Not sorted. Value: 2026-07-01 ID: 422679067
+										91 item Doanh thu Row 1, Not sorted. Value: 30 đ ID: 4224111608
+							92 pane
+								93 pane ID: 461880
+					94 tab item (selectable) Theo ngày
+					95 tab item (selectable) Theo tháng
+					96 tab item (selectable) Theo năm
+					97 tab item (selectable) Theo quý
+					98 tab item (selectable) Bán chạy
+					99 tab item (selectable) Theo danh mục
+					100 tab item (selectable) Trạng thái đơn
+					101 tab item (selectable) Nhân viên × năm
+					102 tab item (selectable) Khách hàng × năm
+					103 tab item (selectable) Sản phẩm × quý 2026
+					104 tab item (selectable) Thu–chi 2026
+				105 pane
+					106 pane
+						107 text 100 đ
+						108 text DOANH THU HOÀN THÀNH
+					109 pane DOANH THU HOÀN THÀNH
+						110 text 4
+						111 text TỔNG SỐ ĐƠN
+					112 pane TỔNG SỐ ĐƠN
+						113 text 2
+						114 text SỐ SẢN PHẨM ĐÃ BÁN
+				115 pane SỐ SẢN PHẨM ĐÃ BÁN
+					116 text Từ
+					117 date and time picker (settable, string) Value: 01/01/2026
+					118 text đến
+					119 date and time picker (settable, string) Value: 05/11/2026
+					120 combo box (settable, string) Tất cả loại bán Value: Tất cả loại bán
+						121 text
+						122 button Open
+					123 button Xem báo cáo
+					124 button Làm mới
+					125 button Xuất Excel
+					126 button Xuất PDF
+					127 text 01/01/2026–05/11/2026 | Tất cả | Doanh thu: 100 đ
+					128 text Năm
+					129 spinner Năm
+						130 spinner UpDown
+							131 button (disabled) Up
+							132 button (disabled) Down
+						133 edit (settable, string) Năm Value: 2026
+					134 button Xem cả năm
+					135 text Đơn Hoàn thành; ngày lập trong khoảng lọc; đơn vị: đồng. Thu–chi (tiền nhập hàng): chọn Tất cả loại bán.
+				136 text Đã cập nhật lúc 17:06:27
+		40 pane
+			41 text Thống kê — báo cáo
+			42 text Nghiệm thu DB thử Quản trị viên
+			43 button Đăng xuất
+		44 pane
+			45 pane
+				46 text CỬA HÀNG
+				47 button ◈ Tổng quan
+				48 button ▦ Sản phẩm
+				49 button ▤ Danh mục
+				50 button ◇ Khuyến mãi
+				51 text BÁN HÀNG
+				52 button ▤ Đơn hàng
+				53 button ▣ Bán tại quầy
+				54 text NHẬP HÀNG
+				55 button ▥ Phiếu nhập
+				56 button ◇ Nhà cung cấp
+				57 text BÁO CÁO
+				58 button ▥ Thống kê
+				59 button ★ Quản lý đánh giá
+				60 text HỆ THỐNG
+				61 button ◇ Nhân viên, tài khoản
+				62 button ◇ Đổi mật khẩu
+				63 button ▤ Sao lưu, phục hồi
+				64 button ↪ Thoát
+				65 scroll bar (settable, float) Vertical Value: 0 ID: NonClientVerticalScrollBar
+					66 button Line up ID: UpButton
+					67 thumb Position ID: ScrollbarThumb
+					68 button Page down ID: DownPageButton
+					69 button Line down ID: DownButton
+			70 text BADMINTON SHOP / QUẢN LÝ
+		71 title bar (settable, string) Value: BadmintonShop - Quản lý cửa hàng
+			72 menu bar System ID: MenuBar
+				73 menu item System
+			74 button Minimize
+			75 button Restore
+			76 button Close
+
+Document text: ```
+2026
+```

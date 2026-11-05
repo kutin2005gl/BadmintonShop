@@ -9,6 +9,8 @@ namespace BadmintonShop.Desktop;
 public partial class FrmDanhSachPhieuNhap : Form
 {
     private readonly PhieuNhapRepository _pnRepo = new();
+    private bool binding;
+    private readonly BoNhoPhien<int,DataTable> details=new(BoNhoPhien<int,int>.ThoiHanMacDinh);
 
     // TV1: khoi tao form (chi giao dien, KHONG truy cap CSDL de VS Designer mo duoc)
     public FrmDanhSachPhieuNhap()
@@ -53,7 +55,8 @@ public partial class FrmDanhSachPhieuNhap : Form
         try
         {
             var dt = _pnRepo.LayDanhSachHienThi(tu, den, maNCC);
-            dgvPhieu.DataSource = dt;
+            binding=true;
+            try { dgvPhieu.DataSource = dt; }finally { binding=false; }
             dgvPhieu.Columns["MaPN"]!.HeaderText = "Số phiếu";
             dgvPhieu.Columns["NgayNhap"]!.HeaderText = "Ngày nhập";
             dgvPhieu.Columns["NgayNhap"]!.DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
@@ -64,10 +67,9 @@ public partial class FrmDanhSachPhieuNhap : Form
             var tong = dt.AsEnumerable().Sum(r => r.Field<decimal>("TongTien"));
             lblTongKet.Text = $"{dt.Rows.Count} phiếu – tổng giá trị nhập: {tong:N0} đ";
 
-            dgvPhieu.ClearSelection();
             foreach (DataGridViewRow r in dgvPhieu.Rows)
                 if (chonMaPN != 0 && (int)r.Cells["MaPN"].Value == chonMaPN) { r.Selected = true; dgvPhieu.CurrentCell = r.Cells["MaPN"]; }
-            if (dgvPhieu.SelectedRows.Count == 0) dgvChiTiet.DataSource = null;
+            dgvPhieu_SelectionChanged(this,EventArgs.Empty);
         }
         catch (Exception ex) { BaoLoiHeThong(ex); }
     }
@@ -75,11 +77,13 @@ public partial class FrmDanhSachPhieuNhap : Form
     // TV1: chon 1 phieu thi hien chi tiet cac san pham ben duoi
     private void dgvPhieu_SelectionChanged(object? sender, EventArgs e)
     {
-        if (dgvPhieu.CurrentRow?.DataBoundItem is not DataRowView r || !dgvPhieu.CurrentRow.Selected) return;
+        if(binding)return;
+        if (dgvPhieu.CurrentRow?.DataBoundItem is not DataRowView r)
+        { dgvChiTiet.DataSource=null;grpChiTiet.Text="Chi tiết phiếu nhập";return; }
         var maPN = (int)r["MaPN"];
         try
         {
-            dgvChiTiet.DataSource = _pnRepo.LayChiTietHienThi(maPN);
+            dgvChiTiet.DataSource = details.Lay(maPN,$"{DbHelper.ConnectionString}|{PhienDangNhap.MaTK}|{PhienDangNhap.VaiTro}|{DbHelper.DauHieuDuLieu}",()=>_pnRepo.LayChiTietHienThi(maPN));
             dgvChiTiet.Columns["MaSP"]!.HeaderText = "Mã SP";
             dgvChiTiet.Columns["TenSP"]!.HeaderText = "Sản phẩm";
             dgvChiTiet.Columns["TenSP"]!.FillWeight = 250;

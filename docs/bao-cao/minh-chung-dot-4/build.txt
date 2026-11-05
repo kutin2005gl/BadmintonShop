@@ -1,0 +1,10 @@
+  BadmintonShop.Core -> D:\DoAn_CNPM\BadmintonShop\BadmintonShop.Core\bin\Debug\net8.0\BadmintonShop.Core.dll
+  BadmintonShop.Web -> D:\DoAn_CNPM\BadmintonShop\BadmintonShop.Web\bin\Debug\net8.0\BadmintonShop.Web.dll
+  BadmintonShop.Desktop -> D:\DoAn_CNPM\BadmintonShop\BadmintonShop.Desktop\bin\Debug\net8.0-windows\BadmintonShop.Desktop.dll
+  BadmintonShop.SV4.Checks -> D:\DoAn_CNPM\BadmintonShop\tests\BadmintonShop.SV4.Checks\bin\Debug\net8.0-windows\BadmintonShop.SV4.Checks.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.96

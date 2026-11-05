@@ -8,6 +8,8 @@ namespace BadmintonShop.Web.Controllers;
 
 public class SanPhamController : Controller
 {
+    private readonly BadmintonShop.Web.Services.DanhMucCongKhai catalog;
+    public SanPhamController(BadmintonShop.Web.Services.DanhMucCongKhai catalog)=>this.catalog=catalog;
     private readonly SanPhamRepository _sanPhamRepository = new();
 
     // Repository lấy danh mục từ SQL Server
@@ -19,18 +21,19 @@ public class SanPhamController : Controller
         string? tuKhoa,
         int? maDM,
         string? sapXep,
-        int trang = 1)
+        int trang = 1,bool lamMoi=false)
     {
         const int soSanPhamMoiTrang = 8;
 
         // 1. Lấy danh mục từ SQL Server
-        var danhMuc = _danhMucRepository.LayTatCa();
+        var snapshot=catalog.Lay(lamMoi);
+        var danhMuc = snapshot.Categories;
 
         // 2. Lấy sản phẩm theo từ khóa và danh mục
-        var danhSach = _sanPhamRepository.LayTatCa(
-            tuKhoa,
-            maDM
-        );
+        var keyword=tuKhoa?.Trim();
+        var danhSach = snapshot.Products.Where(sp=>
+            (string.IsNullOrEmpty(keyword) || $"{sp.TenSP} {sp.ThuongHieu}".Contains(keyword,StringComparison.CurrentCultureIgnoreCase)) &&
+            (!maDM.HasValue || sp.MaDM==maDM)).ToList();
 
         // 3. Chỉ hiển thị sản phẩm đang bán
         danhSach = danhSach

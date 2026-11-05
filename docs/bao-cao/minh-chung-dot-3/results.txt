@@ -1,0 +1,7 @@
+Isolated test database: BadmintonShop_SV4_Test_20261105162207_dc9ab928
+PASS DB-R01 SQL joins / trigger totals / independent two-year expected values
+PASS DB-R02 SQL end-day inclusion / quarter boundary / purchase-only period / channel
+Report fixture verified: BadmintonShop_SV4_Test_20261105162207_dc9ab928; --report-demo-only retains this fixture without subsequent mutation checks.
+Separate PIDs Web=26076, Desktop forms=29056; order=11; revenue 511 -> 511 pending -> 611 completed; report reload=2 SQL, reuse=0, manual refresh=2. HTTP uses production login/cart/checkout, no test endpoints.
+PASS E01 production Web process checkout -> Desktop form transition -> cached report refresh
+RESULT: 3 passed, 0 failed. Output: C:\Users\nhatt\AppData\Local\Temp\BadmintonShop-SV4-Checks\20261105-162207
