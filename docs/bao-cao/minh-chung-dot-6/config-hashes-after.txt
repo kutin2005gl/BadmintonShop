@@ -1,0 +1,9 @@
+
+Algorithm : SHA256
+Hash      : 5A27D65BCCEDC0FE1C58F2742EA8B07C13CCF54AB41C43D06F288794F6AA6914
+Path      : D:\DoAn_CNPM\BadmintonShop\BadmintonShop.Desktop\App.config
+
+Algorithm : SHA256
+Hash      : 65CA48BC0DA9D3C97F9A324B0460EE435C3522FC95415E85C305E0F3A244D99D
+Path      : D:\DoAn_CNPM\BadmintonShop\BadmintonShop.Web\appsettings.json
+

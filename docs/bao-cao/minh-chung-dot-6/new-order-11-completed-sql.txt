@@ -1,0 +1,15 @@
+DB
+--
+BadmintonShop_SV4_Test_20261106021438_b10b8080
+MaHD NgayLap TrangThai TongTien MaKH MaNV
+---- ------- --------- -------- ---- ----
+11 2026-11-06 02:22:28.167 Hoàn thành 100 3 NULL
+MaSP SoLuongTon
+---- ----------
+1 94
+Revenue2026ThroughNov6
+----------------------
+200
+Revenue2025Through2026
+----------------------
+611

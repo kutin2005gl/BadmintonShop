@@ -1,0 +1,7 @@
+Observed 06/11/2026, Asia/Saigon; Codex.
+Command: dotnet build BadmintonShop.sln --no-restore -m:1 -v:minimal
+Build succeeded. Exit code 0.
+1 Warning(s), 0 Error(s). Time Elapsed 00:00:34.96
+BadmintonShop.Desktop/FrmKhuyenMai.cs(278,9): warning CS8602: Dereference of a possibly null reference.
+This is a transcription of the tool output, not a raw redirected build log.
+No claim that historical warnings have been fixed.

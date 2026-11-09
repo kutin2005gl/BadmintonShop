@@ -1,0 +1,24 @@
+PASS U01 required name / trim / length
+PASS U02 money range and whole dong
+PASS U03 all 25 state pairs
+PASS U04 role matrix and session
+PASS U05 relative image safety
+PASS U06 allocation rounding tie and zero
+PASS U07 allocation 1000 random and large money
+PASS U08 report complete only / counts / quantities / category sum
+PASS U09 empty report
+PASS U10 constructors safe without DB or login
+PASS U11 XLSX roundtrip and OpenXML schema
+PASS U12 PDF report / invoice / empty / multipage reopen
+PASS U13 image decode / reencode / bad / missing / size limit
+PASS R01 product quarters / two years / empty quarters / end date / canceled
+PASS R02 employee / customer years / unassigned groups / no duplicated invoice
+PASS R03 purchase cash out / separate datasets / negative difference / channel scope
+PASS R04 date intersection / reversed range / empty year
+PASS R05 allocation shared across products and categories
+PASS R06 new reports XLSX numeric values and PDF reopen
+PASS R07 chart includes unassigned group and handles empty total row
+PASS C01 snapshots / exact expiry / refresh / owner and revision isolation / failures
+PASS A01 six operators / inclusive million boundaries / AND OR NOT / city groups
+PASS X03 wide year pivots split into readable sections / XLSX all years retained
+RESULT: 23 passed, 0 failed. Output: %USERPROFILE%\AppData\Local\Packages\sandbox.{899a503d-6811-498a-8354-c64ef6b43506}\AC\Temp\BadmintonShop-SV4-Checks\20261106-020519

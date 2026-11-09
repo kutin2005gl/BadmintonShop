@@ -1,0 +1,9 @@
+PASS MS01 stale success cannot overwrite latest selection even when transport ignores abort
+PASS MS02 delayed response body cannot overwrite latest selection
+PASS MS03 stale error/finally does not clear busy or replace pending latest content
+PASS MS04 network failure shows error; selecting again recovers
+PASS MS05 HTTP errors and login redirects do not inject their bodies
+PASS MS06 Space and Enter on row select; nested link key keeps native action
+PASS MS07 modifier clicks preserve native navigation
+PASS MS08 page without detail panel loads safely
+RESULT: 8/8 local script contracts passed; no browser/network/DPI acceptance implied.

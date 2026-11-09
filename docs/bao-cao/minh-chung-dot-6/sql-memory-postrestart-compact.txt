@@ -1,0 +1,8 @@
+name|ValueInUse
+----|----------
+user connections|0
+min server memory (MB)|16
+max server memory (MB)|2147483647
+physical_memory_in_use_kb|process_physical_memory_low
+-------------------------|---------------------------
+54260|1
