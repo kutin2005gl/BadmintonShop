@@ -1,0 +1,302 @@
+[
+  {
+    "Name": "Theo ngày",
+    "Columns": [
+      "Kỳ",
+      "Doanh thu"
+    ],
+    "Rows": [
+      [
+        "2026-01-01",
+        70
+      ],
+      [
+        "2026-07-01",
+        30
+      ],
+      [
+        "2026-11-05",
+        200
+      ]
+    ]
+  },
+  {
+    "Name": "Theo tháng",
+    "Columns": [
+      "Kỳ",
+      "Doanh thu"
+    ],
+    "Rows": [
+      [
+        "2026-01",
+        70
+      ],
+      [
+        "2026-07",
+        30
+      ],
+      [
+        "2026-11",
+        200
+      ]
+    ]
+  },
+  {
+    "Name": "Theo năm",
+    "Columns": [
+      "Kỳ",
+      "Doanh thu"
+    ],
+    "Rows": [
+      [
+        "2026",
+        300
+      ]
+    ]
+  },
+  {
+    "Name": "Theo quý",
+    "Columns": [
+      "Kỳ",
+      "Doanh thu"
+    ],
+    "Rows": [
+      [
+        "2026-Q1",
+        70
+      ],
+      [
+        "2026-Q3",
+        30
+      ],
+      [
+        "2026-Q4",
+        200
+      ]
+    ]
+  },
+  {
+    "Name": "Bán chạy",
+    "Columns": [
+      "Mã SP",
+      "Sản phẩm",
+      "Số lượng"
+    ],
+    "Rows": [
+      [
+        1,
+        "Vợt thử",
+        3
+      ],
+      [
+        2,
+        "Cầu thử",
+        1
+      ]
+    ]
+  },
+  {
+    "Name": "Theo danh mục",
+    "Columns": [
+      "Mã DM",
+      "Danh mục",
+      "Doanh thu"
+    ],
+    "Rows": [
+      [
+        1,
+        "SV4 TEST Vợt",
+        270
+      ],
+      [
+        2,
+        "SV4 TEST Cầu",
+        30
+      ]
+    ]
+  },
+  {
+    "Name": "Trạng thái đơn",
+    "Columns": [
+      "Trạng thái",
+      "Số đơn"
+    ],
+    "Rows": [
+      [
+        "Chờ xác nhận",
+        1
+      ],
+      [
+        "Đã xác nhận",
+        0
+      ],
+      [
+        "Đang giao",
+        0
+      ],
+      [
+        "Hoàn thành",
+        4
+      ],
+      [
+        "Đã hủy",
+        1
+      ]
+    ]
+  },
+  {
+    "Name": "Nhân viên × năm",
+    "Columns": [
+      "Mã",
+      "Tên",
+      "2026",
+      "Tổng"
+    ],
+    "Rows": [
+      [
+        null,
+        "Chưa gán nhân viên",
+        230,
+        230
+      ],
+      [
+        1,
+        "SV4 TEST",
+        70,
+        70
+      ],
+      [
+        null,
+        "Tất cả",
+        300,
+        300
+      ]
+    ]
+  },
+  {
+    "Name": "Khách hàng × năm",
+    "Columns": [
+      "Mã",
+      "Tên",
+      "2026",
+      "Tổng"
+    ],
+    "Rows": [
+      [
+        null,
+        "Khách vãng lai",
+        30,
+        30
+      ],
+      [
+        1,
+        "Khách 1",
+        70,
+        70
+      ],
+      [
+        3,
+        "Khách nghiệm thu",
+        200,
+        200
+      ],
+      [
+        null,
+        "Tất cả",
+        300,
+        300
+      ]
+    ]
+  },
+  {
+    "Name": "Sản phẩm × quý 2026",
+    "Columns": [
+      "Mã SP",
+      "Sản phẩm",
+      "Q1",
+      "Q2",
+      "Q3",
+      "Q4",
+      "Tổng"
+    ],
+    "Rows": [
+      [
+        1,
+        "Vợt thử",
+        70,
+        0,
+        0,
+        200,
+        270
+      ],
+      [
+        2,
+        "Cầu thử",
+        0,
+        0,
+        30,
+        0,
+        30
+      ],
+      [
+        3,
+        "Sản phẩm 3",
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        null,
+        "Tất cả",
+        70,
+        0,
+        30,
+        200,
+        300
+      ]
+    ]
+  },
+  {
+    "Name": "Thu–chi 2026",
+    "Columns": [
+      "Mã",
+      "Chỉ tiêu",
+      "Q1",
+      "Q2",
+      "Q3",
+      "Q4",
+      "Tổng"
+    ],
+    "Rows": [
+      [
+        1,
+        "Thu bán hàng",
+        70,
+        0,
+        30,
+        200,
+        300
+      ],
+      [
+        2,
+        "Chi nhập hàng",
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        "Chênh lệch thu–chi",
+        70,
+        0,
+        30,
+        200,
+        300
+      ]
+    ]
+  }
+]

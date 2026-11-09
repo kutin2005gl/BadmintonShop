@@ -1,0 +1,2 @@
+PASS ui-snapshot-200: 11 XLSX tables and 11 PDF pages; every displayed cell matches; all columns covered; horizontal bounds valid
+PASS frozen independent oracle: original 2026 revenue 70+30 plus UI order 100 = 200; 11 exact schemas/row counts; December purchases excluded

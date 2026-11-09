@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-06",
+  "timezone": "Asia/Saigon",
+  "database": "BadmintonShop_SV4_Test_20261106021438_b10b8080",
+  "desktopPidAtLaunch": 19488,
+  "webPidAtLaunch": 2756,
+  "webUrl": "http://127.0.0.1:5186/TaiKhoan/DangNhap",
+  "desktopEntry": "Production executable; no acceptance-desktop-review",
+  "connectionScope": "Environment set separately for each child process",
+  "email": "Email__Bat=false for test Web process only",
+  "desktopObserved": "Login form, empty username/password; no automated login",
+  "webObserved": "HTTP 200 login form only; no browser visual verification",
+  "browserOpen": "Blocked by policy; user given URL",
+  "note": "PIDs are launch evidence, not a guarantee processes remain alive in a later session"
+}

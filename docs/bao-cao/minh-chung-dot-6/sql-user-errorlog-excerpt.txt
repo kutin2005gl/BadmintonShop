@@ -1,0 +1,101 @@
+User-supplied ERRORLOG excerpt; received 06/11/2026. Not a live database query.
+
+Algorithm : SHA256
+Hash      : 29148DB7455DD627CA5E9DED5404417153C3F2ABBB579344F88D1743BEF643E5
+Path      : C:\Users\nhatt\.codex\attachments\82d65f80-1bd3-4dee-8c96-0bf52020c8d3\Pasted text.txt
+
+FIRST ALLOCATION FAILURE
+2026-11-05 19:47:50.73 Server       Failed allocate pages: FAIL_PAGE_ALLOCATION 1
+2026-11-05 19:47:50.76 Server       MSR-1
+Process/System Counts                         Value
+---------------------------------------- ----------
+Available Physical Memory                 254685184 242.89 mb
+Available Virtual Memory                 140715373895680 127.98 tb
+Available Paging File                      35647488 34.00 mb
+Working Set                                13385728 12.77 mb
+Percent of Committed Memory in WS                 5 
+Page Faults                                 2331983 
+System physical memory high                       0 false
+System physical memory low                        1 true
+Process physical memory low                       1 true
+Process virtual memory low                        0 false
+2026-11-05 19:47:50.76 Server       MSR-1
+Memory Manager                                   KB
+---------------------------------------- ----------
+VM Reserved                                16862272 16.08 gb
+VM Committed                                 253532 247.59 mb
+Locked Pages Allocated                            0 0.00 bytes
+Large Pages Allocated                             0 0.00 bytes
+Emergency Memory                               1024 1.00 mb
+Emergency Memory In Use                          16 16.00 kb
+Target Committed                             253536 247.59 mb
+Current Committed                            253536 247.59 mb
+Pages Allocated                              148336 144.86 mb
+Pages Reserved                                    0 0.00 bytes
+Pages Free                                    12480 12.19 mb
+Pages In Use                                 240872 235.23 mb
+Page Alloc Potential                             -8 -8.00 kb
+NUMA Growth Phase                                 2 Steady
+Last OOM Factor                                   1 AllocationPotential
+Last OS Error                                     0 
+2026-11-05 19:47:50.76 Server       MSR-1
+Memory node Id = 0                               KB
+---------------------------------------- ----------
+VM Reserved                                16859008 16.08 gb
+VM Committed                                 253532 247.59 mb
+Locked Pages Allocated                            0 0.00 bytes
+Pages Allocated                              148336 144.86 mb
+Pages Free                                    12480 12.19 mb
+Target Committed                             253536 247.59 mb
+Current Committed                            253536 247.59 mb
+Foreign Committed                                 0 0.00 bytes
+Away Committed                                    0 0.00 bytes
+LAST MEMORY STATUS
+2026-11-06 02:10:15.05 spid8s       MSR-14
+Process/System Counts                         Value
+---------------------------------------- ----------
+Available Physical Memory                 889483264 848.28 mb
+Available Virtual Memory                 140715329753088 127.98 tb
+Available Paging File                    10085056512 9.39 gb
+Working Set                                24629248 23.49 mb
+Percent of Committed Memory in WS                 9 
+Page Faults                                 4665364 
+System physical memory high                       0 false
+System physical memory low                        0 false
+Process physical memory low                       1 true
+Process virtual memory low                        0 false
+2026-11-06 02:10:15.05 spid8s       MSR-14
+Memory Manager                                   KB
+---------------------------------------- ----------
+VM Reserved                                16862336 16.08 gb
+VM Committed                                 257924 251.88 mb
+Locked Pages Allocated                            0 0.00 bytes
+Large Pages Allocated                             0 0.00 bytes
+Emergency Memory                               1024 1.00 mb
+Emergency Memory In Use                          16 16.00 kb
+Target Committed                             257928 251.88 mb
+Current Committed                            257928 251.88 mb
+Pages Allocated                              152104 148.54 mb
+Pages Reserved                                    0 0.00 bytes
+Pages Free                                    13024 12.72 mb
+Pages In Use                                 244824 239.09 mb
+Page Alloc Potential                        7565784 7.22 gb
+NUMA Growth Phase                                 2 Steady
+Last OOM Factor                                   3 EscapeTimeout
+Last OS Error                                   997 997(Overlapped I/O operation is
+2026-11-06 02:10:15.05 spid8s       MSR-14
+Memory node Id = 0                               KB
+---------------------------------------- ----------
+VM Reserved                                16859072 16.08 gb
+VM Committed                                 257924 251.88 mb
+Locked Pages Allocated                            0 0.00 bytes
+Pages Allocated                              152104 148.54 mb
+Pages Free                                    13024 12.72 mb
+Target Committed                             257784 251.74 mb
+Current Committed                            257928 251.88 mb
+Foreign Committed                                 0 0.00 bytes
+Away Committed                                    0 0.00 bytes
+Taken Away Committed                              0 0.00 bytes
+LAST ERROR
+2026-11-06 02:11:07.72 spid40s     Error: 701, Severity: 17, State: 89.
+Reference: https://learn.microsoft.com/en-us/troubleshoot/sql/database-engine/performance/dbcc-memorystatus-monitor-memory-usage

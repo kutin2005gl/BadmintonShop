@@ -1,0 +1,190 @@
+2026-11-06T02:03:55.7612163+07:00
+
+Id
+--
+SE Asia Standard Time
+
+
+Name      : MSSQL$SQLEXPRESS
+State     : Running
+ProcessId : 3092
+StartName : NT Service\MSSQL$SQLEXPRESS
+PathName  : "C:\Program Files\Microsoft SQL Server\MSSQL17.SQLEXPRESS\MSSQL\Binn\sqlservr.exe" -sSQLEXPRESS
+
+
+LastBootUpTime         : 11/04/2026 12:34:32 PM
+TotalVisibleMemorySize : 8221692
+FreePhysicalMemory     : 673232
+TotalVirtualMemorySize : 33300968
+FreeVirtualMemory      : 9384880
+
+
+ProcessId      : 3092
+CreationDate   : 11/04/2026 12:37:53 PM
+WorkingSetSize : 15130624
+PageFileUsage  : 464836
+ThreadCount    : 90
+HandleCount    : 861
+
+Get-ItemProperty: 
+Line |
+   2 |  … ormat-List; Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Microsoft SQL  …
+     |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Requested registry access is not allowed.
+
+PSChildName Enabled
+----------- -------
+Sm                1
+Tcp               0
+
+
+TimeUTC : 2026-11-05T18:32:25.1601522Z
+Id      : 701
+Message : There is insufficient system memory in resource pool 'internal' to run this query.
+
+TimeUTC : 2026-11-05T18:32:25.1551117Z
+Id      : 17300
+Message : SQL Server was unable to run a new system task, either because there is insufficient memory or the number of configured sessions exceeds the maximum allowed in the server. Verify that the server has adequate memory. Use sp_configure with option 'user connections' to check the maximum number of user connections allowed. Use sys.dm_exec_sessions to check the current number of sessions, including user processes.
+
+TimeUTC : 2026-11-05T18:32:25.1357935Z
+Id      : 17300
+Message : SQL Server was unable to run a new system task, either because there is insufficient memory or the number of configured sessions exceeds the maximum allowed in the server. Verify that the server has adequate memory. Use sp_configure with option 'user connections' to check the maximum number of user connections allowed. Use sys.dm_exec_sessions to check the current number of sessions, including user processes.
+
+TimeUTC : 2026-11-05T18:32:25.1355884Z
+Id      : 17300
+Message : SQL Server was unable to run a new system task, either because there is insufficient memory or the number of configured sessions exceeds the maximum allowed in the server. Verify that the server has adequate memory. Use sp_configure with option 'user connections' to check the maximum number of user connections allowed. Use sys.dm_exec_sessions to check the current number of sessions, including user processes.
+
+TimeUTC : 2026-11-05T18:32:25.1343395Z
+Id      : 17300
+Message : SQL Server was unable to run a new system task, either because there is insufficient memory or the number of configured sessions exceeds the maximum allowed in the server. Verify that the server has adequate memory. Use sp_configure with option 'user connections' to check the maximum number of user connections allowed. Use sys.dm_exec_sessions to check the current number of sessions, including user processes.
+
+TimeUTC : 2026-11-05T18:32:25.1343740Z
+Id      : 701
+Message : There is insufficient system memory in resource pool 'internal' to run this query.
+
+TimeUTC : 2026-11-05T18:32:25.1297159Z
+Id      : 17300
+Message : SQL Server was unable to run a new system task, either because there is insufficient memory or the number of configured sessions exceeds the maximum allowed in the server. Verify that the server has adequate memory. Use sp_configure with option 'user connections' to check the maximum number of user connections allowed. Use sys.dm_exec_sessions to check the current number of sessions, including user processes.
+
+TimeUTC : 2026-11-05T18:32:25.1295444Z
+Id      : 17300
+Message : SQL Server was unable to run a new system task, either because there is insufficient memory or the number of configured sessions exceeds the maximum allowed in the server. Verify that the server has adequate memory. Use sp_configure with option 'user connections' to check the maximum number of user connections allowed. Use sys.dm_exec_sessions to check the current number of sessions, including user processes.
+
+TimeUTC : 2026-11-05T18:32:25.1294585Z
+Id      : 701
+Message : There is insufficient system memory in resource pool 'internal' to run this query.
+
+TimeUTC : 2026-11-05T18:32:25.1214955Z
+Id      : 17300
+Message : SQL Server was unable to run a new system task, either because there is insufficient memory or the number of configured sessions exceeds the maximum allowed in the server. Verify that the server has adequate memory. Use sp_configure with option 'user connections' to check the maximum number of user connections allowed. Use sys.dm_exec_sessions to check the current number of sessions, including user processes.
+
+TimeUTC : 2026-11-05T18:32:25.1217710Z
+Id      : 17300
+Message : SQL Server was unable to run a new system task, either because there is insufficient memory or the number of configured sessions exceeds the maximum allowed in the server. Verify that the server has adequate memory. Use sp_configure with option 'user connections' to check the maximum number of user connections allowed. Use sys.dm_exec_sessions to check the current number of sessions, including user processes.
+
+TimeUTC : 2026-11-05T18:32:25.1213681Z
+Id      : 17312
+Message : SQL Server is terminating a system or background task XE Dispatcher Task due to errors in starting up the task (setup state 1).
+
+TimeUTC : 2026-11-05T18:32:25.1213119Z
+Id      : 701
+Message : There is insufficient system memory in resource pool 'internal' to run this query.
+
+TimeUTC : 2026-11-05T18:32:25.1211626Z
+Id      : 17300
+Message : SQL Server was unable to run a new system task, either because there is insufficient memory or the number of configured sessions exceeds the maximum allowed in the server. Verify that the server has adequate memory. Use sp_configure with option 'user connections' to check the maximum number of user connections allowed. Use sys.dm_exec_sessions to check the current number of sessions, including user processes.
+
+TimeUTC : 2026-11-05T18:32:25.1211563Z
+Id      : 17312
+Message : SQL Server is terminating a system or background task XE Dispatcher Task due to errors in starting up the task (setup state 1).
+
+TimeUTC : 2026-11-05T18:32:25.1203809Z
+Id      : 17300
+Message : SQL Server was unable to run a new system task, either because there is insufficient memory or the number of configured sessions exceeds the maximum allowed in the server. Verify that the server has adequate memory. Use sp_configure with option 'user connections' to check the maximum number of user connections allowed. Use sys.dm_exec_sessions to check the current number of sessions, including user processes.
+
+TimeUTC : 2026-11-05T18:32:25.1197287Z
+Id      : 701
+Message : There is insufficient system memory in resource pool 'internal' to run this query.
+
+TimeUTC : 2026-11-05T18:32:25.1171876Z
+Id      : 17300
+Message : SQL Server was unable to run a new system task, either because there is insufficient memory or the number of configured sessions exceeds the maximum allowed in the server. Verify that the server has adequate memory. Use sp_configure with option 'user connections' to check the maximum number of user connections allowed. Use sys.dm_exec_sessions to check the current number of sessions, including user processes.
+
+TimeUTC : 2026-11-05T18:32:25.1149470Z
+Id      : 17300
+Message : SQL Server was unable to run a new system task, either because there is insufficient memory or the number of configured sessions exceeds the maximum allowed in the server. Verify that the server has adequate memory. Use sp_configure with option 'user connections' to check the maximum number of user connections allowed. Use sys.dm_exec_sessions to check the current number of sessions, including user processes.
+
+TimeUTC : 2026-11-05T18:32:25.0939803Z
+Id      : 18053
+Message : Error: 17300, Severity: 16, State: 1. (Params:). The error is printed in terse mode because there was error during formatting. Tracing, ETW, notifications etc are skipped.
+
+TimeUTC : 2026-11-05T18:32:25.0013192Z
+Id      : 18053
+Message : Error: 17300, Severity: 16, State: 1. (Params:). The error is printed in terse mode because there was error during formatting. Tracing, ETW, notifications etc are skipped.
+
+TimeUTC : 2026-11-05T18:32:24.9524535Z
+Id      : 17300
+Message : SQL Server was unable to run a new system task, either because there is insufficient memory or the number of configured sessions exceeds the maximum allowed in the server. Verify that the server has adequate memory. Use sp_configure with option 'user connections' to check the maximum number of user connections allowed. Use sys.dm_exec_sessions to check the current number of sessions, including user processes.
+
+TimeUTC : 2026-11-05T18:31:56.7025145Z
+Id      : 17300
+Message : SQL Server was unable to run a new system task, either because there is insufficient memory or the number of configured sessions exceeds the maximum allowed in the server. Verify that the server has adequate memory. Use sp_configure with option 'user connections' to check the maximum number of user connections allowed. Use sys.dm_exec_sessions to check the current number of sessions, including user processes.
+
+TimeUTC : 2026-11-05T18:31:14.5522004Z
+Id      : 18053
+Message : Error: 17300, Severity: 16, State: 1. (Params:). The error is printed in terse mode because there was error during formatting. Tracing, ETW, notifications etc are skipped.
+
+TimeUTC : 2026-11-05T18:31:13.4337892Z
+Id      : 17300
+Message : SQL Server was unable to run a new system task, either because there is insufficient memory or the number of configured sessions exceeds the maximum allowed in the server. Verify that the server has adequate memory. Use sp_configure with option 'user connections' to check the maximum number of user connections allowed. Use sys.dm_exec_sessions to check the current number of sessions, including user processes.
+
+TimeUTC : 2026-11-05T18:30:35.2888459Z
+Id      : 18053
+Message : Error: 17300, Severity: 16, State: 1. (Params:). The error is printed in terse mode because there was error during formatting. Tracing, ETW, notifications etc are skipped.
+
+TimeUTC : 2026-11-05T18:30:35.2664456Z
+Id      : 18053
+Message : Error: 17300, Severity: 16, State: 1. (Params:). The error is printed in terse mode because there was error during formatting. Tracing, ETW, notifications etc are skipped.
+
+TimeUTC : 2026-11-05T18:30:34.9883632Z
+Id      : 18053
+Message : Error: 17300, Severity: 16, State: 1. (Params:). The error is printed in terse mode because there was error during formatting. Tracing, ETW, notifications etc are skipped.
+
+TimeUTC : 2026-11-05T18:30:32.4204751Z
+Id      : 17300
+Message : SQL Server was unable to run a new system task, either because there is insufficient memory or the number of configured sessions exceeds the maximum allowed in the server. Verify that the server has adequate memory. Use sp_configure with option 'user connections' to check the maximum number of user connections allowed. Use sys.dm_exec_sessions to check the current number of sessions, including user processes.
+
+TimeUTC : 2026-11-05T18:30:32.3808277Z
+Id      : 17894
+Message : Dispatcher (0x76a4) from dispatcher pool 'XE Engine dispatcher pool for user sessions' Worker 0x000001CC860F4190 appears to be stuck on Node 0. Approx CPU Used: kernel 3218 ms, user 227671 ms, Interval: 431698.
+
+TimeUTC : 2026-11-05T18:30:32.2889820Z
+Id      : 18053
+Message : Error: 17300, Severity: 16, State: 1. (Params:). The error is printed in terse mode because there was error during formatting. Tracing, ETW, notifications etc are skipped.
+
+TimeUTC : 2026-11-05T18:30:24.9745428Z
+Id      : 17312
+Message : SQL Server is terminating a system or background task QDS Data Persist Task due to errors in starting up the task (setup state 1).
+
+TimeUTC : 2026-11-05T18:29:13.5121518Z
+Id      : 701
+Message : There is insufficient system memory in resource pool 'internal' to run this query.
+
+TimeUTC : 2026-11-05T18:28:34.9433358Z
+Id      : 701
+Message : There is insufficient system memory in resource pool 'internal' to run this query.
+
+TimeUTC : 2026-11-05T18:28:24.9334143Z
+Id      : 701
+Message : There is insufficient system memory in resource pool 'internal' to run this query.
+
+Get-Content: 
+Line |
+   2 |  … ormat-List; Get-Content 'C:\Program Files\Microsoft SQL Server\MSSQL1 …
+     |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Access to the path 'C:\Program Files\Microsoft SQL Server\MSSQL17.SQLEXPRESS\MSSQL\Log\ERRORLOG' is denied.
+Get-Content: 
+Line |
+   2 |  … ormat-List; Get-Content 'C:\Program Files\Microsoft SQL Server\MSSQL1 …
+     |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Cannot find path 'C:\Program Files\Microsoft SQL Server\MSSQL17.SQLEXPRESS\MSSQL\Log\ERRORLOG' because it does not exist.

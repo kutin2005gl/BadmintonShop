@@ -1,0 +1,6 @@
+Isolated test database: BadmintonShop_SV4_Test_20261106021438_b10b8080
+PASS DB-R01 SQL joins / trigger totals / independent two-year expected values
+PASS DB-R02 SQL end-day inclusion / quarter boundary / purchase-only period / channel
+Report fixture verified: BadmintonShop_SV4_Test_20261106021438_b10b8080; --report-demo-only retains this fixture without subsequent mutation checks.
+UI fixture ready; no acceptance order created. Production Desktop login is NOT exercised.
+RESULT: 2 passed, 0 failed. Output: C:\Users\nhatt\AppData\Local\Temp\BadmintonShop-SV4-Checks\20261106-021438
