@@ -21,4 +21,4 @@ PASS R07 chart includes unassigned group and handles empty total row
 PASS C01 snapshots / exact expiry / refresh / owner and revision isolation / failures
 PASS A01 six operators / inclusive million boundaries / AND OR NOT / city groups
 PASS X03 wide year pivots split into readable sections / XLSX all years retained
-RESULT: 23 passed, 0 failed. Output: C:\Users\nhatt\AppData\Local\Packages\sandbox.{899a503d-6811-498a-8354-c64ef6b43506}\AC\Temp\BadmintonShop-SV4-Checks\20261106-020519
+RESULT: 23 passed, 0 failed. Output: %USERPROFILE%\AppData\Local\Packages\sandbox.{899a503d-6811-498a-8354-c64ef6b43506}\AC\Temp\BadmintonShop-SV4-Checks\20261106-020519

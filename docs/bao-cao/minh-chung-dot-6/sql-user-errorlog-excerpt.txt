@@ -2,7 +2,7 @@ User-supplied ERRORLOG excerpt; received 06/11/2026. Not a live database query.
 
 Algorithm : SHA256
 Hash      : 29148DB7455DD627CA5E9DED5404417153C3F2ABBB579344F88D1743BEF643E5
-Path      : C:\Users\nhatt\.codex\attachments\82d65f80-1bd3-4dee-8c96-0bf52020c8d3\Pasted text.txt
+Path      : <tệp dán từ người dùng>
 
 FIRST ALLOCATION FAILURE
 2026-11-05 19:47:50.73 Server       Failed allocate pages: FAIL_PAGE_ALLOCATION 1
