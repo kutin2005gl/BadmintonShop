@@ -23,7 +23,7 @@ public sealed class FrmLocNangCao : Form
         }
         var join=Sv4Ui.Chon("AND","OR");var useSecond=new CheckBox { Text="Dùng điều kiện (2)",AutoSize=true,Checked=true };
         var actions=new FlowLayoutPanel { Width=850,Height=45 };actions.Controls.AddRange([useSecond,join]);panel.Controls.Add(actions);
-        var description=new Label { AutoSize=true,Text="(NOT tùy chọn (điều kiện 1)) AND/OR (NOT tùy chọn (điều kiện 2)). Văn bản: =, !=; ngày: dd/MM/yyyy." };panel.Controls.Add(description);
+        var description=new Label { AutoSize=true,Text="(NOT tùy chọn (điều kiện 1)) AND/OR (NOT tùy chọn (điều kiện 2)). Văn bản: =, !=, chứa; ngày: dd/MM/yyyy." };panel.Controls.Add(description);
         actions.Controls.Add(Sv4Ui.Nut("Áp dụng",()=>
         {
             try

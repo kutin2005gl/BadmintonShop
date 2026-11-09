@@ -20,6 +20,11 @@ internal static partial class Program
             Eq("3,4",Ids(new("Total",">","1000000")));Eq("1",Ids(new("Total","<","1000000")));
             Eq("2",Ids(new("Total","=","1000000")));Eq("1,3,4",Ids(new("Total","!=","1000000")));
             Eq("2,3,4",Ids(new("Date",">=","02/01/2026")));
+            // TV1: Kiem tra chua voi OR va NOT gom ca o NULL va tu choi so ngay.
+            Eq("1,2",Ids(new("City",LocNangCao.Chua,"hcm"),new("City",LocNangCao.Chua,"hà nội"),"OR"));
+            Eq("2,3,4",Ids(new("City",LocNangCao.Chua,"hcm",true)));
+            Reject(()=>LocNangCao.Tao(table,allowed,new("Total",LocNangCao.Chua,"1")));
+            Reject(()=>LocNangCao.Tao(table,allowed,new("Date",LocNangCao.Chua,"01")));
             foreach(var condition in new[]{new DieuKienLoc("Total","=",""),new("Total","=","abc"),new("Date","=","31/02/2026"),new("City",">","a"),new("Unknown","=","1"),new("Total","==","1")})
                 Reject(()=>LocNangCao.Tao(table,allowed,condition));
             Reject(()=>LocNangCao.Tao(table,allowed,new("Total",">=","2000000"),new("Total","<=","1000000")));

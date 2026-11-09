@@ -72,10 +72,11 @@ BadmintonShop\
 ├── BadmintonShop.Desktop\    Desktop quản lý – WinForms (SV1, SV4)
 │   └── App.config            chuỗi kết nối của desktop
 ├── database\
-│   ├── BadmintonShop.sql     file tổng = 01 + 02 + 03, chạy 1 lần là xong
+│   ├── BadmintonShop.sql     file tổng = 01 + 02 + 03 + 04 + 06 + 07 + 08
 │   ├── 01_CreateDatabase.sql tạo CSDL, 15 bảng, khóa, ràng buộc, chỉ mục
 │   ├── 02_Triggers.sql       trigger tồn kho, tổng tiền + thủ tục
-│   └── 03_SampleData.sql     dữ liệu mẫu + tài khoản test
+│   ├── 03_SampleData.sql     dữ liệu mẫu + tài khoản test
+│   └── 08_SV1_KhachHangHaNoi.sql 08: 3 khách hàng Hà Nội + 4 hóa đơn để demo tìm kiếm nâng cao (chứa ... OR ...)
 ├── tools\
 │   ├── HashTool\             tạo chuỗi băm BCrypt cho mật khẩu mẫu
 │   └── XuatBaoCao\           xuất tài liệu Markdown sang Word
@@ -84,13 +85,13 @@ BadmintonShop\
 
 ## 4. Tạo cơ sở dữ liệu
 
-Cách nhanh nhất: chạy **một file duy nhất** `database\BadmintonShop.sql` – bản nối sẵn của 01 → 02 → 03 → 04 → 06 → 07, dùng trên máy chưa có CSDL. Muốn chạy từng phần thì chạy đủ sáu script này **theo đúng thứ tự**. File 05 chỉ dành cho DB test/demo riêng, không thuộc chuỗi cài đặt thông thường.
+Cách nhanh nhất: chạy **một file duy nhất** `database\BadmintonShop.sql` – bản nối sẵn của 01 → 02 → 03 → 04 → 06 → 07 → 08, dùng trên máy chưa có CSDL. Muốn chạy từng phần thì chạy đủ bảy script này **theo đúng thứ tự**. File 05 chỉ dành cho DB test/demo riêng, không thuộc chuỗi cài đặt thông thường.
 
 Chú ý: file tổng (và file 01) **xóa và tạo lại** CSDL `BadmintonShop` nếu đã có. Nếu đang có dữ liệu cần giữ, hãy sao lưu trước (mục 7).
 
 ### 4.1. Cách 1 – bằng SSMS
 
-Mở SSMS, kết nối tới server, mở file `database\BadmintonShop.sql` (File → Open → File…) và bấm Execute (F5). Nếu chạy từng phần thì mở và Execute lần lượt 01, 02, 03, 04, 06, 07.
+Mở SSMS, kết nối tới server, mở file `database\BadmintonShop.sql` (File → Open → File…) và bấm Execute (F5). Nếu chạy từng phần thì mở và Execute lần lượt 01, 02, 03, 04, 06, 07, 08.
 
 ### 4.2. Cách 2 – bằng dòng lệnh sqlcmd
 
@@ -109,6 +110,7 @@ sqlcmd -S "<server>" -E -I -b -f 65001 -i database\03_SampleData.sql
 sqlcmd -S "<server>" -E -I -b -f 65001 -i database\04_SV4_Migration.sql
 sqlcmd -S "<server>" -E -I -b -f 65001 -i database\06_SV4_POS_Request.sql
 sqlcmd -S "<server>" -E -I -b -f 65001 -i database\07_SV2_DanhGiaSanPham.sql
+sqlcmd -S "<server>" -E -I -b -f 65001 -i database\08_SV1_KhachHangHaNoi.sql
 ```
 
 Ý nghĩa các tham số: `-E` đăng nhập bằng tài khoản Windows; `-I` **bắt buộc** (bật QUOTED_IDENTIFIER, nếu thiếu sẽ lỗi khi tạo chỉ mục/cột tính); `-b` dừng ngay khi có lỗi; `-f 65001` đọc file UTF-8 để tiếng Việt không bị lỗi font.
