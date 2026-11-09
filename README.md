@@ -15,13 +15,13 @@ POS đã tích hợp khuyến mãi dùng chung SV3 (sản phẩm, hóa đơn, vo
 - **BadmintonShop.Core** – Class Library dùng chung: Models, DataAccess (ADO.NET), Services (SV1)
 - **BadmintonShop.Web** – ASP.NET Core MVC cho khách hàng (SV2, SV3)
 - **BadmintonShop.Desktop** – WinForms cho nhân viên / quản lý (SV1, SV4)
-- **database/** – `BadmintonShop.sql` (file bàn giao, chạy 1 lần trên máy trống) = nối `01_CreateDatabase.sql` → `02_Triggers.sql` → `03_SampleData.sql` → migration `04` → `06` → `07`
+- **database/** – `BadmintonShop.sql` (file bàn giao, chạy 1 lần trên máy trống) = nối `01_CreateDatabase.sql` → `02_Triggers.sql` → `03_SampleData.sql` → migration `04` → `06` → `07` → `08`
 - **docs/** – ERD, phân công; **[hướng dẫn cài đặt](docs/bao-cao/huong-dan-cai-dat.md)** (bản mới nhất), các chương báo cáo trong `docs/bao-cao/`
 
 ## Chạy nhanh
 
-1. SSMS: mở và chạy `database/BadmintonShop.sql` (hoặc chạy lần lượt 01 → 02 → 03 → 04 → 06 → 07 trên CSDL mới).
-   Ai sửa 01/02/03/04/06/07 thì ghép lại file tổng (Git Bash): `cd database && { cat 01_CreateDatabase.sql; sed '1s/^\xEF\xBB\xBF//' 02_Triggers.sql; sed '1s/^\xEF\xBB\xBF//' 03_SampleData.sql; cat 04_SV4_Migration.sql; cat 06_SV4_POS_Request.sql; cat 07_SV2_DanhGiaSanPham.sql; } > BadmintonShop.sql`
+1. SSMS: mở và chạy `database/BadmintonShop.sql` (hoặc chạy lần lượt 01 → 02 → 03 → 04 → 06 → 07 → 08 trên CSDL mới).
+   Ai sửa 01/02/03/04/06/07/08 thì ghép lại file tổng (Git Bash): `cd database && { cat 01_CreateDatabase.sql; sed '1s/^\xEF\xBB\xBF//' 02_Triggers.sql; sed '1s/^\xEF\xBB\xBF//' 03_SampleData.sql; printf '\n'; cat 04_SV4_Migration.sql; cat 06_SV4_POS_Request.sql; cat 07_SV2_DanhGiaSanPham.sql; sed '1s/^\xEF\xBB\xBF//' 08_SV1_KhachHangHaNoi.sql; } > BadmintonShop.sql`
    (hoặc nhắn SV1 ghép).
 2. Sửa `Server=` trong `BadmintonShop.Web/appsettings.json` và `BadmintonShop.Desktop/App.config` cho khớp máy mình (`localhost` hoặc `.\SQLEXPRESS`). **Không commit** phần sửa này nếu có mật khẩu.
 3. Mở `BadmintonShop.sln` → Build → chạy Web hoặc Desktop.
