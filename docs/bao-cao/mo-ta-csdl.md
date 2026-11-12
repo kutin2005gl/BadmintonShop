@@ -210,11 +210,11 @@ Ngoài chỉ mục tự tạo cho khóa chính và UNIQUE, CSDL có thêm các c
 | trg_HoaDon_CapNhat | Trigger trên HoaDon | Hóa đơn chuyển sang "Đã hủy" thì trả hàng về kho; không cho mở lại đơn đã hủy; đổi TienGiamGia thì tính lại TongTien |
 | sp_KiemTraTonKho | Thủ tục | Kiểm tra một sản phẩm còn đủ số lượng để bán hay không (dùng trước khi đặt hàng) |
 
-## Bổ sung theo script hiện tại — 05/11/2026
+## 8. Bảng và cột bổ sung
 
-Phần bảng nền phía trên mô tả bản 15/10. Script tổng hiện có 16 bảng người dùng; ứng dụng đánh giá dùng `DanhGiaSanPham`, không dùng bảng `PhanHoi` cũ. Bản Word chưa xuất lại sau lần cập nhật Markdown này.
+Ngoài 15 bảng nền ở trên, script tổng có thêm bảng `DanhGiaSanPham` (tổng cộng 16 bảng). Chức năng đánh giá dùng bảng này; bảng `PhanHoi` nền vẫn được giữ.
 
-### DanhGiaSanPham (script 07)
+### 8.1. Bảng DanhGiaSanPham – Đánh giá sản phẩm (script 07)
 
 | Cột | Kiểu | Ràng buộc / ý nghĩa |
 |---|---|---|
@@ -228,7 +228,7 @@ Phần bảng nền phía trên mô tả bản 15/10. Script tổng hiện có 1
 
 Chỉ mục `IX_DanhGiaSanPham_SP(MaSP, TrangThai)` hỗ trợ đọc đánh giá theo sản phẩm và trạng thái.
 
-### Bổ sung HoaDon (script 04/06)
+### 8.2. Cột bổ sung của bảng HoaDon (script 04, 06)
 
 | Cột | Kiểu | Ý nghĩa |
 |---|---|---|
@@ -237,4 +237,4 @@ Chỉ mục `IX_DanhGiaSanPham_SP(MaSP, TrangThai)` hỗ trợ đọc đánh gi�
 | TienKhachDua | DECIMAL(18,0) NULL | Số tiền nhận tại quầy |
 | DauVanTayPOS | VARCHAR(64) NULL | SHA-256 yêu cầu POS đã xác nhận |
 
-Unique filtered index `UX_HoaDon_MaYeuCauPOS` áp dụng khi MaYeuCauPOS khác NULL. Các cột bổ sung không thay thế schema nền. Số lượng bảng/cột ở đây được đối chiếu tĩnh với SQL repo, chưa truy vấn lại CSDL đang chạy ngày 05/11.
+Unique filtered index `UX_HoaDon_MaYeuCauPOS` áp dụng khi MaYeuCauPOS khác NULL. Các cột bổ sung không thay đổi lược đồ nền.

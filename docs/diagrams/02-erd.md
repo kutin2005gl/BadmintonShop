@@ -1,6 +1,6 @@
 # Sơ đồ thực thể – liên kết (ERD)
 
-Sơ đồ dưới đây vẽ **đúng theo `database/01_CreateDatabase.sql`**: đủ 15 bảng, đúng tên cột và kiểu dữ liệu, đánh dấu khóa chính (PK), khóa ngoại (FK), cột duy nhất (UK).
+Sơ đồ dưới đây vẽ theo `database/01_CreateDatabase.sql`, bổ sung bảng đánh giá từ `database/07_SV2_DanhGiaSanPham.sql` và các cột mở rộng của `HoaDon` trong `database/BadmintonShop.sql`: đủ 16 bảng, đúng tên cột và kiểu dữ liệu, đánh dấu khóa chính (PK), khóa ngoại (FK), cột duy nhất (UK).
 Các khóa chính đơn đều là `INT IDENTITY(1,1)` (tự tăng); `ThanhTien` ở hai bảng chi tiết là **cột tính** (`PERSISTED`).
 Bội số quan hệ đọc theo ký hiệu Mermaid: `||--o{` một – nhiều (0..n), `||--|{` một – nhiều (1..n), `||--o|` một – không hoặc một, `|o--o{` FK cho phép NULL (0..1 – nhiều).
 
@@ -109,6 +109,10 @@ erDiagram
         decimal TienGiamGia "DECIMAL(18,0), ≥ 0"
         decimal TongTien "trigger = tổng ThanhTien − TienGiamGia"
         nvarchar(30) TrangThai "CHECK 5 trạng thái"
+        nvarchar(500) LyDoHuy "NULL"
+        uniqueidentifier MaYeuCauPOS "NULL, UNIQUE khi khác NULL"
+        decimal TienKhachDua "DECIMAL(18,0), NULL"
+        varchar(64) DauVanTayPOS "NULL"
     }
     ChiTietHoaDon {
         int MaHD PK, FK "ON DELETE CASCADE"
@@ -128,6 +132,18 @@ erDiagram
         nvarchar(20) TrangThai "mặc định Hiển thị"
     }
 
+    DanhGiaSanPham {
+        int MaDG PK "IDENTITY"
+        int MaSP FK "NOT NULL"
+        int MaKH FK "NOT NULL"
+        int SoSao "NOT NULL, 1..5"
+        nvarchar(1000) NoiDung "NULL"
+        datetime NgayDanhGia "NOT NULL, mặc định GETDATE()"
+        nvarchar(20) TrangThai "Chờ duyệt / Đã duyệt / Từ chối"
+    }
+
+    SanPham    ||--o{ DanhGiaSanPham  : "nhận"
+    KhachHang  ||--o{ DanhGiaSanPham  : "gửi"
     NhanVien   ||--o| TaiKhoan         : "có"
     NhanVien   ||--o{ PhieuNhap        : "lập"
     NhaCungCap ||--o{ PhieuNhap        : "cung cấp"

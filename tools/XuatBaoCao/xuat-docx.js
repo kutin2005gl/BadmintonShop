@@ -51,7 +51,11 @@ function taoHinh(chuThich, duongDan, soHinh) {
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER, spacing: { after: 200 },
-      children: [new TextRun({ text: `Hình ${soHinh}. `, bold: true, italics: true }), ...tachInline(chuThich, { italics: true })],
+      // chu thich da danh so san ("Hinh 3.1. ...", do ghep-bao-cao.js sinh) thi giu nguyen, khong danh them
+      children: (m => m
+        ? [new TextRun({ text: m[1], bold: true, italics: true }), ...tachInline(m[2], { italics: true })]
+        : [new TextRun({ text: `Hình ${soHinh}. `, bold: true, italics: true }), ...tachInline(chuThich, { italics: true })]
+      )(chuThich.match(/^(Hình \d+(?:\.\d+)*\. )(.*)$/)),
     }),
   ];
 }
@@ -100,7 +104,7 @@ function chuyenDoi(fileMd) {
   let soHinh = 0;
   for (let i = 0; i < dong.length; i++) {
     const l = dong[i];
-    if (!l.trim() || l.startsWith(">")) continue;
+    if (!l.trim() || l.startsWith(">") || /^<!--.*-->$/.test(l.trim())) continue;
     let m;
     if (l.startsWith("```")) {
       // khoi ma: font Consolas, nen xam nhat, giu nguyen khoang trang dau dong
@@ -112,11 +116,15 @@ function chuyenDoi(fileMd) {
         indent: { left: 284 }, keepLines: true, keepNext: k < ma.length - 1,
         children: [new TextRun({ text: dm.length ? dm : " ", font: "Consolas", size: 19 })],
       })));
-    } else if ((m = l.match(/^(#{1,3}) (.*)$/))) {
-      const muc = [HeadingLevel.HEADING_1, HeadingLevel.HEADING_2, HeadingLevel.HEADING_3][m[1].length - 1];
+    } else if ((m = l.match(/^(#{1,4}) (.*)$/))) {
+      const muc = [HeadingLevel.HEADING_1, HeadingLevel.HEADING_2, HeadingLevel.HEADING_3, HeadingLevel.HEADING_4][m[1].length - 1];
       kq.push(new Paragraph({ heading: muc, children: tachInline(m[2]) }));
     } else if ((m = l.match(/^!\[(.*)\]\((.*)\)$/))) {
-      kq.push(...taoHinh(m[1], path.resolve(thuMuc, m[2]), ++soHinh));
+      if (m[1].startsWith("TODO:")) {
+        kq.push(new Paragraph({ children: [new TextRun({ text: m[1], italics: true })] }));
+      } else {
+        kq.push(...taoHinh(m[1], path.resolve(thuMuc, m[2]), ++soHinh));
+      }
     } else if (l.startsWith("|")) {
       const bang = [];
       while (i < dong.length && dong[i].startsWith("|")) bang.push(dong[i++]);
@@ -151,6 +159,9 @@ async function main() {
         { id: "Heading3", name: "Heading 3", basedOn: "Normal", next: "Normal", quickFormat: true,
           run: { font: FONT, size: 26, bold: true, italics: true, color: "000000" },
           paragraph: { spacing: { before: 200, after: 100 }, outlineLevel: 2, keepNext: true } },
+        { id: "Heading4", name: "Heading 4", basedOn: "Normal", next: "Normal", quickFormat: true,
+          run: { font: FONT, size: 26, italics: true, color: "000000" },
+          paragraph: { spacing: { before: 160, after: 80 }, outlineLevel: 3, keepNext: true } },
       ],
     },
     numbering: { config: [{ reference: "cham", levels: [{ level: 0, format: LevelFormat.BULLET, text: "–", alignment: AlignmentType.LEFT,
