@@ -20,7 +20,7 @@
 
 8. Hướng dẫn sử dụng
 
-9. Tổng kết — SV4
+9. Tổng kết
 
 10. Bảng tự đánh giá
 
@@ -184,13 +184,22 @@ Bảng 3.4
 | PhanHoi | MaKH | KhachHang | Không | Chặn |
 | PhanHoi | MaSP | SanPham | Không | Chặn |
 
-Bảng mô tả chi tiết từng cột (kiểu dữ liệu, ràng buộc, ý nghĩa) của cả 15 bảng được trình bày ở phần Mô tả cơ sở dữ liệu.
+Bảng mô tả chi tiết từng cột (kiểu dữ liệu, ràng buộc, ý nghĩa) của các bảng được trình bày ở phần Mô tả cơ sở dữ liệu.
 
-### 3.8. Cập nhật kiến trúc dữ liệu — 05/11/2026
+#### 3.7.4. Bảng và cột bổ sung
 
-Cài đủ SQL hiện tại tạo 16 bảng người dùng: 15 bảng nền và `DanhGiaSanPham` (script 07). Bổ sung lược đồ quan hệ: DanhGiaSanPham(<ins>MaDG</ins>, _MaSP_, _MaKH_, SoSao, NoiDung, NgayDanhGia, TrangThai); hai FK tham chiếu SanPham và KhachHang. Ứng dụng đánh giá sử dụng bảng mới này, giữ PhanHoi nền. HoaDon bổ sung bốn cột/index POS và hủy đơn theo 04/06. Xem phần cập nhật trong [mô tả CSDL](mo-ta-csdl.md). Sơ đồ PNG và bản Word là bản nền, cần xuất lại trước khi nộp.
+Script tổng `database/BadmintonShop.sql` tạo 16 bảng: 15 bảng nền ở trên và bảng `DanhGiaSanPham` (script 07). Chức năng đánh giá trên Web và duyệt đánh giá trên Desktop dùng bảng này; bảng `PhanHoi` nền vẫn được giữ để không đổi lược đồ đã chốt.
 
-Tái sử dụng Core/Repository hoặc cache Form chưa tự chứng minh đạt yêu cầu tái sử dụng dữ liệu tìm kiếm trong 5–10 phút. Phần đối chiếu yêu cầu giảng viên nằm trong [báo cáo rà soát](ra-soat-yeu-cau-2026-11-05.md).
+16. DanhGiaSanPham(<ins>MaDG</ins>, _MaSP_, _MaKH_, SoSao, NoiDung, NgayDanhGia, TrangThai)
+
+Bảng 3.5
+
+| Bảng con | Khóa ngoại | Tham chiếu | Cho phép NULL | Khi xóa bản ghi cha |
+|---|---|---|:-:|---|
+| DanhGiaSanPham | MaSP | SanPham | Không | Chặn |
+| DanhGiaSanPham | MaKH | KhachHang | Không | Chặn |
+
+Bảng `HoaDon` được bổ sung bốn cột phục vụ hủy đơn và bán tại quầy (script 04, 06): `LyDoHuy`, `MaYeuCauPOS` (chỉ mục duy nhất khi khác NULL, chống ghi trùng hóa đơn), `TienKhachDua`, `DauVanTayPOS`.
 
 ## 4. Cơ sở dữ liệu — SV1
 
@@ -435,11 +444,11 @@ Bảng 4.17
 | trg_HoaDon_CapNhat | Trigger trên HoaDon | Hóa đơn chuyển sang "Đã hủy" thì trả hàng về kho; không cho mở lại đơn đã hủy; đổi TienGiamGia thì tính lại TongTien |
 | sp_KiemTraTonKho | Thủ tục | Kiểm tra một sản phẩm còn đủ số lượng để bán hay không (dùng trước khi đặt hàng) |
 
-### 4.8. Bổ sung theo script hiện tại — 05/11/2026
+### 4.8. Bảng và cột bổ sung
 
-Phần bảng nền phía trên mô tả bản 15/10. Script tổng hiện có 16 bảng người dùng; ứng dụng đánh giá dùng `DanhGiaSanPham`, không dùng bảng `PhanHoi` cũ. Bản Word chưa xuất lại sau lần cập nhật Markdown này.
+Ngoài 15 bảng nền ở trên, script tổng có thêm bảng `DanhGiaSanPham` (tổng cộng 16 bảng). Chức năng đánh giá dùng bảng này; bảng `PhanHoi` nền vẫn được giữ.
 
-#### 4.8.1. DanhGiaSanPham (script 07)
+#### 4.8.1. Bảng DanhGiaSanPham – Đánh giá sản phẩm (script 07)
 
 Bảng 4.18
 
@@ -455,7 +464,7 @@ Bảng 4.18
 
 Chỉ mục `IX_DanhGiaSanPham_SP(MaSP, TrangThai)` hỗ trợ đọc đánh giá theo sản phẩm và trạng thái.
 
-#### 4.8.2. Bổ sung HoaDon (script 04/06)
+#### 4.8.2. Cột bổ sung của bảng HoaDon (script 04, 06)
 
 Bảng 4.19
 
@@ -466,11 +475,11 @@ Bảng 4.19
 | TienKhachDua | DECIMAL(18,0) NULL | Số tiền nhận tại quầy |
 | DauVanTayPOS | VARCHAR(64) NULL | SHA-256 yêu cầu POS đã xác nhận |
 
-Unique filtered index `UX_HoaDon_MaYeuCauPOS` áp dụng khi MaYeuCauPOS khác NULL. Các cột bổ sung không thay thế schema nền. Số lượng bảng/cột ở đây được đối chiếu tĩnh với SQL repo, chưa truy vấn lại CSDL đang chạy ngày 05/11.
+Unique filtered index `UX_HoaDon_MaYeuCauPOS` áp dụng khi MaYeuCauPOS khác NULL. Các cột bổ sung không thay đổi lược đồ nền.
 
-### 4.9. Kiểm chứng ngày 12/11/2026
+### 4.9. Kiểm chứng dữ liệu mẫu
 
-16 bảng, 3 trigger, 1 proc, 40 SP, 23 KH, 5 NV, 11 phiếu nhập, 28 hóa đơn Online, 4 CTKM, 34 đánh giá, tồn âm bằng 0. Hóa đơn trải 5 tháng 06–10/2026.
+Chạy `database/BadmintonShop.sql` trên CSDL trống ngày 12/11/2026: 16 bảng, 3 trigger, 1 thủ tục, 40 sản phẩm, 23 khách hàng, 5 nhân viên, 11 phiếu nhập, 28 hóa đơn Online, 4 CTKM, 34 đánh giá, không sản phẩm nào tồn kho âm. Hóa đơn trải 5 tháng 06–10/2026.
 
 TODO(SV3): Phối hợp SV4 bổ sung hóa đơn trải 6–12 tháng.
 
@@ -484,257 +493,15 @@ TODO(SV3): Cung cấp sequence đặt hàng/thanh toán và activity xử lý đ
 
 ### 5.2. Class diagram — SV4
 
-Phản ánh mã nguồn nhánh `feature/sv4-final-integration` ngày 26/10/2026 (chưa commit, nền develop `920a576`). Ký hiệu: liên kết thực thể theo FK; dependency là lời gọi trong mã. Thuộc tính trình bày phần chính, không thay thế model đầy đủ.
-
 #### 5.2.1. Các thực thể Core
 
-```mermaid
-classDiagram
-    class DanhMuc {
-        +int MaDM
-        +string TenDanhMuc
-        +string MoTa
-    }
-    class SanPham {
-        +int MaSP
-        +int MaDM
-        +string TenSP
-        +decimal DonGiaBan
-        +int SoLuongTon
-        +string HinhAnh
-        +string TrangThai
-    }
-    class NhanVien {
-        +int MaNV
-        +string HoTen
-        +string ChucVu
-    }
-    class TaiKhoan {
-        +int MaTK
-        +int MaNV
-        +string VaiTro
-        +bool TrangThai
-    }
-    class KhachHang {
-        +int MaKH
-        +string HoTen
-        +string Email
-    }
-    class HoaDon {
-        +int MaHD
-        +int? MaKH
-        +int? MaNV
-        +int? MaCTKM
-        +DateTime NgayLap
-        +string LoaiBan
-        +decimal TienGiamGia
-        +decimal TongTien
-        +string TrangThai
-        +string LyDoHuy
-        +Guid? MaYeuCauPOS
-        +decimal? TienKhachDua
-    }
-    class ChiTietHoaDon {
-        +int MaHD
-        +int MaSP
-        +int SoLuong
-        +decimal DonGia
-        +decimal GiamGia
-        +decimal ThanhTien
-    }
-    class NhaCungCap {
-        +int MaNCC
-        +string TenNCC
-    }
-    class PhieuNhap {
-        +int MaPN
-        +int MaNV
-        +int MaNCC
-        +decimal TongTien
-    }
-    class ChiTietPhieuNhap {
-        +int MaPN
-        +int MaSP
-        +int SoLuong
-        +decimal DonGia
-        +decimal ThanhTien
-    }
-    class CTKM {
-        +int MaCTKM
-        +string LoaiKM
-        +DateTime NgayBatDau
-        +DateTime NgayKetThuc
-    }
-    class KMTheoSP {
-        +int MaCTKM
-        +int MaSP
-        +decimal PhanTramGG
-    }
-    class KMTheoHD {
-        +int MaCTKM
-        +decimal TongTienToiThieu
-        +decimal PhanTramGG
-    }
-    class KMTheoVoucher {
-        +int MaCTKM
-        +string MaVoucher
-        +int SoLuong
-        +int DaDung
-    }
-    class PhanHoi {
-        +int MaPH
-        +int MaKH
-        +int MaSP
-        +byte SoSao
-    }
-    DanhMuc "1" --> "0..*" SanPham
-    NhanVien "1" --> "0..1" TaiKhoan
-    NhanVien "0..1" --> "0..*" HoaDon
-    KhachHang "0..1" --> "0..*" HoaDon
-    HoaDon "1" --> "0..*" ChiTietHoaDon
-    SanPham "1" --> "0..*" ChiTietHoaDon
-    NhanVien "1" --> "0..*" PhieuNhap
-    NhaCungCap "1" --> "0..*" PhieuNhap
-    PhieuNhap "1" --> "0..*" ChiTietPhieuNhap
-    SanPham "1" --> "0..*" ChiTietPhieuNhap
-    CTKM "0..1" --> "0..*" HoaDon
-    CTKM "1" --> "0..*" KMTheoSP
-    CTKM "1" --> "0..*" KMTheoHD
-    CTKM "1" --> "0..*" KMTheoVoucher
-    SanPham "1" --> "0..*" KMTheoSP
-    KhachHang "1" --> "0..*" PhanHoi
-    SanPham "1" --> "0..*" PhanHoi
-```
+![TODO: xuất sơ đồ "Các thực thể Core" (Mermaid trong 06-lop-core-sv4.md) ra docs/diagrams/png/06-lop-core-sv4-1.png](../diagrams/png/06-lop-core-sv4-1.png)
 
 Các model là POCO 1–1 với bảng, **không có navigation property/ORM**; các mũi tên trên là FK nghiệp vụ. ChiTietHoaDon.ThanhTien và ChiTietPhieuNhap.ThanhTien chỉ đọc về từ cột tính; HoaDon.TongTien và PhieuNhap.TongTien do trigger tính. CSDL cho phép hóa đơn chưa có chi tiết ở cấp lược đồ; thao tác ghi phải bảo đảm không để header rỗng sau lỗi.
 
 #### 5.2.2. Repository, dịch vụ và giao diện
 
-```mermaid
-classDiagram
-    class DbHelper {
-        +string ConnectionString
-        +TaoKetNoi() SqlConnection
-        +ExecuteQuery() DataTable
-        +ExecuteNonQuery() int
-        +ExecuteScalar() object
-        +ExecuteTransaction()
-    }
-    class DanhMucRepository {
-        +LayTatCa() List~DanhMuc~
-        +LayTheoMa(int maDM) DanhMuc
-        +Luu(DanhMuc dm) int
-        +Xoa(int maDM) void
-    }
-    class SanPhamRepository {
-        +LayTatCa() List~SanPham~
-        +LayTheoMa(int maSP) SanPham
-        +LayDanhSachHienThi() DataTable
-        +Luu(SanPham sp) int
-        +NgungBan(int maSP) void
-    }
-    class HoaDonRepository {
-        +LayDanhSachHienThi() DataTable
-        +LayTheoMa(int ma) HoaDon
-        +LayChiTietHienThi(int ma) DataTable
-        +ChuyenTrangThai() void
-        +ThanhToanPOS() int
-    }
-    class BaoCaoRepository {
-        +LayDuLieu() DataTable
-    }
-    class BaoCaoService {
-        +PhanBo() Dictionary
-        +Tao() KetQuaBaoCao
-    }
-    class KetQuaBaoCao {
-        +DateTime TuNgay
-        +DateTime DenNgay
-        +string LoaiBan
-        +decimal TongDoanhThu
-        +IReadOnlyDictionary Bang
-    }
-    class QuyTacBanHang {
-        +int NguongSapHet
-        +DuocChuyen() bool
-        +BatBuoc() string
-        +KiemTraTien() void
-    }
-    class KhoAnhSanPham {
-        +string ThuMucGoc
-        +DuongDanDayDu() string
-    }
-    class PhienDangNhap {
-        +int MaNV
-        +BatDau() void
-        +DangXuat() void
-        +CoQuyen() bool
-    }
-    class PhanQuyen {
-        +CoQuyen() bool
-    }
-    class QuyenForm {
-        +KiemTraKhiMo() bool
-        +DuQuyen() bool
-    }
-    class Sv4Ui {
-        +Chay() void
-    }
-    class FrmDanhMuc
-    class FrmSanPham
-    class FrmSanPhamSua
-    class FrmDonHang
-    class FrmPOS
-    class FrmThongKe
-    class DongPOS {
-        +int MaSP
-        +int SoLuong
-        +decimal DonGia
-        +decimal ThanhTien
-    }
-    class AnhSanPham {
-        +Doc() Bitmap
-        +Luu() string
-    }
-    class XuatTaiLieu {
-        +Excel() void
-        +BaoCaoPdf() void
-        +HoaDonPdf() void
-    }
-    class BieuDoCot
-    DanhMucRepository ..> DbHelper
-    SanPhamRepository ..> DbHelper
-    HoaDonRepository ..> DbHelper
-    BaoCaoRepository ..> DbHelper
-    DanhMucRepository ..> QuyTacBanHang
-    SanPhamRepository ..> QuyTacBanHang
-    SanPhamRepository ..> KhoAnhSanPham
-    HoaDonRepository ..> QuyTacBanHang
-    BaoCaoService ..> QuyTacBanHang
-    BaoCaoService ..> KetQuaBaoCao
-    PhienDangNhap ..> PhanQuyen
-    QuyenForm ..> PhienDangNhap
-    Sv4Ui ..> QuyenForm
-    FrmDanhMuc ..> DanhMucRepository
-    FrmSanPham ..> SanPhamRepository
-    FrmSanPham ..> FrmSanPhamSua
-    FrmSanPhamSua ..> SanPhamRepository
-    FrmSanPhamSua ..> DanhMucRepository
-    FrmSanPhamSua ..> AnhSanPham
-    AnhSanPham ..> KhoAnhSanPham
-    FrmDonHang ..> HoaDonRepository
-    FrmDonHang ..> XuatTaiLieu
-    FrmPOS ..> SanPhamRepository
-    FrmPOS ..> HoaDonRepository
-    FrmPOS ..> PhienDangNhap
-    FrmPOS ..> DongPOS
-    FrmPOS ..> XuatTaiLieu
-    FrmThongKe ..> BaoCaoRepository
-    FrmThongKe ..> BaoCaoService
-    FrmThongKe ..> BieuDoCot
-    FrmThongKe ..> XuatTaiLieu
-    XuatTaiLieu ..> KetQuaBaoCao
-```
+![TODO: xuất sơ đồ "Repository, dịch vụ và giao diện" (Mermaid trong 06-lop-core-sv4.md) ra docs/diagrams/png/06-lop-core-sv4-2.png](../diagrams/png/06-lop-core-sv4-2.png)
 
 Tất cả form SV4 gọi QuyenForm ở OnLoad và dùng Sv4Ui khi thực hiện thao tác CSDL; lược bỏ các cạnh lặp để dễ đọc. Các lớp NhaCungCapRepository, NhanVienRepository, TaiKhoanRepository, KhachHangRepository, PhieuNhapRepository, SaoLuuRepository (SV1) cũng truy cập DbHelper và model tương ứng; không bị thay thế bởi SV4.
 
@@ -742,59 +509,7 @@ Dịch vụ Core hiện có khác: MatKhauHelper, KiemTraDuLieu, LoiCsdl, VaiTro
 
 #### 5.2.3. Luồng thanh toán cuối cùng
 
-```mermaid
-classDiagram
-    class FrmPOS
-    class DatHangController
-    class GioHangService {
-        +Tinh() KetQuaGioHang
-        ~TinhTrongGiaoDich() KetQuaGioHang
-    }
-    class TinhKhuyenMaiService {
-        +LayPhanTramGiamSanPham() decimal
-        +TinhGiamHoaDon()
-        +LoiVoucher() string
-        +TinhThanhTien() decimal
-    }
-    class KhuyenMaiRepository {
-        +KhuyenMaiRepository(SqlConnection c, SqlTransaction t)
-        +LayVoucherHopLe()
-        +LoiVoucher() string
-        +DungVoucher() bool
-    }
-    class KetQuaGioHang {
-        +string VoucherYeuCau
-        +decimal TongTienHang
-        +decimal TienGiamHoaDon
-        +decimal TongThanhToan
-    }
-    class XacNhanGia {
-        +DauVanTay() string
-        +DauVanTayPOS() string
-        +KiemTra() void
-    }
-    class GiaThanhToanThayDoiException
-    class HoaDonRepository
-    class DonHangOnlineRepository
-    class GiaoDichBanHang {
-        ~TinhLai() KetQuaGioHang
-        ~DungVoucher() void
-        ~GhiChiTiet() void
-    }
-    FrmPOS ..> GioHangService
-    FrmPOS ..> HoaDonRepository
-    DatHangController ..> GioHangService
-    DatHangController ..> DonHangOnlineRepository
-    GioHangService ..> TinhKhuyenMaiService
-    GioHangService ..> KetQuaGioHang
-    TinhKhuyenMaiService ..> KhuyenMaiRepository
-    HoaDonRepository ..> XacNhanGia
-    HoaDonRepository ..> GiaoDichBanHang
-    DonHangOnlineRepository ..> GiaoDichBanHang
-    GiaoDichBanHang ..> GioHangService
-    GiaoDichBanHang ..> XacNhanGia
-    XacNhanGia ..> GiaThanhToanThayDoiException
-```
+![TODO: xuất sơ đồ "Luồng thanh toán cuối cùng" (Mermaid trong 06-lop-core-sv4.md) ra docs/diagrams/png/06-lop-core-sv4-3.png](../diagrams/png/06-lop-core-sv4-3.png)
 
 GiaoDichBanHang internal chia sẻ điều kiện ghi, không thay ranh giới quyền: POS dùng MaNV/QuyenForm; web dùng Authorize/MaKH chủ đơn. KhuyenMaiRepository gắn connection/transaction để không đọc giá qua kết nối khác khi thanh toán. Trigger SV1 là nơi duy nhất sửa tồn và TongTien; không biểu diễn trigger như class C#.
 
@@ -805,54 +520,7 @@ Repository ghi `PhieuNhap` và từng dòng `ChiTietPhieuNhap` trong **một tra
 Code **không tự cộng tồn kho**: mỗi lần INSERT chi tiết, trigger `trg_CTPN_TangTon` tăng `SanPham.SoLuongTon` và tính lại `PhieuNhap.TongTien`.
 Có lỗi ở bất kỳ bước nào thì toàn bộ bị rollback – không có phiếu "nửa vời", tồn kho giữ nguyên.
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor NV as Nhân viên
-    participant F as FrmPhieuNhap
-    participant R as PhieuNhapRepository
-    participant H as DbHelper.ExecuteTransaction
-    participant DB as SQL Server
-
-    NV->>F: Chọn nhà cung cấp, thêm dòng sản phẩm, số lượng, đơn giá nhập
-    F->>F: Gộp dòng trùng sản phẩm, tính ThanhTien và TongTien để hiển thị
-    NV->>F: Bấm Lưu
-    F->>R: Them(pn, chiTiet) với pn.MaNV = PhienDangNhap.MaNV
-    R->>R: Kiểm tra có ít nhất 1 dòng và không trùng MaSP
-
-    alt Dữ liệu không hợp lệ
-        R-->>F: ArgumentException
-        F-->>NV: Báo lỗi, không ghi gì vào CSDL
-    else Dữ liệu hợp lệ
-        R->>H: ExecuteTransaction(congViec)
-        H->>DB: Mở kết nối và BEGIN TRANSACTION
-        H->>R: Gọi congViec(conn, tran)
-        R->>DB: INSERT PhieuNhap (NgayNhap, MaNCC, MaNV) rồi SELECT SCOPE_IDENTITY()
-        DB-->>R: MaPN mới
-
-        loop Mỗi dòng chi tiết
-            R->>DB: INSERT ChiTietPhieuNhap (MaPN, MaSP, SoLuong, DonGia)
-            activate DB
-            Note over DB: trg_CTPN_TangTon (AFTER INSERT)<br/>SanPham.SoLuongTon tăng thêm SoLuong<br/>PhieuNhap.TongTien = tổng ThanhTien
-            deactivate DB
-        end
-
-        alt Tất cả lệnh thành công
-            R-->>H: MaPN
-            H->>DB: COMMIT
-            H-->>R: MaPN
-            R-->>F: MaPN
-            F-->>NV: Thông báo lưu thành công, làm mới danh sách
-        else Lỗi SQL – vi phạm FK hoặc CHECK, mất kết nối
-            DB-->>H: SqlException
-            H->>DB: ROLLBACK
-            Note over DB: Không có PhieuNhap mới,<br/>SoLuongTon giữ nguyên
-            H-->>R: ném lại SqlException
-            R-->>F: SqlException
-            F-->>NV: Báo lỗi, phiếu chưa được lưu
-        end
-    end
-```
+![Hình 5.1. Sơ đồ tuần tự – Lập phiếu nhập hàng (Desktop)](../diagrams/png/04-ton-kho.png)
 
 ### 5.4. Activity đăng nhập Desktop — SV1
 
@@ -860,33 +528,7 @@ Nhân viên nhập tên đăng nhập và mật khẩu trên `FrmDangNhap`. Form
 Mật khẩu được so bằng **BCrypt** với chuỗi băm trong CSDL; mật khẩu được kiểm **trước** trạng thái khóa để người nhập sai không dò được tài khoản nào đang bị khóa.
 Đăng nhập thành công thì thông tin được lưu vào `PhienDangNhap`, mở `FrmMain` và `ApDungPhanQuyen()` ẩn/hiện menu theo vai trò (bảng quyền nằm trong `PhanQuyen.cs`).
 
-```mermaid
-flowchart TD
-    A(["Bắt đầu – mở ứng dụng Desktop"]) --> B["FrmDangNhap: nhập tên đăng nhập và mật khẩu, bấm Đăng nhập hoặc Enter"]
-    B --> C{"Có ô nào để trống?"}
-    C -- Có --> C1["Báo: vui lòng nhập đủ thông tin"] --> B
-    C -- Không --> D{"DbHelper.ThuKetNoi thành công?"}
-    D -- Không --> D1["Báo lỗi kết nối CSDL, kiểm tra SQL Server và chuỗi kết nối"] --> B
-    D -- Có --> E["Tìm tài khoản theo TenDangNhap, JOIN NhanVien lấy HoTen"]
-    E --> F{"Tìm thấy tài khoản?"}
-    F -- Không --> X["Báo: sai tên đăng nhập hoặc mật khẩu, xóa ô mật khẩu"] --> B
-    F -- Có --> G{"BCrypt verify mật khẩu khớp chuỗi băm?"}
-    G -- Không --> X
-    G -- Có --> H{"TrangThai = 0, tài khoản bị khóa?"}
-    H -- Có --> H1["Báo: tài khoản đã bị khóa, liên hệ quản trị viên"] --> B
-    H -- Không --> I["PhienDangNhap.BatDau: lưu MaTK, MaNV, TenDangNhap, HoTen, VaiTro"]
-    I --> J["Mở FrmMain, gọi ApDungPhanQuyen"]
-    J --> K{"VaiTro?"}
-    K -- ADMIN --> K1["Hiện tất cả menu: Nhân sự, Nhập hàng, Sản phẩm, Bán hàng, Báo cáo, Sao lưu – phục hồi"]
-    K -- QUANLY --> K2["Hiện Nhập hàng, Sản phẩm, Bán hàng, Báo cáo<br/>Ẩn Nhân sự, Sao lưu – phục hồi"]
-    K -- NHANVIEN --> K3["Chỉ hiện Bán hàng: POS, Đơn hàng"]
-    K1 --> L["Làm việc trên FrmMain"]
-    K2 --> L
-    K3 --> L
-    L --> M{"Chọn Đăng xuất?"}
-    M -- Có --> M1["PhienDangNhap.DangXuat, xóa thông tin phiên"] --> B
-    M -- Không, chọn Thoát --> Z(["Kết thúc"])
-```
+![Hình 5.2. Sơ đồ hoạt động – Đăng nhập Desktop](../diagrams/png/05-dang-nhap.png)
 
 **Bảng phân quyền áp dụng** (`Core/Services/PhanQuyen.cs`)
 
@@ -1189,17 +831,13 @@ Với CSDL có dữ liệu cần giữ: sao lưu, kiểm tra schema rồi áp d�
 
 TODO(SV3): Hoàn thiện hướng dẫn cấu hình email qua biến môi trường hoặc user-secrets, ghi các khóa cần dùng và bằng chứng gửi email xác nhận đơn thực tế. Xác nhận luồng OTP tài khoản riêng theo môi trường chạy.
 
-### 6.11. Cấu hình bộ nhớ và tài liệu nghiệm thu
+### 6.11. Cấu hình bộ nhớ đệm tìm kiếm
 
-TTL mặc định là 10 phút. Biến môi trường `BadmintonShop__CacheMinutes` nhận giá trị từ 1 đến 60. Các tiến trình cùng tài khoản Windows chia sẻ tín hiệu thay đổi trong thư mục CacheSignals dưới LocalApplicationData/BadmintonShop. Với các tiến trình khác tài khoản hoặc máy, đặt `BadmintonShop__CacheSignalRoot` tới thư mục chung có quyền đọc/ghi và dùng cùng tên server/catalog.
-
-Lệnh tái lập và phạm vi các đợt nghiệm thu được lưu trong `quy-tac-va-tien-do-dot-2.md`, `quy-tac-va-tien-do-dot-3.md` và `quy-tac-va-tien-do-dot-6.md`. Kịch bản bảo vệ được lưu trong `kich-ban-bao-ve-dot-3.md`.
+Dữ liệu tìm kiếm được giữ trong bộ nhớ đệm, mặc định 10 phút. Biến môi trường `BadmintonShop__CacheMinutes` nhận giá trị từ 1 đến 60. Các tiến trình cùng tài khoản Windows chia sẻ tín hiệu thay đổi trong thư mục CacheSignals dưới LocalApplicationData/BadmintonShop. Với các tiến trình khác tài khoản hoặc khác máy, đặt `BadmintonShop__CacheSignalRoot` tới thư mục chung có quyền đọc/ghi và dùng cùng tên server/catalog.
 
 ## 7. Kiểm thử
 
 ### 7.1. Kế hoạch kiểm thử SV4
-
-Kết quả mới xem [biên bản 26/10](../final-integration/README.md). Phần TC01–TC61 bên dưới là kế hoạch và trạng thái lịch sử ngày 18/10, không phải trạng thái hiện tại. Các ca voucher/web trước đây chờ đã được kiểm bằng repository/SQL và HTTP fixture ngày 22/10, chạy lại 26/10; chưa gọi đó là browser E2E.
 
 #### 7.1.1. Bộ kiểm tra hiện tại
 
@@ -1215,16 +853,9 @@ Bảng 7.1
 | GUI | Form thật, voucher Apply/Bỏ, giữ giỏ/bản nháp, sidebar ADMIN/QUANLY/NHANVIEN, 1366×768/1556×884 và scale mô phỏng; 1920×1080 chưa xác minh | Ảnh DrawToBitmap, chưa DPI Windows |
 | Schema | Chỉ SELECT metadata cấu hình hiện tại, chỉ rõ thiếu trường/index/trigger | schema-readonly.txt; không migration CSDL người dùng |
 
-Chưa kiểm: browser login/catalog SV2, SMTP, fault injection mạng đúng sau commit, mọi hộp thoại, Designer, DPI Windows thực, máy in. [Checklist SV2](checklist-sv2-desktop.md) chưa điền. Các lệnh chạy và CSDL test trong [HDSD](huong-dan-su-dung-sv4.md).
+Chưa kiểm: browser login/catalog SV2, SMTP, fault injection mạng đúng sau commit, mọi hộp thoại, Designer, DPI Windows thực, máy in. Checklist SV2 chưa điền. Các lệnh chạy và CSDL test trong HDSD.
 
-#### 7.1.2. Hồ sơ kế hoạch lịch sử 18/10/2026
-
-#### 7.1.3. Kế hoạch và kết quả kiểm thử SV4
-
-
-Ngày thực hiện: 18/10/2026. Không đánh dấu đạt cho module chưa chạy hoặc màn hình giả lập.
-
-#### 7.1.4. Phạm vi và môi trường
+#### 7.1.2. Phạm vi và môi trường
 
 - Windows, SDK .NET 10.0.203 build target .NET 8; có runtime .NET/WindowsDesktop 8.
 - SQL Server LocalDB 17.0.1000.7, Windows integrated authentication, **CSDL test riêng sinh tên mới**. Không chạy migration/demo trên CSDL BadmintonShop có sẵn.
@@ -1234,22 +865,17 @@ Ngày thực hiện: 18/10/2026. Không đánh dấu đạt cho module chưa ch�
 - GUI smoke: thực sự Show và OnLoad các form, dùng DrawToBitmap lưu ảnh của điều khiển thật. Có kiểm nút Mới của danh mục và thêm/bỏ giỏ POS. Không phải kiểm thử đầy đủ thao tác người dùng/Designer.
 - File: mở lại bằng ClosedXML/PDFsharp, xác thực OpenXML, kiểm độc lập bằng openpyxl/pypdf, render PDF bằng Poppler và xem ảnh.
 
-Lệnh chạy và lưu trữ bằng chứng: xem [hướng dẫn SV4](huong-dan-su-dung-sv4.md). File kết quả nằm ở thư mục Temp in tại cuối lần chạy. Mỗi lần integration tạo CSDL test mới và để lại để review. Không tự xóa CSDL.
+Lệnh chạy và lưu trữ bằng chứng: xem hướng dẫn SV4. File kết quả nằm ở thư mục Temp in tại cuối lần chạy. Mỗi lần integration tạo CSDL test mới và để lại để review. Không tự xóa CSDL.
 
-#### 7.1.5. Bảng test case
-
-Đạt (tự động) chỉ chứng minh tầng/bước ghi trong cột bằng chứng; không suy rộng thành đã kiểm E2E trên web hoặc toàn bộ UI. Chờ = chưa thực hiện.
-
-
-#### 7.1.6. Tiêu chí bàn giao và kiểm thử chéo
+#### 7.1.3. Tiêu chí bàn giao và kiểm thử chéo
 
 Build solution không lỗi, unit/integration pass trên CSDL riêng, không sửa CSDL người dùng; file có số liệu và cấu trúc đọc được; ghi chính xác tầng đã kiểm (SQL/repository/HTTP fixture), không đánh đồng browser E2E. SV2 cần kiểm thử chéo phần SV4 theo phân công, đặc biệt nhập liệu tương tác, hộp thoại, DPI và Designer. SV1/SV3 review quy tắc hủy và transaction dùng chung trước PR.
 
-Kiểm độc lập: pypdf đọc Unicode tiếng Việt/PDF nhiều trang, Poppler render xem bố cục; openpyxl đọc đủ 6 sheet, tổng danh mục bằng tổng CSDL. Không kiểm bằng cách đổi đuôi tệp. Kết quả theo lần chạy được lưu trong [biên bản kiểm thử](ket-qua-kiem-thu-sv4.md).
+Kiểm độc lập: pypdf đọc Unicode tiếng Việt/PDF nhiều trang, Poppler render xem bố cục; openpyxl đọc đủ 6 sheet, tổng danh mục bằng tổng CSDL. Không kiểm bằng cách đổi đuôi tệp. Kết quả theo lần chạy được lưu trong biên bản kiểm thử.
 
 ### 7.2. Bảng test case chung SV1 và SV4
 
-Kết quả giữ theo mốc của từng nguồn, gồm hồ sơ SV1 ngày 15/10 và kế hoạch lịch sử SV4 ngày 18/10. Các đợt kiểm mới được trình bày riêng ở mục kết quả.
+Kết quả giữ theo mốc của từng nguồn, gồm hồ sơ SV1 ngày 15/10 và kế hoạch SV4 ngày 18/10. Các lần kiểm sau được trình bày ở mục kết quả.
 
 Bảng 7.2
 
@@ -1353,52 +979,9 @@ Bảng 7.2
 | TC096 | SV4 | TC60 |  |  | Khách chưa mua/đã mua gửi đánh giá, desktop duyệt | Chặn đánh giá trái quyền; ẩn/hiện đúng | Chờ SV2 |
 | TC097 | SV4 | TC61 |  |  | Mất mạng ngay sau commit POS trước nhận kết quả | Retry cùng token trả đơn cũ; thao tác người dùng không tạo đơn mới | Chờ fault injection mạng; retry bền vững đã đạt I04/I09 |
 
-### 7.3. Kết quả kiểm thử SV4 theo từng đợt
+### 7.3. Kết quả kiểm thử SV4
 
-[Kết quả chạy mới](../final-integration/pr-review/README.md) trên D:\CodexWorktrees\BadmintonShop-sv4, nhánh feature/sv4-final-integration: build 0 lỗi/cảnh báo; integration **74/74**, install **15/15**; Python đối chiếu 12 bộ lọc và file xuất từ cửa sổ thật đều đạt. Đã sửa nhãn giảm giá POS bị cắt, mở lại build cuối xác minh đủ ba dòng. Demo thật thêm SP15 có ảnh/tồn 0, phiếu nhập8 tăng 5, POS42 trả 807.500/thừa 192.500, đơn Online demo37 hoàn thành; SQL và Excel/PDF báo cáo native cùng bộ lọc = 46.602.300đ. CSDL hồi quy riêng có tổng 13.172.279đ, không trộn hai phạm vi.
-
-1920×1080/DPI Windows thật vẫn chưa xác minh; HTTP fixture chưa browser E2E, chưa SV2 kiểm chéo. CSDL người dùng chỉ đọc schema, vẫn thiếu 4 cột/index; chưa migration/seed/ghi thử. Các đoạn dưới là lịch sử các lượt trước, không phải số liệu của lần rà cuối.
-
-#### 7.3.1. Hồ sơ trước lượt rà PR
-
-#### 7.3.2. Kết quả SV4 hiện tại — 26/10/2026
-
-Nhánh `feature/sv4-final-integration` chưa commit, nền develop `920a576`, tái sử dụng `6e7657a`. Môi trường Windows x64/SDK 10.0.402, target .NET 8, SQL Server 2022. [Biên bản final và SHA-256 mã được kiểm](../final-integration/README.md) là kết quả hiện tại; bên dưới giữ riêng hồ sơ 18/10 và 22/10, không gộp thành một lần chạy.
-
-- Build solution: 0 lỗi, 0 cảnh báo.
-- Tích hợp: **74 đạt, 0 lỗi**, CSDL riêng `BadmintonShop_SV4_Test_20261026212650_f83402ea`; 6 LIMIT 1920×1080 chưa xác minh, không tính như kiểm màn hình đích đã đạt.
-- Cài mới/migration/demo: **15 đạt, 0 lỗi** (gồm 13 unit + 2 ca cài đặt), CSDL `BadmintonShop_SV4_Test_Install_20261026211927_eded9f88`.
-- Python openpyxl/pypdf kiểm độc lập file cuối và cả 12 bộ lọc SQL/bảng/XLSX/PDF: đạt. Tổng doanh thu hoàn thành toàn khoảng cuối = **13.172.379 đồng**; số tiền của lần trước có thể khác do ca cạnh tranh, không dùng lẫn CSDL/file.
-- Schema đang cấu hình `localhost / BadmintonShop`: chỉ đọc metadata; thiếu 4 cột HoaDon và index POS, chưa cập nhật. Không ghi thử/seed/migration vào CSDL người dùng.
-- Ảnh control WinForms thật 1366×768 và 1556×884, scale 125%/150% mô phỏng. Harness cũ đặt tên 1920×1080 sai do giới hạn cửa sổ; đã sửa ghi kích thước thật, lưu probe phát hiện trước sửa. **Chưa kiểm 1920×1080 hoặc DPI Windows thực tế.**
-- Web được kiểm repository/SQL và HTTP Kestrel với đăng nhập fixture trong test host; chưa browser E2E login/catalog SV2. Chưa có bằng chứng SV2 kiểm thử chéo; chưa fault injection mạng đúng sau commit, mọi hộp thoại, Designer hoặc in giấy.
-
-Log/build, ảnh, Excel/PDF, phép đối chiếu và lệnh chạy: [docs/final-integration](../final-integration/README.md). HDSD/demo và checklist SV2 đã cập nhật. Không commit, push, mở PR hoặc merge trong lần này.
-
-#### 7.3.3. Hồ sơ kết quả lịch sử (giữ nguyên theo từng ngày)
-
-#### 7.3.4. Biên bản kết quả SV4 — 18/10/2026
-
-#### 7.3.5. Phiên bản và phạm vi
-
-Nhánh `feature/sv4-desktop`, tạo từ `origin/develop` sau fetch tại `c57ef31`. Ban đầu working tree sạch trên `feature/sv2-web`. Biên bản ghi nhận kết quả trước bước commit/push; việc xuất bản nhánh và mở PR được thực hiện theo yêu cầu bàn giao tiếp theo của người dùng. Không sửa mã web, trigger/schema nền 01/02/03, cấu hình kết nối hoặc dữ liệu CSDL BadmintonShop có sẵn.
-
-Môi trường: Windows, .NET SDK 10.0.203, target .NET 8 Windows; LocalDB 17.0.1000.7. Server localhost có phản hồi ban đầu nhưng sau đó timeout cả SqlClient và sqlcmd; đã chuyển toàn bộ integration sang LocalDB. Không restart hoặc reset SQL Server localhost.
-
-#### 7.3.6. Lệnh và kết quả lần cuối
-
-```powershell
-dotnet build BadmintonShop.sln -c Release --no-restore
-dotnet run --project tests/BadmintonShop.SV4.Checks -c Release --no-build -- --integration --server '(localdb)\MSSQLLocalDB'
-```
-
-- Build **thành công, 0 warning, 0 error**, cả Core, Desktop, Web và project kiểm tra.
-- **35 kiểm tra đạt, 0 lỗi**: U01–U13, I01–I16, GUI render 6 form.
-- CSDL lần cuối: `BadmintonShop_SV4_Test_20261018212348_1953608f`, được tạo riêng mới và giữ lại để review. Những lần thử trước cũng giữ CSDL test riêng cùng prefix; không dùng/xóa CSDL người dùng.
-- Kết quả gốc: `%TEMP%/BadmintonShop-SV4-Checks/20261018-212346/results.txt`, cùng thư mục chứa ảnh render, XLSX/PDF. [Log lưu trong repository](minh-chung-sv4/results.txt) đã thay phần đường dẫn profile bằng `%TEMP%`, không sửa kết quả kiểm tra.
-- `git diff --check`: không lỗi whitespace. Các phần chưa commit là mã nguồn, SQL bổ sung, tài liệu và ảnh render; bin/obj/config máy không đưa vào thay đổi.
-
-#### 7.3.7. Nghiệp vụ đã kiểm chứng
+#### 7.3.1. Nghiệp vụ đã kiểm chứng
 
 CRUD danh mục, tên trùng, dữ liệu không hợp lệ, chặn xóa khi có sản phẩm; thêm sản phẩm tồn 0, phiếu nhập tăng tồn bằng trigger, sửa sản phẩm không ghi tồn. Ảnh thật đọc/mã hóa lại được, chặn file giả/quá dung lượng và kiểm đường dẫn tương đối.
 
@@ -1410,56 +993,15 @@ Rollback sau header và dòng hợp lệ đầu tiên rồi lỗi tồn dòng th
 
 Giảm 7,5% trên dòng 2×100 tạo thành tiền 185, cộng dòng 50 thành 235; giảm hóa đơn 30 còn **205**, báo cáo danh mục tổng 205. Phần trăm lẻ giữ đúng trên lưới và PDF. Kiểm phân bổ gồm 1.000 bộ ngẫu nhiên, trường hợp hòa, 0 và tiền 18 chữ số.
 
-#### 7.3.8. Đối chiếu file bằng công cụ độc lập
-
-```powershell
-# Cần openpyxl và pypdf; đã dùng Python runtime có sẵn của môi trường kiểm tra.
-python tests/BadmintonShop.SV4.Checks/verify_exports.py '<thu-muc-ket-qua>' --expected-revenue 13170715
-```
-
-Kết quả: PASS. openpyxl mở đủ **6 sheet**, ô số giữ kiểu numeric. Tổng ngày/tháng/năm/danh mục đều **13.170.715 đồng**, bằng `SELECT SUM(TongTien) FROM HoaDon WHERE TrangThai=N'Hoàn thành'` trên CSDL test cuối cùng. Truy vấn độc lập cũng cho tồn nhỏ nhất **0**.
-
-pypdf mở đủ 6 trang báo cáo, đọc được tiếng Việt và quy tắc; hóa đơn nhiều trang đọc lại được. Hóa đơn POS xuất lại lấy tiền khách đưa 120, tổng 100, thừa 20 đúng từ CSDL. Hóa đơn giảm giá hiển thị **7,5% và tổng 205**. ClosedXML mở lại XLSX, OpenXmlValidator không có lỗi schema. PDFsharp mở lại PDF thành công.
-
-Đã render bằng Poppler và xem các trang báo cáo theo mẫu, hóa đơn thường/giảm giá và bố cục nhiều trang; chữ Việt, cột tiền, tiêu đề/footer và số trang hiển thị được, không đổi đuôi CSV. Không thực hiện mở ứng dụng Microsoft Excel/Adobe Reader hoặc in giấy.
-
-#### 7.3.9. Minh chứng giao diện thật
-
-Ảnh dưới đây là kết quả **Show/OnLoad + DrawToBitmap của Form WinForms thật trên CSDL test**, không phải ảnh thiết kế hoặc ảnh mockup. Dữ liệu là fixture SV4. Smoke kiểm tra nút Mới của danh mục làm sạch ô nhập và POS thêm/bỏ dòng giỏ; chưa phải bộ E2E click đầy đủ.
-
-- [Danh mục](minh-chung-sv4/FrmDanhMuc.png)
-- [Sản phẩm](minh-chung-sv4/FrmSanPham.png)
-- [Thêm/sửa sản phẩm](minh-chung-sv4/FrmSanPhamSua.png)
-- [Đơn hàng và giảm giá lẻ](minh-chung-sv4/FrmDonHang.png)
-- [POS](minh-chung-sv4/FrmPOS.png)
-- [Báo cáo](minh-chung-sv4/FrmThongKe.png)
-
-Ảnh báo cáo dùng mặc định đầu năm 2026 đến 18/10/2026, tổng 10.420.715; file kiểm độc lập dùng khoảng 18/09/2025–18/10/2026 nên tổng 13.170.715. Hai khoảng khác nhau được ghi rõ, không coi đó là sai lệch bảng/file.
-
-#### 7.3.10. Chưa kiểm thử và phối hợp còn lại
+#### 7.3.2. Chưa kiểm thử và phối hợp còn lại
 
 Chưa chạy E2E web SV2/SV3, khuyến mãi/voucher/email, hộp thoại và thao tác tay đầy đủ, scale/DPI, mở Visual Studio Designer, thiết bị máy in hoặc fault injection mạng ngay sau commit. Ma trận quyền đã kiểm tự động; mở form trái quyền và hộp thoại chặn cần kiểm thủ công riêng.
 
-SV1 cần review migration/luồng tồn; SV2 cần mount kho ảnh và kiểm thử chéo desktop; SV3 cần dùng chung HoaDonRepository, thống nhất quyền hủy khách/nhân viên và tích hợp service khuyến mãi khi hoàn thiện. Danh sách đầy đủ nằm trong [61 test case](kiem-thu-sv4.md) và [quy ước tích hợp](tich-hop-sv4.md).
-
-
-#### 7.3.11. Cập nhật tích hợp SV3–SV4 ngày 22/10/2026
-
-Xem [báo cáo tích hợp hiện tại](tich-hop-sv3-sv4.md) và bằng chứng riêng tại `docs/integration-sv3/`. Không thay số liệu của các lần chạy lịch sử bên trên.
+SV1 cần review migration/luồng tồn; SV2 cần mount kho ảnh và kiểm thử chéo desktop; SV3 cần dùng chung HoaDonRepository, thống nhất quyền hủy khách/nhân viên và tích hợp service khuyến mãi khi hoàn thiện. Danh sách đầy đủ nằm trong 61 test case và quy ước tích hợp.
 
 ### 7.4. Tích hợp SV3–SV4
 
-Ngày thực hiện: 22/10/2026. Nhánh làm việc: `codex/sv4-sv3-integration`. Không commit, push, tạo PR hay merge vào develop/main trong đợt này.
-
-#### 7.4.1. Nền code và phạm vi
-
-Đã fetch remote trước khi sửa. `origin/develop` tại `fef0067` đã chứa PR #2 (SV4 nền) và #3 (SV3). PR giao diện #4 vẫn **open, chưa merged**, có thể merge ở thời điểm kiểm tra; head `2d6adbc`. Nhánh SV4 cũ ở `fd9d56e`.
-
-Nhánh tích hợp tách từ giao diện mới rồi lấy code develop bằng squash không commit. Những file Web/SV3, script tổng/sample và biên bản tuần 02 xuất hiện trong diff là phần nhập từ develop; không chạy các script này trên CSDL cửa hàng. Các thay đổi giao diện ở PR #4 được giữ lại. `App.config` cá nhân vẫn nằm ngoài phần chỉnh sửa. Không tìm thấy AGENTS.md áp dụng trong project/đường dẫn cha; đã đọc README và quy ước tích hợp SV4.
-
-Không làm email, cổng thanh toán, trang quản lý khuyến mãi hoặc giao diện đăng nhập khách hàng của SV3/SV2.
-
-#### 7.4.2. Quy tắc giá dùng chung
+#### 7.4.1. Quy tắc giá dùng chung
 
 Web và POS cùng gọi `GioHangService` → `TinhKhuyenMaiService` → `KhuyenMaiRepository`:
 
@@ -1471,7 +1013,7 @@ Web và POS cùng gọi `GioHangService` → `TinhKhuyenMaiService` → `KhuyenM
 
 POS có ô voucher, Áp dụng/Bỏ mã, thông báo mã sai/hết hạn/hết lượt và ưu đãi hóa đơn tốt hơn mã. Hiển thị tiền trước giảm, giảm sản phẩm, giảm hóa đơn/voucher, tổng phải thu, khách đưa và thừa/thiếu. Thay giỏ hoặc mã đã áp dụng sẽ tính lại; sửa nội dung mã mà chưa bấm Áp dụng sẽ khóa thanh toán. Mã lỗi không bị âm thầm bỏ để thu một tổng tiền khác.
 
-#### 7.4.3. Transaction và kiểm tra xác nhận
+#### 7.4.2. Transaction và kiểm tra xác nhận
 
 `KhuyenMaiRepository` có constructor nhận connection/transaction. `GioHangService.TinhTrongGiaoDich` dùng cùng calculator với preview, đọc sản phẩm bằng UPDLOCK/HOLDLOCK theo MaSP tăng dần và đọc khuyến mãi bằng repository đã bound. Không mở connection riêng để tính khuyến mãi lúc lưu.
 
@@ -1486,7 +1028,7 @@ POS có ô voucher, Áp dụng/Bỏ mã, thông báo mã sai/hết hạn/hết l
 
 Lỗi SQL/nghiệp vụ ở bất cứ bước nào đều đi qua rollback của `DbHelper.ExecuteTransaction`. Không có lệnh production tự trừ kho hoặc tự cập nhật TongTien.
 
-#### 7.4.4. Token POS và migration riêng
+#### 7.4.3. Token POS và migration riêng
 
 Migration mới: `database/06_SV4_POS_Request.sql`, chạy lại được, sau migration 04. Chỉ thêm nullable `HoaDon.DauVanTayPOS VARCHAR(64)`, không đổi cột/index cũ. **Đã chạy hai lần trên CSDL test mới; chưa chạy trên CSDL cửa hàng.** POS kiểm khả năng schema và báo rõ nếu chưa có cột cần thiết.
 
@@ -1498,7 +1040,7 @@ Retry token đã thành công kiểm fingerprint rồi trả MaHD cũ **trước
 
 POS giữ token/báo giá khi lỗi chưa rõ kết quả; không tự tạo token mới khi retry. Nếu người dùng chủ động tạo giỏ mới sau lỗi kết nối, vẫn có lời nhắc kiểm tra Đơn hàng trước. Chưa thử ngắt mạng vật lý đúng thời điểm sau commit; đã kiểm retry giao dịch thành công và hai yêu cầu đồng thời.
 
-#### 7.4.5. Đơn hàng và ranh giới quyền
+#### 7.4.4. Đơn hàng và ranh giới quyền
 
 - Web tạo Online/Chờ xác nhận, trừ kho một lần ở INSERT chi tiết.
 - Desktop xác nhận → giao → hoàn thành; UPDATE kèm trạng thái kỳ vọng và LoaiBan Online. Các bước tiến không trừ thêm kho.
@@ -1508,7 +1050,7 @@ POS giữ token/báo giá khi lỗi chưa rõ kết quả; không tự tạo tok
 - Hủy đồng thời với xác nhận chỉ một thao tác thắng; trigger hoàn kho khi mới chuyển sang hủy nên không hoàn lại lần hai.
 - **Hoàn lượt voucher khi hủy chưa được nhóm chốt**: giữ hành vi SV3 hiện có là không giảm DaDung. Cần SV1/SV3 thống nhất riêng; không tự thay chính sách trong đợt này.
 
-#### 7.4.6. Hóa đơn và báo cáo
+#### 7.4.5. Hóa đơn và báo cáo
 
 PDF hóa đơn ghi riêng tiền hàng trước giảm, giảm sản phẩm, tiền hàng sau giảm sản phẩm, giảm hóa đơn/voucher, MaCTKM đã lưu, tổng thu và tiền khách/thừa. Dữ liệu lấy từ giá/%/tiền của hóa đơn đã lưu; không gọi service khuyến mãi hiện tại khi xuất lại.
 
@@ -1516,33 +1058,7 @@ Giữ BaoCaoService: doanh thu/số bán chỉ Hoàn thành, theo NgayLap; hủy
 
 Đã đối chiếu tổng SQL, dòng/header, báo cáo ngày/tháng/năm/danh mục và Excel. File cuối được xuất sau toàn bộ thao tác Web/Desktop, có `final-expected-revenue.txt` là tổng SQL cùng thời điểm. Kiểm độc lập dùng openpyxl/pypdf xác minh XLSX numeric, tổng, PDF Unicode, tổng và các khoản giảm trên hóa đơn lịch sử.
 
-#### 7.4.7. Chạy kiểm tra và demo an toàn
-
-Lượt chạy cuối: **build 0 lỗi/0 cảnh báo; 68 kiểm tra đạt, 0 thất bại**, process exit code 0. CSDL riêng: `BadmintonShop_SV4_Test_20261022163229_52671bee`. Kiểm độc lập openpyxl/pypdf đạt: 6 sheet, 6 trang báo cáo, tổng doanh thu Hoàn thành của **fixture test** là **13.172.235 đồng**, các khoản giảm trên PDF lịch sử khớp. Đây không phải doanh thu CSDL cửa hàng.
-
-Đã sửa hai lỗi lộ ra trong kiểm tra: khoảng khóa token gây deadlock Web/POS, và callback bind báo cáo chạy sai thread khi mở/đóng nhiều Form. Bộ tải hiện dùng control đích để marshal thao tác bind/cập nhật về UI thread, có bảo vệ khi Form bị dispose.
-
-```powershell
-dotnet build BadmintonShop.sln -p:OutDir=D:\Desktop\BadmintonShop-SV3-integration-build\
-dotnet D:\Desktop\BadmintonShop-SV3-integration-build\BadmintonShop.SV4.Checks.dll --integration --server .
-```
-
-Mỗi lần chạy tạo **CSDL mới** tên `BadmintonShop_SV4_Test_<thời điểm>_<guid>` trên server được chỉ định, không nhận tên CSDL cửa hàng. Schema 01/02 + migrations 04/06 chỉ áp dụng cho CSDL test. Không tự xóa CSDL test sau chạy để có thể kiểm tra bằng SSMS. Bộ test tạo account desktop `sv4test / TestOnly@123` trong CSDL đó để demo thủ công; đây không phải tài khoản cửa hàng.
-
-Kết quả cuối và tên CSDL: xem [log kiểm tra](../integration-sv3/results.txt). Bằng chứng được giữ tại [integration-sv3](../integration-sv3); thư mục Temp đầy đủ in cuối log.
-
-Để demo POS bằng ứng dụng, mở PowerShell mới và đặt biến môi trường chỉ trong phiên đó, thay tên CSDL bằng tên được log của lần chạy:
-
-```powershell
-$env:ConnectionStrings__BadmintonShop='Server=.;Database=BadmintonShop_SV4_Test_<tên trong log>;Integrated Security=True;TrustServerCertificate=True;'
-& 'D:\Desktop\BadmintonShop-SV3-integration-build\BadmintonShop.Desktop.exe'
-```
-
-Đăng nhập account test ở trên, chọn Bán tại quầy. Bộ fixture có sản phẩm Integration và voucher HTTP20; chọn đúng sản phẩm của chương trình hoặc xem KM_TheoSP trong SSMS để demo giảm sản phẩm. Áp mã, sửa số lượng, bỏ mã, nhập tiền, thanh toán và xuất lại PDF; chỉ làm trên CSDL test. Muốn demo đủ các ca độc lập và reset fixture, chạy lại bộ kiểm tra để tạo CSDL mới.
-
-Web hiện chưa có TaiKhoanController/View đăng nhập khách hàng ở nền develop. H01 khởi chạy **Kestrel thật với controller/view production**, Session/cookie auth/CSRF thật, dùng endpoint đăng nhập fixture chỉ trong tiến trình test. Các endpoint `/__test/*` nằm trong project kiểm tra, không thêm vào startup Web production. Vì vậy đã kiểm HTTP có xác thực, đặt/hủy/theo dõi đơn; **chưa kiểm giao diện đăng nhập thực tế hoặc thao tác browser thủ công xuyên hai ứng dụng**. Không nhận là đã triển khai/kiểm email/cổng thanh toán.
-
-#### 7.4.8. Test case mới
+#### 7.4.6. Test case mới
 
 Bảng 7.3
 
@@ -1569,102 +1085,6 @@ Bảng 7.3
 | H01 | HTTP qua Kestrel: CSRF, chủ đơn, Web đặt, trạng thái Desktop → Web, hủy và stale quote |
 
 Giữ 13 unit, 16 integration SV4 cũ, 6 render Form và bộ smoke khung UI/quyền/bản nháp/scale. Các vòng test có UI đều dùng STA context và message loop; ảnh là DrawToBitmap từ Form thật. Mức 125%/150% là mô phỏng layout, chưa thay DPI Windows thực tế. Không tự xác nhận mọi thao tác keyboard/Designer.
-
-#### 7.4.9. File triển khai và phối hợp
-
-- Core: sửa `KhuyenMaiRepository`, `SanPhamRepository` (overload khóa trong transaction), `HoaDonRepository`, `DonHangOnlineRepository`, `GioHangService`, `TinhKhuyenMaiService`, model `GioHang`; thêm `GiaoDichBanHang` và `XacNhanGia`.
-- Desktop: `FrmPOS`, nhãn khoản giảm trong `FrmDonHang`, `XuatTaiLieu`, marshal UI trong `ShopTheme`; giữ shell, bảng màu và dashboard mới.
-- Web: `DatHangController`, `DonHangController`, hai view chi tiết/xác nhận đơn; giữ Authorize/ValidateAntiForgeryToken và phạm vi SV3 khác.
-- Migration: `06_SV4_POS_Request.sql` riêng; không ghép/chạy lên CSDL cửa hàng.
-- Test: sửa console runner/Pump, thêm PromotionIntegration/WebHttpChecks/verify_integration_exports, reference Web + ASP.NET shared framework có sẵn; không thêm package UI hay gói test server ngoài.
-- Tài liệu: cập nhật README/quy ước tích hợp, dẫn báo cáo mới và lưu bằng chứng.
-
-SV1 cần review migration 06 và quyền thực thi `sp_getapplock`, triển khai 04/06 trên môi trường phù hợp theo quy trình nhóm. SV3 cần review quy tắc hòa ưu đãi, chính sách hoàn lượt voucher, và kiểm thử chéo với màn hình quản lý khuyến mãi của mình. SV2 cần hoàn thiện đăng nhập Web để demo qua browser bằng UI thật. Không có việc nào ở đây được tự merge hoặc tự triển khai lên CSDL cửa hàng.
-
-### 7.5. Quy ước tích hợp SV4
-
-#### 7.5.1. SV1 — lược đồ, tồn kho, phân quyền
-
-SV1 review/sao lưu rồi áp dụng `database/04_SV4_Migration.sql` và `06_SV4_POS_Request.sql` trên từng CSDL cần giữ; không tự chạy khi ứng dụng khởi động. Thêm nullable `HoaDon.LyDoHuy NVARCHAR(500)`, `MaYeuCauPOS UNIQUEIDENTIFIER`, `TienKhachDua DECIMAL(18,0)` và unique filtered index cho token khác NULL. Web cũ không cần truyền các cột mới. Model HoaDon đã bổ sung property tương ứng.
-
-Giữ nguyên trigger `trg_CTPN_TangTon`, `trg_CTHD_GiamTon`, `trg_HoaDon_CapNhat`. Trigger giảm tồn khi **INSERT chi tiết**, kể cả đơn Online Chờ xác nhận; không trừ thêm lúc xác nhận/hoàn thành. Hủy qua UPDATE trạng thái làm trigger hoàn kho. Không sửa/xóa từng dòng sau lưu; hoàn/trả sau giao chưa có nghiệp vụ.
-
-`DbHelper.ExecuteTransaction` có thêm tham số optional IsolationLevel, mặc định giữ ReadCommitted. Báo cáo dùng Serializable để đọc tập dữ liệu nhất quán. POS khóa sản phẩm UPDLOCK/HOLDLOCK theo mã tăng dần, kiểm lại giá và tồn, rồi ghi hóa đơn/chi tiết trong transaction. Những luồng ghi khác vẫn phải dùng transaction và xử lý lỗi trigger.
-
-Giữ `ChucNang`, `PhienDangNhap`, `QuyenForm`, `FrmMain.ApDungPhanQuyen`. Quản lý nhân viên, nhập hàng, sao lưu không thay đổi. Repository dùng chung không phụ thuộc phiên desktop; web phải xác thực/ủy quyền tại endpoint. Kiểm quyền trong Form là ranh giới UI desktop, không thay cho quyền SQL Server/API.
-
-Quy tắc hủy nhân viên hiện triển khai: Chờ xác nhận/Đã xác nhận, trước Đang giao. Cần SV1/SV3 review khi gộp; chưa có luồng trả hàng sau hoàn thành.
-
-#### 7.5.2. SV2 — danh mục, sản phẩm và ảnh
-
-- Không tạo DanhMucRepository/SanPhamRepository khác. Giữ nguyên LayTatCa/LayTheoMa. SV4 thêm `Luu`, `Xoa` danh mục; `Luu`, `NgungBan`, `LayDanhSachHienThi` sản phẩm.
-- Web chỉ hiển thị bán sản phẩm TrangThai=`Đang bán`; ảnh mới/tên/giá thay đổi thấy sau khi nạp lại. Tồn mới 0, tăng qua phiếu nhập. Không cho web ghi tồn theo dữ liệu form.
-- `SanPham.HinhAnh` là **khóa tương đối** `products/<uuid>.jpg`, dấu `/`, không chứa ổ đĩa, `..`, URL, backslash. Khóa NULL nghĩa là không có ảnh. `KhoAnhSanPham.DuongDanDayDu` kiểm khóa và ghép gốc.
-- Gốc kho dùng biến môi trường `BadmintonShop__MediaRoot`; mặc định `AppContext.BaseDirectory/media` chỉ phù hợp phát triển một app. Khi triển khai phải cấu hình gốc lưu chung bền vững, quyền ghi cho desktop và quyền đọc cho web. Khác máy: dùng thư mục chia sẻ/volume; thiết kế này chưa hỗ trợ upload API/object storage.
-- SV2 cần mount vùng `products` của kho làm StaticFileProvider với URL ví dụ `/media/products/<uuid>.jpg`; CSDL không lưu prefix `/media`. URL tạo bằng `"/media/" + HinhAnh`, không ghép root vật lý vào HTML. Chỉ phục vụ ảnh từ vùng này, không expose toàn bộ thư mục tùy ý. Cung cấp ảnh fallback khi NULL/404/sai khóa, không lỗi cả trang.
-- Desktop giải mã ảnh ≤10 MB/30 triệu điểm ảnh và mã hóa JPEG. Không dùng tên file gốc, không tự xóa ảnh cũ dùng chung. Dọn ảnh mồ côi cần đối chiếu CSDL và backup, chưa tự động thực hiện.
-- Đánh giá/bình luận, tài khoản/hồ sơ web và menu duyệt phản hồi thuộc SV2, còn placeholder trên nhánh nền này.
-
-#### 7.5.3. SV3 — hóa đơn, trạng thái và khuyến mãi
-
-Sau tích hợp, giữ `HoaDonRepository` cho nhân viên/POS và `DonHangOnlineRepository` cho khách hàng, chia sẻ ghi đơn qua `GiaoDichBanHang` để không làm mất ranh giới quyền sở hữu. Các API nhân viên/POS hiện có: `LayTheoMa`, `LayDanhSachHienThi`, `LayChiTietHienThi`, `ChuyenTrangThai`, `ThanhToanPOS`.
-
-Online: Chờ xác nhận → Đã xác nhận → Đang giao → Hoàn thành. `QuyTacBanHang.DuocChuyen` chia sẻ ma trận. `ChuyenTrangThai(ma, trạng thái kỳ vọng, mới, lý do)` UPDATE có điều kiện để tránh ghi đè; chỉ luồng nhân viên Online. Khách web tự hủy cần endpoint kiểm đúng MaKH và chỉ Chờ xác nhận; không gọi API nhân viên mà thiếu kiểm quyền/chủ đơn.
-
-Hóa đơn POS: MaKH=NULL, MaNV=phiên, LoaiBan=`Tại quầy`, HinhThucTT=`Tiền mặt`, TrangThai=`Hoàn thành`. Giá từng dòng được kiểm lại với sản phẩm trong transaction. Token GUID bền vững chỉ dùng cho POS, không phải mã hóa đơn hiển thị. Khi retry giữ nguyên token và giỏ/tiền; index chống ghi hai lần. Mã yêu cầu khác là giao dịch khác.
-
-Giảm theo SP là phần trăm `ChiTietHoaDon.GiamGia`; `ThanhTien` là cột tính. Giảm cấp hóa đơn/voucher ghi `HoaDon.TienGiamGia`, `MaCTKM`; `TongTien` do trigger tính. Không tự tính lại rồi trừ lần hai.
-
-`TinhKhuyenMaiService` và `GioHangService` SV3 đã được dùng chung Web/POS. Sản phẩm giảm trước; cấp hóa đơn chọn một giữa bậc hóa đơn và voucher, bằng tiền ưu tiên voucher theo quy tắc SV3. `KhuyenMaiRepository` hỗ trợ connection/transaction có sẵn. Khi lưu, hai luồng khóa sản phẩm tăng dần, đọc lại giá/khuyến mãi/lượt dùng trong Serializable, so báo giá đã xác nhận rồi mới tăng lượt và ghi đơn. Tổng và tồn vẫn do trigger.
-
-POS thêm migration riêng `06_SV4_POS_Request.sql` (sau 04), cột nullable `DauVanTayPOS VARCHAR(64)` lưu SHA-256 của yêu cầu xác nhận. Giữ token và báo giá khi chưa rõ kết quả; retry token thành công đọc lại hóa đơn cũ trước khi tính giá hiện tại, không trừ voucher/tồn lần nữa. Khóa `sp_getapplock` theo token tránh khoảng khóa trên index token gây deadlock với Web. Chưa tự chạy migration trên CSDL cửa hàng.
-
-Quy tắc hoàn lượt voucher khi hủy **chưa chốt**: giữ cách SV3 đang làm là không giảm `DaDung` lúc hủy; không tự đặt chính sách mới. Chi tiết thiết kế, bằng chứng, giới hạn và demo: [tích hợp SV3–SV4](tich-hop-sv3-sv4.md).
-
-#### 7.5.4. Thống kê và thư viện
-
-Doanh thu/số bán chỉ Hoàn thành; số đơn đếm mọi trạng thái. Lọc theo NgayLap và LoaiBan, ngày cuối tính hết ngày. Chưa có cột ngày hoàn thành nên doanh thu theo **ngày lập của đơn hiện Hoàn thành**, không theo ngày giao xong; cần thống nhất khi báo cáo tài chính thật.
-
-Net từng hóa đơn là TongTien trong CSDL. Phân bổ cho danh mục hiện tại theo ThanhTien sau giảm sản phẩm, lấy phần nguyên và chia đồng dư theo phần dư lớn nhất, hòa ưu tiên MaDM nhỏ. Sản phẩm chuyển danh mục sẽ làm thống kê danh mục lịch sử thay đổi; cần cột snapshot nếu nhóm muốn giữ danh mục tại thời điểm bán.
-
-Bảng/biểu đồ/file dùng `KetQuaBaoCao` cùng lần đọc. Không dùng query riêng cho tổng. Biểu đồ gộp phần dư khi quá 12 dòng nhưng giữ tổng. XLSX giữ dữ liệu số thật, PDF có Unicode và tự phân trang.
-
-Thư viện thêm, tương thích project .NET 8 Windows, giấy phép MIT phù hợp đồ án:
-
-- [ClosedXML 0.105.0](https://www.nuget.org/packages/ClosedXML/0.105.0): tạo XLSX thật, không cần cài Excel.
-- [PDFsharp-MigraDoc-GDI 6.2.0](https://www.nuget.org/packages/PDFsharp-MigraDoc-GDI/6.2.0): PDF, dùng font Windows; không tuyên bố chạy export GDI trên Linux.
-- Biểu đồ vẽ bằng WinForms/GDI sẵn có, không thêm gói biểu đồ.
-
-Giữ thông báo bản quyền/license của các package khi phân phối theo MIT; phụ thuộc bắc cầu do NuGet restore theo dependency metadata, không chép DLL thủ công. Không dùng license trả phí/trial hoặc watermark. Version trực tiếp được pin trong csproj, NuGet audit chạy khi restore/build.
-
-#### 7.5.5. Cập nhật bàn giao 26/10/2026
-
-Nhánh final tạo từ develop `920a576`, tận dụng `6e7657a`; chưa commit/push/PR. CSDL cấu hình hiện tại `localhost / BadmintonShop` thiếu 4 cột HoaDon và index token; [kiểm tra chỉ đọc](../final-integration/schema-readonly.txt) xác định chính xác. Không sửa CSDL cửa hàng. Script tổng đã gồm 04/06 cho cài mới; không chạy tổng lên dữ liệu đang giữ. Demo 05 chỉ nhận DB riêng theo tiền tố test/demo, có 12 tháng dữ liệu và ba CTKM `[SV4-DEMO]`.
-
-Lý do voucher phân biệt không tồn tại/chưa mở/hết hạn/hết lượt/ngừng áp dụng, dùng chung service cho Web/POS. POS chỉ sẵn sàng khi có cả cột và unique filtered index MaYeuCauPOS. Giá thay đổi cần xác nhận lại; không yêu cầu xóa giỏ. Tiền/giảm từ UI chỉ là báo giá xác nhận, transaction đọc lại dữ liệu thật trước ghi.
-
-Kết quả hiện tại và giới hạn ở [biên bản final](../final-integration/README.md). SV1 review schema/trigger, SV3 xác nhận chính sách voucher/email/idempotency web; SV2 thực hiện [checklist kiểm thử chéo](checklist-sv2-desktop.md), login/catalog và mount kho ảnh. Không ghi SV2 đã kiểm khi chưa có xác nhận.
-
-
-#### 7.5.6. Rà cuối trước PR, sau chuyển ổ D
-
-Worktree sử dụng: `D:\CodexWorktrees\BadmintonShop-sv4`, nhánh `feature/sv4-final-integration`. [Kết quả và commit mới](../final-integration/pr-review/README.md) có 74/74 integration, 15/15 install, kiểm độc lập 12 bộ lọc và demo cửa sổ thật. Đã sửa chiều cao tóm tắt POS để không cắt dòng giảm giá và giữ thông tin hóa đơn gần nhất sau tải lại. 1920×1080, DPI Windows thật, browser E2E và kiểm chéo SV2 vẫn chưa xác minh. Được phép commit/push/mở PR theo yêu cầu mới, không merge.
-
-### 7.6. Checklist kiểm thử chéo SV2
-
-Chưa có bằng chứng SV2 đã thực hiện. Người kiểm điền ngày, commit/build, máy/DPI, CSDL test và đính kèm kết quả/ảnh; không dùng CSDL thật.
-
-- [ ] ADMIN/QUANLY/NHANVIEN: menu đúng quyền, thử mở trực tiếp form trái quyền; đăng xuất không thao tác tiếp được.
-- [ ] Danh mục/sản phẩm: thêm/sửa, tên trùng, ảnh hợp lệ/NULL/thiếu, ngừng bán; web catalog nhìn cùng dữ liệu/kho ảnh.
-- [ ] Phiếu nhập SV1 làm tăng tồn; POS không sửa tồn trực tiếp.
-- [ ] POS giảm SP + hóa đơn/voucher đúng quy tắc; voucher sai/chưa mở/hết hạn/hết lượt có lý do riêng.
-- [ ] Thiếu/đủ/thừa tiền; thanh toán lặp bị khóa, thất bại giữ giỏ; đổi giá trước thanh toán cần xác nhận lại; xem hóa đơn trước khi Giỏ mới sau lỗi mạng.
-- [ ] Chuyển menu liên tục, quay lại POS/bản nháp; đóng/đăng xuất lúc tải và mở lại trang.
-- [ ] Khách thật qua UI SV2 đặt COD → desktop cùng mã/chi tiết → xác nhận/giao/hoàn thành → web đúng trạng thái. Khách khác không xem/hủy; khách chỉ hủy khi Chờ, nhân viên bắt buộc lý do trước giao.
-- [ ] Thống kê đúng ngày/loại bán; đơn hủy không doanh thu; bảng/Excel/PDF cùng bộ lọc, hóa đơn dùng giá lưu.
-- [ ] Cửa sổ 1366×768 và 1920×1080; DPI Windows 125%/150% thật, scroll tới nút, không cắt/chồng. Kiểm Visual Studio Designer và hộp thoại/in nếu cần demo.
-
-Người kiểm: …; Ngày: …; Build/commit: …; Môi trường/CSDL riêng: …; Kết quả/lỗi/ảnh: …
 
 ## 8. Hướng dẫn sử dụng
 
@@ -1840,25 +1260,7 @@ Giao diện web thuộc SV2. Cơ chế xác thực dùng repository khách hàng
 
 ### 8.2. Phần SV4
 
-#### 8.2.1. Mở trong Visual Studio và thiết lập
-
-Mở `D:\CodexWorktrees\BadmintonShop-sv4\BadmintonShop.sln` trên nhánh `feature/sv4-final-integration`, đặt `BadmintonShop.Desktop` làm Startup Project, Build rồi F5. Cần Windows, .NET 8 Desktop Runtime/SDK và SQL Server. Mở đúng worktree ổ D, không sửa/build bản dự phòng ổ C. Kết quả/commit trước PR và lệnh chạy demo hiện có: [rà soát cuối](../final-integration/pr-review/README.md).
-
-Cả web và desktop ưu tiên biến môi trường `ConnectionStrings__BadmintonShop`; nếu không có thì đọc appsettings.json/App.config tương ứng. Giữ cấu hình cá nhân ở máy. Có thể kiểm schema mà không ghi dữ liệu:
-
-```powershell
-dotnet run --project tests/BadmintonShop.SV4.Checks -- --schema-readonly
-```
-
-Ngày 26/10, cấu hình hiện tại trỏ `localhost / BadmintonShop`; kết nối thực tế `DESKTOP-FGE20L2`. Thiếu `HoaDon.LyDoHuy`, `MaYeuCauPOS`, `TienKhachDua`, `DauVanTayPOS` và index `UX_HoaDon_MaYeuCauPOS`. Ba trigger vẫn bật. Công cụ chỉ SELECT metadata, không sửa/seed CSDL; xem [kết quả](../final-integration/schema-readonly.txt). Máy khác cần chạy lại kiểm tra.
-
-Với CSDL hiện có cần giữ: SV1 sao lưu/review rồi áp dụng **04 → 06** bằng SSMS hoặc sqlcmd. Hai migration có `USE BadmintonShop`; phải kiểm tên đích trước Execute. Không chạy script 01 hoặc SQL tổng trên CSDL đang có dữ liệu. Không chạy demo trên CSDL cửa hàng.
-
-Cài máy trống: script tổng đã gồm schema nền, trigger, dữ liệu mẫu, 04 và 06; có đoạn DROP/CREATE nên chỉ dùng cho môi trường bỏ được. Bộ kiểm tra cài mới tạo CSDL `BadmintonShop_SV4_Test_Install_*`, bỏ hoàn toàn đoạn DROP/CREATE và đổi `USE` sang tên test.
-
-Kho ảnh: đặt `BadmintonShop__MediaRoot` tới cùng thư mục bền vững cho web/desktop, ví dụ `D:\BadmintonShopMedia`; desktop cần ghi, web cần đọc và mount `/media/products`. CSDL chỉ lưu `products/<uuid>.jpg`. Chưa mount/fallback ảnh trên web là việc SV2 cần xác minh.
-
-#### 8.2.2. Thao tác chính
+#### 8.2.1. Thao tác chính
 
 - **Danh mục/Sản phẩm:** tìm/lọc, thêm/sửa, chọn ảnh, ngừng bán. Tồn 0 khi tạo; dùng Nhập hàng → Phiếu nhập của SV1 để tăng tồn, không sửa tồn trực tiếp. Cảnh báo hết = 0; sắp hết = 1–5.
 - **Đơn hàng:** lọc ngày/trạng thái/loại/mã hoặc thông tin khách. Chọn đơn để xem giá và giảm đã lưu; xác nhận → giao → hoàn thành. Nhân viên hủy trước giao phải nhập lý do. Đơn đã thay đổi cần tải lại. Xuất PDF từ đơn đã lưu.
@@ -1867,51 +1269,15 @@ Kho ảnh: đặt `BadmintonShop__MediaRoot` tới cùng thư mục bền vững
 - **Báo cáo:** chọn khoảng/loại bán → Xem báo cáo. Chỉ Hoàn thành tạo doanh thu và số lượng; trạng thái đếm cả đơn hủy. Phân kỳ theo NgayLap. Excel/PDF dùng đúng kết quả đang hiển thị; sửa bộ lọc chưa tải không làm đổi file. PDF hóa đơn dùng giá/giảm/tổng đã lưu.
 - **Điều hướng:** chuyển mục giữ giỏ và bản nháp. Đóng/đăng xuất cảnh báo dữ liệu chưa lưu và chặn khi có tác vụ chạy. ADMIN có mọi mục; QUANLY trừ nhân viên/tài khoản và sao lưu; NHANVIEN chỉ đơn hàng/POS (ngoài các mục phiên cá nhân).
 
-#### 8.2.3. CSDL demo và kịch bản 5–7 phút
-
-Dùng CSDL riêng tên `BadmintonShop_SV4_Demo*` hoặc `BadmintonShop_SV4_Test_*`, có đủ schema/trigger/04/06. Có thể dùng CSDL cài mới test do lệnh dưới tạo; tài khoản mẫu được seed chỉ ở CSDL này. Chuyển chuỗi kết nối của cả hai app bằng biến môi trường phiên rồi mở lại app. Không tạo tài khoản/cửa hậu trong CSDL thật.
-
-```powershell
-dotnet run --project tests/BadmintonShop.SV4.Checks -- --install-checks --server .
-# Đọc tên CSDL test vừa in; tuyệt đối không thay bằng CSDL cửa hàng:
-sqlcmd -S . -E -C -I -b -f 65001 -d '<TEN_CSDL_TEST_VUA_TAO>' -i database/05_SV4_Demo.sql
-$env:ConnectionStrings__BadmintonShop='Server=.;Database=<TEN_CSDL_TEST_VUA_TAO>;Integrated Security=True;TrustServerCertificate=True;'
-dotnet run --project BadmintonShop.Desktop
-```
-
-Script 05 chỉ nhận CSDL có tiền tố test/demo trên, nhập kho trước bán, 12 tháng đơn, nhãn `[SV4-DEMO]`; khóa transaction và sentinel chống thêm trùng. Có giảm vợt 10%, bậc đơn từ 1 triệu giảm 5% và `SV4DEMO15` giảm 15%, hiệu lực 30 ngày kể từ lần seed đầu, 30 lượt. Chạy lại không gia hạn chương trình đã có.
-
-Bảng 8.2
-
-| Thời gian | Thao tác và điểm cần thấy |
-| --- | --- |
-| 0:00–1:00 | ADMIN/QUANLY thêm sản phẩm `[DEMO]`, chọn ảnh; tồn 0. |
-| 1:00–2:00 | Phiếu nhập SV1 chọn nhà cung cấp, nhập hàng vừa tạo; lưu rồi kiểm tồn tăng. |
-| 2:00–3:30 | POS chọn vợt `[SV4-DEMO]`, áp `SV4DEMO15`: một vợt 500.000 → giảm SP 50.000 → voucher 67.500 → trả 382.500; đưa 400.000 thừa 17.500. Lưu và xuất PDF. |
-| 3:30–5:00 | Nếu SV2 login/catalog sẵn sàng: khách đặt COD, desktop thấy cùng mã/chi tiết rồi xác nhận/giao/hoàn thành; web cập nhật trạng thái. Nếu thiếu UI SV2, dùng đơn `[SV4-DEMO]` để minh họa trạng thái và nói rõ đó là dữ liệu demo, không nhận đã đi web E2E. |
-| 5:00–6:30 | Thống kê mở từ 13 tháng trước đến hôm nay; lọc Online/Tại quầy, xem biểu đồ và xuất XLSX/PDF. Đơn hoàn thành tính doanh thu; hủy không tính. |
-
-#### 8.2.4. Kiểm tra và bằng chứng
-
-```powershell
-dotnet build BadmintonShop.sln
-dotnet run --project tests/BadmintonShop.SV4.Checks -- --integration --server .
-python tests/BadmintonShop.SV4.Checks/verify_integration_exports.py '<thu-muc-ket-qua>'
-```
-
-Test ghi riêng `BadmintonShop_SV4_Test_*`, không tự xóa CSDL. Kết quả và giới hạn xem [biên bản](../final-integration/README.md); checklist SV2 chưa được đánh dấu thay người kiểm. Ảnh render thực tế 1366×768 và 1556×884; 1920×1080 chưa xác minh do giới hạn cửa sổ. Scale mô phỏng không thay thế kiểm DPI Windows thật, hộp thoại, Designer hoặc in giấy.
-
 ### 8.3. Phần SV2 và SV3
 
 TODO(SV2): Bổ sung hướng dẫn khách hàng và đánh giá.
 
 TODO(SV3): Bổ sung hướng dẫn giỏ hàng, đặt hàng và khuyến mãi.
 
-## 9. Tổng kết — SV4
+## 9. Tổng kết
 
-Nhánh `feature/sv4-final-integration`, nền `origin/develop` tại `920a576`. Tận dụng phần tích hợp đã có tại `6e7657a` trên `feature/sv4-desktop`; các chỉnh sửa lần này chưa commit. Không lấy số liệu kiểm tra ngày 18/10 hoặc 22/10 làm kết quả chạy ngày 26/10.
-
-### 9.1. Kết quả triển khai
+### 9.1. Kết quả triển khai phần SV4
 
 - Sản phẩm/danh mục: CRUD, kiểm đầu vào, ảnh tương đối an toàn, ngừng bán giữ lịch sử, lọc/tìm/cảnh báo tồn. Sản phẩm mới tồn 0; nhập hàng qua chức năng SV1 và trigger.
 - Đơn Online: so trạng thái kỳ vọng, xác nhận → giao → hoàn thành; nhân viên hủy trước giao, bắt buộc lý do. Khách chỉ hủy đúng đơn của mình khi Chờ xác nhận. Trigger hoàn kho đúng một lần.
@@ -1921,30 +1287,13 @@ Nhánh `feature/sv4-final-integration`, nền `origin/develop` tại `920a576`. 
 - Báo cáo có bộ lọc ngày/tháng/năm/khoảng, loại bán, bảng/biểu đồ và XLSX/PDF thật. Doanh thu chỉ Hoàn thành, lấy `TongTien` đã lưu; phân bổ danh mục không giảm hai lần.
 - Sidebar, tải nền, cache trang và giữ bản nháp tiếp tục được dùng. Bảo vệ callback sau đóng và log vòng đời được giữ từ đợt điều tra trước.
 
-### 9.2. Kiểm chứng và giới hạn
-
-Kết quả chạy mới, môi trường, ảnh và file xuất: [biên bản 26/10](../final-integration/README.md). CSDL test luôn có tên riêng; CSDL người dùng chỉ được đọc metadata. CSDL đang cấu hình còn thiếu migration 04/06, do đó cần cập nhật có chủ đích trước khi dùng POS tích hợp.
-
-HTTP test chạy MVC/Kestrel thật với cookie/anti-forgery và đăng nhập fixture trong test host; không phải E2E trình duyệt đăng nhập/catalog SV2. Chưa có bằng chứng SV2 kiểm thử chéo; [checklist bàn giao](checklist-sv2-desktop.md) vẫn để trống.
-
-Ảnh là `Show/OnLoad + DrawToBitmap` của control thật tại 1366×768 và 1556×884; 1920×1080 bị Windows giới hạn nên chưa xác minh. Scale 125%/150% là mô phỏng `Control.Scale`, chưa đổi DPI Windows, chưa xác minh Designer, máy in và mọi nhánh hộp thoại. Chưa fault injection mạng đúng khoảng sau commit/trước phản hồi, dù retry sau commit và rollback giữa transaction đã được kiểm tra.
-
-Lỗi `Dispose/CreateHandle` chưa tái hiện ở đợt debugger 22/10; chưa xác định lời gọi gốc, không khẳng định đã sửa dứt điểm. Giữ [log và giới hạn điều tra](../lifecycle-diagnostics/README.md).
-
-### 9.3. Phối hợp và hướng phát triển
+### 9.2. Phối hợp và hướng phát triển
 
 SV1 review migration, quyền và trigger trước triển khai; SV3 xác nhận quy tắc ưu đãi/hủy (hiện không hoàn lượt voucher khi hủy), email và idempotency web; SV2 hoàn thiện login/catalog/mount kho ảnh và kiểm thử chéo desktop. Không mở rộng trả hàng, thanh toán thật hoặc hóa đơn điện tử.
 
 Doanh thu hiện phân kỳ theo NgayLap của đơn đang Hoàn thành; chưa có ngày hoàn thành và snapshot tên/danh mục. Ảnh dùng filesystem chung, chưa có object storage/dọn ảnh mồ côi. Query chạy nền trên desktop nhưng chưa benchmark dữ liệu lớn; Serializable có thể chặn ghi. Đây là giới hạn đồ án, không tuyên bố sẵn sàng vận hành thương mại.
 
-
-### 9.4. Rà cuối trước PR, sau chuyển ổ D
-
-Worktree sử dụng: `D:\CodexWorktrees\BadmintonShop-sv4`, nhánh `feature/sv4-final-integration`. [Kết quả và commit mới](../final-integration/pr-review/README.md) có 74/74 integration, 15/15 install, kiểm độc lập 12 bộ lọc và demo cửa sổ thật. Đã sửa chiều cao tóm tắt POS để không cắt dòng giảm giá và giữ thông tin hóa đơn gần nhất sau tải lại. 1920×1080, DPI Windows thật, browser E2E và kiểm chéo SV2 vẫn chưa xác minh. Được phép commit/push/mở PR theo yêu cầu mới, không merge.
-
-### 9.5. Đối chiếu yêu cầu giảng viên — 05/11/2026
-
-Các chức năng/kết quả ở trên mô tả phạm vi triển khai SV4, chưa đồng nghĩa đạt đủ yêu cầu môn học. Báo cáo hiện có sáu bảng; chưa có thu–chi–lợi nhuận theo quý, nhân viên × năm, khách hàng × năm, sản phẩm × quý/năm và nhập Excel cho người dùng. Tìm kiếm dùng bộ nhớ ở một số form nhưng chưa có cơ chế làm mới 5–10 phút đồng bộ. Các phần này là yêu cầu cần hoàn thiện, không chuyển hết sang hướng phát triển tùy chọn. Xem [báo cáo rà soát](ra-soat-yeu-cau-2026-11-05.md). Không sửa logic trong lượt review này.
+TODO(SV4): Bổ sung kết quả của SV1, SV2, SV3 để chương tổng kết bao quát cả nhóm.
 
 ## 10. Bảng tự đánh giá
 
@@ -2113,8 +1462,6 @@ Ghi chú cột Kết quả: **Đạt** = SV1 đã chạy và đúng mong đợi 
 
 ### 11.2. Đặc tả SV4
 
-Cập nhật 26/10/2026. Nhánh `feature/sv4-final-integration`, nền `origin/develop` tại `920a576`, tái sử dụng tích hợp `6e7657a`; thay đổi hiện chưa commit. Mã nguồn thực tế là căn cứ.
-
 #### 11.2.1. Tác nhân và quyền
 
 ADMIN dùng toàn bộ chức năng. QUANLY dùng sản phẩm, danh mục, đơn hàng, POS, thống kê. NHANVIEN chỉ dùng đơn hàng và POS. Chưa đăng nhập không được mở form. `FrmMain.ApDungPhanQuyen()` giữ nguyên; mỗi form kiểm `QuyenForm.KiemTraKhiMo` trong OnLoad, thao tác CSDL đi qua `Sv4Ui.Chay` kiểm lại `PhienDangNhap.CoQuyen`.
@@ -2180,21 +1527,6 @@ SQL chỉ ở Core/DataAccess, có tham số; Form không viết SQL. Giữ API 
 
 Chỉ điều chỉnh Core/Web cần thiết cho tính lại giá trong transaction và xác nhận báo giá; giữ API đọc, xác thực và chủ đơn. Không chỉnh trigger SV1 hoặc bổ sung email/thanh toán thật. Truy vấn desktop chạy worker qua ShopTheme.Load; dữ liệu lớn vẫn cần phân trang/benchmark. Quy tắc voucher khi hủy giữ nguyên SV3: chưa hoàn lượt.
 
+#### 11.2.8. Chức năng bổ sung: bộ nhớ đệm, lọc nâng cao, nhập Excel
 
-#### 11.2.8. Rà cuối trước PR, sau chuyển ổ D
-
-Worktree sử dụng: `D:\CodexWorktrees\BadmintonShop-sv4`, nhánh `feature/sv4-final-integration`. [Kết quả và commit mới](../final-integration/pr-review/README.md) có 74/74 integration, 15/15 install, kiểm độc lập 12 bộ lọc và demo cửa sổ thật. Đã sửa chiều cao tóm tắt POS để không cắt dòng giảm giá và giữ thông tin hóa đơn gần nhất sau tải lại. 1920×1080, DPI Windows thật, browser E2E và kiểm chéo SV2 vẫn chưa xác minh. Được phép commit/push/mở PR theo yêu cầu mới, không merge.
-
-#### 11.2.9. Đối chiếu yêu cầu giảng viên — 05/11/2026
-
-Các chức năng/kết quả ở trên mô tả phạm vi triển khai SV4, chưa đồng nghĩa đạt đủ yêu cầu môn học. Báo cáo hiện có sáu bảng; chưa có thu–chi–lợi nhuận theo quý, nhân viên × năm, khách hàng × năm, sản phẩm × quý/năm và nhập Excel cho người dùng. Tìm kiếm dùng bộ nhớ ở một số form nhưng chưa có cơ chế làm mới 5–10 phút đồng bộ. Các phần này là yêu cầu cần hoàn thiện, không chuyển hết sang hướng phát triển tùy chọn. Xem [báo cáo rà soát](ra-soat-yeu-cau-2026-11-05.md). Không sửa logic trong lượt review này.
-
-#### 11.2.10. Bổ sung đợt 2 — 05/11/2026
-
-Danh sách sản phẩm/hóa đơn và báo cáo có bộ nhớ theo điều kiện, quyền, TTL và tín hiệu ghi; Web chỉ chia sẻ catalog công khai. Đơn hàng có bộ lọc hai điều kiện AND/OR/NOT với sáu phép so sánh. Màn sản phẩm có nhập XLSX mới, xem trước, lỗi dòng/cột, quyền và rollback toàn file; không nhập tồn kho hoặc ghi đè mã. PDF nhân viên/khách hàng nhiều năm chia phần và lặp tổng toàn kỳ. Quy tắc tạm, kiểm chứng và phần chưa nghiệm thu: [đợt 2](quy-tac-va-tien-do-dot-2.md).
-
-#### 11.2.11. Cập nhật nghiệm thu đợt 3 — 05/11/2026
-
-Đọc [biên bản đợt 3](quy-tac-va-tien-do-dot-3.md) và [kịch bản bảo vệ](kich-ban-bao-ve-dot-3.md) trước khi demo. Main–sub Web tạm mở rộng cho Đơn hàng của tôi: chọn ô/Enter/Space nạp chi tiết cùng trang, kiểm tra chủ sở hữu và không cache dữ liệu cá nhân. Không có màn phiếu nhập Web cho khách.
-
-Đã kiểm tra hộp lưu/chọn file Windows, preview lỗi/đúng và xác nhận nhập qua MessageBox trên DB thử; mở báo cáo bằng Excel và PDF Chrome. Tích hợp hai tiến trình tự động đạt, chưa thay nghiệm thu UI trọn Web → Desktop → báo cáo. TTL, phạm vi cuối và chính sách nhập thêm mới vẫn chờ chốt. Đợt này không đổi schema nghiệp vụ; setup DB acceptance bổ sung DDL migration 07 để trang sản phẩm đọc được bảng đánh giá.
+Danh sách sản phẩm/hóa đơn và báo cáo có bộ nhớ theo điều kiện, quyền, TTL và tín hiệu ghi; Web chỉ chia sẻ catalog công khai. Đơn hàng có bộ lọc hai điều kiện AND/OR/NOT với sáu phép so sánh. Màn sản phẩm có nhập XLSX mới, xem trước, lỗi dòng/cột, quyền và rollback toàn file; không nhập tồn kho hoặc ghi đè mã. PDF nhân viên/khách hàng nhiều năm chia phần và lặp tổng toàn kỳ. Quy tắc tạm, kiểm chứng và phần chưa nghiệm thu: đợt 2.

@@ -282,8 +282,6 @@ Với CSDL có dữ liệu cần giữ: sao lưu, kiểm tra schema rồi áp d�
 
 TODO(SV3): Hoàn thiện hướng dẫn cấu hình email qua biến môi trường hoặc user-secrets, ghi các khóa cần dùng và bằng chứng gửi email xác nhận đơn thực tế. Xác nhận luồng OTP tài khoản riêng theo môi trường chạy.
 
-## 11. Cấu hình bộ nhớ và tài liệu nghiệm thu
+## 11. Cấu hình bộ nhớ đệm tìm kiếm
 
-TTL mặc định là 10 phút. Biến môi trường `BadmintonShop__CacheMinutes` nhận giá trị từ 1 đến 60. Các tiến trình cùng tài khoản Windows chia sẻ tín hiệu thay đổi trong thư mục CacheSignals dưới LocalApplicationData/BadmintonShop. Với các tiến trình khác tài khoản hoặc máy, đặt `BadmintonShop__CacheSignalRoot` tới thư mục chung có quyền đọc/ghi và dùng cùng tên server/catalog.
-
-Lệnh tái lập và phạm vi các đợt nghiệm thu được lưu trong `quy-tac-va-tien-do-dot-2.md`, `quy-tac-va-tien-do-dot-3.md` và `quy-tac-va-tien-do-dot-6.md`. Kịch bản bảo vệ được lưu trong `kich-ban-bao-ve-dot-3.md`.
+Dữ liệu tìm kiếm được giữ trong bộ nhớ đệm, mặc định 10 phút. Biến môi trường `BadmintonShop__CacheMinutes` nhận giá trị từ 1 đến 60. Các tiến trình cùng tài khoản Windows chia sẻ tín hiệu thay đổi trong thư mục CacheSignals dưới LocalApplicationData/BadmintonShop. Với các tiến trình khác tài khoản hoặc khác máy, đặt `BadmintonShop__CacheSignalRoot` tới thư mục chung có quyền đọc/ghi và dùng cùng tên server/catalog.

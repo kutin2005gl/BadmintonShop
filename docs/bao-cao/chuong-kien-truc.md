@@ -141,10 +141,17 @@ Quy ước: khóa chính <ins>gạch chân</ins>, khóa ngoại _in nghiêng_; c
 | PhanHoi | MaKH | KhachHang | Không | Chặn |
 | PhanHoi | MaSP | SanPham | Không | Chặn |
 
-Bảng mô tả chi tiết từng cột (kiểu dữ liệu, ràng buộc, ý nghĩa) của cả 15 bảng được trình bày ở phần Mô tả cơ sở dữ liệu.
+Bảng mô tả chi tiết từng cột (kiểu dữ liệu, ràng buộc, ý nghĩa) của các bảng được trình bày ở phần Mô tả cơ sở dữ liệu.
 
-## Cập nhật kiến trúc dữ liệu — 05/11/2026
+### 7.4. Bảng và cột bổ sung
 
-Cài đủ SQL hiện tại tạo 16 bảng người dùng: 15 bảng nền và `DanhGiaSanPham` (script 07). Bổ sung lược đồ quan hệ: DanhGiaSanPham(<ins>MaDG</ins>, _MaSP_, _MaKH_, SoSao, NoiDung, NgayDanhGia, TrangThai); hai FK tham chiếu SanPham và KhachHang. Ứng dụng đánh giá sử dụng bảng mới này, giữ PhanHoi nền. HoaDon bổ sung bốn cột/index POS và hủy đơn theo 04/06. Xem phần cập nhật trong [mô tả CSDL](mo-ta-csdl.md). Sơ đồ PNG và bản Word là bản nền, cần xuất lại trước khi nộp.
+Script tổng `database/BadmintonShop.sql` tạo 16 bảng: 15 bảng nền ở trên và bảng `DanhGiaSanPham` (script 07). Chức năng đánh giá trên Web và duyệt đánh giá trên Desktop dùng bảng này; bảng `PhanHoi` nền vẫn được giữ để không đổi lược đồ đã chốt.
 
-Tái sử dụng Core/Repository hoặc cache Form chưa tự chứng minh đạt yêu cầu tái sử dụng dữ liệu tìm kiếm trong 5–10 phút. Phần đối chiếu yêu cầu giảng viên nằm trong [báo cáo rà soát](ra-soat-yeu-cau-2026-11-05.md).
+16. DanhGiaSanPham(<ins>MaDG</ins>, _MaSP_, _MaKH_, SoSao, NoiDung, NgayDanhGia, TrangThai)
+
+| Bảng con | Khóa ngoại | Tham chiếu | Cho phép NULL | Khi xóa bản ghi cha |
+|---|---|---|:-:|---|
+| DanhGiaSanPham | MaSP | SanPham | Không | Chặn |
+| DanhGiaSanPham | MaKH | KhachHang | Không | Chặn |
+
+Bảng `HoaDon` được bổ sung bốn cột phục vụ hủy đơn và bán tại quầy (script 04, 06): `LyDoHuy`, `MaYeuCauPOS` (chỉ mục duy nhất khi khác NULL, chống ghi trùng hóa đơn), `TienKhachDua`, `DauVanTayPOS`.

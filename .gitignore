@@ -27,3 +27,6 @@ Thumbs.db
 
 # Node (tools/XuatBaoCao)
 node_modules/
+
+# Ban Word bao cao tong: xuat lai khi chot ban nop (node tools/XuatBaoCao/xuat-docx.js docs/bao-cao/bao-cao-tong.md)
+docs/bao-cao/bao-cao-tong.docx
