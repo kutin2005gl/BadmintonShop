@@ -116,7 +116,11 @@ function chuyenDoi(fileMd) {
       const muc = [HeadingLevel.HEADING_1, HeadingLevel.HEADING_2, HeadingLevel.HEADING_3][m[1].length - 1];
       kq.push(new Paragraph({ heading: muc, children: tachInline(m[2]) }));
     } else if ((m = l.match(/^!\[(.*)\]\((.*)\)$/))) {
-      kq.push(...taoHinh(m[1], path.resolve(thuMuc, m[2]), ++soHinh));
+      if (m[1].startsWith("TODO:")) {
+        kq.push(new Paragraph({ children: [new TextRun({ text: m[1], italics: true })] }));
+      } else {
+        kq.push(...taoHinh(m[1], path.resolve(thuMuc, m[2]), ++soHinh));
+      }
     } else if (l.startsWith("|")) {
       const bang = [];
       while (i < dong.length && dong[i].startsWith("|")) bang.push(dong[i++]);
