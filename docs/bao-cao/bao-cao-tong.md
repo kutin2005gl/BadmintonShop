@@ -495,13 +495,13 @@ TODO(SV3): Cung cấp sequence đặt hàng/thanh toán và activity xử lý đ
 
 #### 5.2.1. Các thực thể Core
 
-![TODO: xuất sơ đồ "Các thực thể Core" (Mermaid trong 06-lop-core-sv4.md) ra docs/diagrams/png/06-lop-core-sv4-1.png](../diagrams/png/06-lop-core-sv4-1.png)
+![Hình 5.1. Các thực thể Core](../diagrams/png/06-lop-core-sv4-1.png)
 
 Các model là POCO 1–1 với bảng, **không có navigation property/ORM**; các mũi tên trên là FK nghiệp vụ. ChiTietHoaDon.ThanhTien và ChiTietPhieuNhap.ThanhTien chỉ đọc về từ cột tính; HoaDon.TongTien và PhieuNhap.TongTien do trigger tính. CSDL cho phép hóa đơn chưa có chi tiết ở cấp lược đồ; thao tác ghi phải bảo đảm không để header rỗng sau lỗi.
 
 #### 5.2.2. Repository, dịch vụ và giao diện
 
-![TODO: xuất sơ đồ "Repository, dịch vụ và giao diện" (Mermaid trong 06-lop-core-sv4.md) ra docs/diagrams/png/06-lop-core-sv4-2.png](../diagrams/png/06-lop-core-sv4-2.png)
+![Hình 5.2. Repository, dịch vụ và giao diện](../diagrams/png/06-lop-core-sv4-2.png)
 
 Tất cả form SV4 gọi QuyenForm ở OnLoad và dùng Sv4Ui khi thực hiện thao tác CSDL; lược bỏ các cạnh lặp để dễ đọc. Các lớp NhaCungCapRepository, NhanVienRepository, TaiKhoanRepository, KhachHangRepository, PhieuNhapRepository, SaoLuuRepository (SV1) cũng truy cập DbHelper và model tương ứng; không bị thay thế bởi SV4.
 
@@ -509,7 +509,7 @@ Dịch vụ Core hiện có khác: MatKhauHelper, KiemTraDuLieu, LoiCsdl, VaiTro
 
 #### 5.2.3. Luồng thanh toán cuối cùng
 
-![TODO: xuất sơ đồ "Luồng thanh toán cuối cùng" (Mermaid trong 06-lop-core-sv4.md) ra docs/diagrams/png/06-lop-core-sv4-3.png](../diagrams/png/06-lop-core-sv4-3.png)
+![Hình 5.3. Luồng thanh toán cuối cùng](../diagrams/png/06-lop-core-sv4-3.png)
 
 GiaoDichBanHang internal chia sẻ điều kiện ghi, không thay ranh giới quyền: POS dùng MaNV/QuyenForm; web dùng Authorize/MaKH chủ đơn. KhuyenMaiRepository gắn connection/transaction để không đọc giá qua kết nối khác khi thanh toán. Trigger SV1 là nơi duy nhất sửa tồn và TongTien; không biểu diễn trigger như class C#.
 
@@ -520,7 +520,7 @@ Repository ghi `PhieuNhap` và từng dòng `ChiTietPhieuNhap` trong **một tra
 Code **không tự cộng tồn kho**: mỗi lần INSERT chi tiết, trigger `trg_CTPN_TangTon` tăng `SanPham.SoLuongTon` và tính lại `PhieuNhap.TongTien`.
 Có lỗi ở bất kỳ bước nào thì toàn bộ bị rollback – không có phiếu "nửa vời", tồn kho giữ nguyên.
 
-![Hình 5.1. Sơ đồ tuần tự – Lập phiếu nhập hàng (Desktop)](../diagrams/png/04-ton-kho.png)
+![Hình 5.4. Sơ đồ tuần tự – Lập phiếu nhập hàng (Desktop)](../diagrams/png/04-ton-kho.png)
 
 ### 5.4. Activity đăng nhập Desktop — SV1
 
@@ -528,7 +528,7 @@ Nhân viên nhập tên đăng nhập và mật khẩu trên `FrmDangNhap`. Form
 Mật khẩu được so bằng **BCrypt** với chuỗi băm trong CSDL; mật khẩu được kiểm **trước** trạng thái khóa để người nhập sai không dò được tài khoản nào đang bị khóa.
 Đăng nhập thành công thì thông tin được lưu vào `PhienDangNhap`, mở `FrmMain` và `ApDungPhanQuyen()` ẩn/hiện menu theo vai trò (bảng quyền nằm trong `PhanQuyen.cs`).
 
-![Hình 5.2. Sơ đồ hoạt động – Đăng nhập Desktop](../diagrams/png/05-dang-nhap.png)
+![Hình 5.5. Sơ đồ hoạt động – Đăng nhập Desktop](../diagrams/png/05-dang-nhap.png)
 
 **Bảng phân quyền áp dụng** (`Core/Services/PhanQuyen.cs`)
 
