@@ -9,7 +9,7 @@
     <p class="text-3xl font-extrabold tracking-tight mb-8">@Model.TongTien.Dong()</p>
     <form asp-action="ThanhToanOnline" asp-route-id="@Model.MaHD" method="post" class="flex flex-col gap-3">
         <button type="submit" class="btn-accent w-full">Xác nhận đã thanh toán</button>
-        <a asp-controller="DonHang" asp-action="ChiTiet" asp-route-id="@Model.MaHD" class="text-sm font-bold uppercase underline hover:text-primary">Thanh toán sau</a>
+        <a asp-action="ThanhCong" asp-route-id="@Model.MaHD" class="text-sm font-bold uppercase underline hover:text-primary">Thanh toán sau</a>
     </form>
 </div>
 </div>

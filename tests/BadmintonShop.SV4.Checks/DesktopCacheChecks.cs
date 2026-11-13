@@ -69,7 +69,15 @@ internal static partial class Program
                 var data=(System.Data.DataTable)grid.DataSource!;True(report.Bang.Values.Contains(data));
                 for(int r=0;r<data.Rows.Count;r++)for(int c=0;c<data.Columns.Count;c++)Eq(data.Rows[r][c],grid.Rows[r].Cells[c].Value);
             }
-            foreach(var chart in Controls(form).OfType<BieuDoCot>())True(report.Bang.Values.Contains(chart.DuLieu!));
+            foreach(var chart in Controls(form).OfType<BieuDoCot>())
+            {
+                var d=chart.DuLieu!;if(report.Bang.Values.Contains(d))continue;
+                // CO-06: biểu đồ "Sản phẩm × quý" vẽ Q1–Q4 của dòng đang chọn; phải khớp đúng một dòng của bảng báo cáo.
+                True(d.Columns[1].ColumnName.StartsWith("Doanh thu — ",StringComparison.Ordinal) && d.Rows.Count==4);
+                var q=Enumerable.Range(0,4).Select(i=>d.Rows[i].Field<decimal>(1)).ToArray();
+                True(report.Bang.Where(b=>b.Key.StartsWith("Sản phẩm × quý ",StringComparison.Ordinal)).SelectMany(b=>b.Value.AsEnumerable())
+                    .Any(r=>Enumerable.Range(1,4).Select(i=>r.Field<decimal>($"Q{i}")).SequenceEqual(q)));
+            }
             XuatTaiLieu.Excel(Path.Combine(output,"ui-report.xlsx"),report);XuatTaiLieu.BaoCaoPdf(Path.Combine(output,"ui-report.pdf"),report);
             ExportExpected("ui-report",report);Eq(initial,counter.Count);
             Button Button(string text)=>Controls(form).OfType<Button>().Single(b=>b.Text==text);

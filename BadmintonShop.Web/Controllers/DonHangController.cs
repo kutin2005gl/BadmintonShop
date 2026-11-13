@@ -33,12 +33,13 @@ public class DonHangController : Controller
     {
         var hd = _donHang.LayDonCuaKhach(id, MaKH);
         if (hd == null) return NotFound();
+        ViewData["Nhung"] = true;
         return PartialView("ChiTiet", new ChiTietDonViewModel { Don = hd, Dong = _donHang.LayChiTietHienThi(id, MaKH) });
     }
 
     // TV3: khach huy don khi con "Cho xac nhan"
     [HttpPost, ValidateAntiForgeryToken]
-    public IActionResult Huy(int id)
+    public IActionResult Huy(int id, bool veDanhSach = false)
     {
         try
         {
@@ -49,6 +50,7 @@ public class DonHangController : Controller
         {
             TempData["Loi"] = LoiCsdl.ThongBao(ex);
         }
-        return RedirectToAction(nameof(ChiTiet), new { id });
+        // Huy tu panel main-sub o man hinh danh sach thi quay lai danh sach, khong nhay sang trang chi tiet
+        return veDanhSach ? RedirectToAction(nameof(Index)) : RedirectToAction(nameof(ChiTiet), new { id });
     }
 }

@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using BadmintonShop.Core.DataAccess;
 using BadmintonShop.Core.Services;
 
@@ -33,7 +33,7 @@ public class FrmDonHang : Form
                 using var dialog=new FrmLocNangCao(source);
                 if(dialog.ShowDialog(this)==DialogResult.OK) { advanced=dialog.KetQua;filterDescription.Text=dialog.MoTa;Nap(); }
             })),Sv4Ui.Nut("Bỏ lọc nâng cao",()=>Chay(()=> { advanced=null;filterDescription.Text="Chưa áp dụng bộ lọc nâng cao";Nap(); })),filterDescription]);
-        grid=Sv4Ui.Luoi();chiTiet=Sv4Ui.Luoi();thongTin=new Label { Dock=DockStyle.Top,Height=90,Padding=new Padding(6) };
+        grid=Sv4Ui.Luoi();chiTiet=Sv4Ui.Luoi();thongTin=new Label { Dock=DockStyle.Top,Height=105,Padding=new Padding(6) };
         var split=new SplitContainer { Dock=DockStyle.Fill,Orientation=Orientation.Horizontal,Size=new Size(1200,650),SplitterDistance=320 };
         split.Panel1.Controls.Add(grid);split.Panel2.Controls.Add(chiTiet);split.Panel2.Controls.Add(thongTin);
         Controls.Add(split);Controls.Add(bar);ShopTheme.Apply(this);grid.CurrentCellChanged+=(_,_)=> { if(!binding)ChiTiet(); };
@@ -54,6 +54,8 @@ public class FrmDonHang : Form
                 (advanced==null || advanced(r))))filtered.ImportRow(row);
             filtered.ExtendedProperties["HoTroLyDoHuy"]=rows.ExtendedProperties["HoTroLyDoHuy"];
             binding=true;try { grid.DataSource=filtered; }finally { binding=false; }
+            // CO-04: lưới chỉ giữ mã đơn + tên/SĐT khách ghép từ KhachHang; email, địa chỉ hồ sơ xem ở dòng thông tin khi chọn đơn.
+            foreach(var cot in new[]{"Email","DiaChiKhachHang"})if(grid.Columns.Contains(cot))grid.Columns[cot]!.Visible=false;
         },rows=>rows.Rows.Count==0);
         ChiTiet();
     }
@@ -72,7 +74,7 @@ public class FrmDonHang : Form
         chiTiet.DataSource=null;
         if(Sv4Ui.MaDong(grid,"MaHD") is not int ma) { thongTin.Text="Không có đơn hàng trong khoảng lọc."+(!supported?"\nCSDL chưa hỗ trợ cập nhật trạng thái SV4; hiện chỉ xem / xuất đơn.":"");return; }
         var r=((DataRowView)grid.CurrentRow!.DataBoundItem).Row;
-        var description=$"HĐ {ma} | {r["TrangThai"]} | Giảm hóa đơn / voucher: {r["TienGiamGia"]:N0} đ | Tổng thanh toán: {r["TongTien"]:N0} đ\nLý do hủy: {r["LyDoHuy"]}";
+        var description=$"HĐ {ma} | {r["TrangThai"]} | Giảm hóa đơn / voucher: {r["TienGiamGia"]:N0} đ | Tổng thanh toán: {r["TongTien"]:N0} đ\nKhách: {r["KhachHang"]} | SĐT: {r["SDT"]} | Email: {r["Email"]} | Địa chỉ hồ sơ: {r["DiaChiKhachHang"]}\nLý do hủy: {r["LyDoHuy"]}";
         thongTin.Text="Đang tải chi tiết…";
         var scope=$"{DbHelper.ConnectionString}|{PhienDangNhap.MaTK}|{PhienDangNhap.VaiTro}|{DbHelper.DauHieuDuLieu}";
         try

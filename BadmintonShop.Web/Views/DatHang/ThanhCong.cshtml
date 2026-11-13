@@ -25,7 +25,10 @@
 </div>
 
 <div class="flex flex-wrap justify-center gap-4 mt-8">
-    <a asp-controller="DonHang" asp-action="ChiTiet" asp-route-id="@hd.MaHD" class="btn-dark">Theo dõi đơn hàng</a>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <a asp-controller="DonHang" asp-action="ChiTiet" asp-route-id="@hd.MaHD" class="btn-dark">Theo dõi đơn hàng</a>
+    }
     <a asp-controller="Home" asp-action="Index" class="btn-outline">Tiếp tục mua sắm</a>
 </div>
 </div>
