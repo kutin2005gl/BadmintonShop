@@ -37,7 +37,8 @@ public static class EmailService
             var khach = new KhachHangRepository().LayTheoMa(maKH);
             var donRepo = new DonHangOnlineRepository();
             var don = donRepo.LayDonCuaKhach(maHD, maKH);
-            if (khach == null || don == null || string.IsNullOrWhiteSpace(khach.Email)) return false;
+            if (khach == null || don == null || string.IsNullOrWhiteSpace(khach.Email)
+                || KhachHangRepository.LaEmailVangLai(khach.Email)) return false;
             var dong = donRepo.LayChiTietHienThi(maHD, maKH);
 
             using var mail = new MailMessage

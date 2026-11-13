@@ -27,7 +27,7 @@ public class DonHangOnlineRepository
         {
             var ngay = DateTime.Now;
             var fresh = GiaoDichBanHang.TinhLai(c, t, gio, ngay);
-            GiaoDichBanHang.DungVoucher(c, t, fresh, ngay);
+            GiaoDichBanHang.DungVoucher(c, t, fresh, ngay, maKH);
 
             using var hd = new SqlCommand(@"INSERT INTO HoaDon (MaKH, LoaiBan, HinhThucTT, DiaChiGiao, MaCTKM, TienGiamGia)
                                             VALUES (@kh, N'Online', @tt, @dc, @ctkm, @giam);

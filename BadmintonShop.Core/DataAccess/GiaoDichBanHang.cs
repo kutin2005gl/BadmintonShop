@@ -1,4 +1,4 @@
-using BadmintonShop.Core.Models;
+﻿using BadmintonShop.Core.Models;
 using BadmintonShop.Core.Services;
 using Microsoft.Data.SqlClient;
 
@@ -20,10 +20,16 @@ internal static class GiaoDichBanHang
         XacNhanGia.KiemTra(gio,fresh);
         return fresh;
     }
-    internal static void DungVoucher(SqlConnection c,SqlTransaction t,KetQuaGioHang gio,DateTime ngay)
+    // maKH: khach dat Web (null/0 = POS, khong gioi han theo khach). Kiem tra theo khach chay SAU khi UPDATE giu khoa
+    // dong voucher, nen hai don dong thoi cua cung 1 khach bi xep hang; loi -> rollback, khong mat luot.
+    internal static void DungVoucher(SqlConnection c,SqlTransaction t,KetQuaGioHang gio,DateTime ngay,int? maKH=null)
     {
-        if(gio.MaVoucher!=null && !new KhuyenMaiRepository(c,t).DungVoucher(c,t,gio.MaVoucher,ngay,gio.MaCTKM))
+        if(gio.MaVoucher==null) return;
+        var repo=new KhuyenMaiRepository(c,t);
+        if(!repo.DungVoucher(c,t,gio.MaVoucher,ngay,gio.MaCTKM))
             throw new InvalidOperationException("Voucher vừa hết hiệu lực hoặc hết lượt. Hãy áp dụng lại mã.");
+        if(maKH>0 && repo.KhachDaDungVoucher(maKH.Value,gio.MaVoucher))
+            throw new InvalidOperationException(KhuyenMaiRepository.ThongBaoDaDungVoucher);
     }
     internal static void GhiChiTiet(SqlConnection c,SqlTransaction t,int ma,KetQuaGioHang gio)
     {

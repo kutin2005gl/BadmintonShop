@@ -2,6 +2,7 @@
 @using System.Data
 @{
     var hd = Model.Don;
+    var nhung = ViewData["Nhung"] is true;   // true = chi tiet nhung trong man hinh danh sach (main-sub), bo khung trang day du
     ViewData["Title"] = "Đơn hàng #" + hd.MaHD;
     var cacBuoc = new[] { "Chờ xác nhận", "Đã xác nhận", "Đang giao", "Hoàn thành" };
     var viTri = Array.IndexOf(cacBuoc, hd.TrangThai);
@@ -9,12 +10,19 @@
     foreach (DataRow r in Model.Dong.Rows) { tienHang += (decimal)r["ThanhTien"]; }
 }
 
-<div class="container mx-auto px-4 py-12">
-<a asp-action="Index" class="text-xs font-bold uppercase underline hover:text-primary">&larr; Đơn hàng của tôi</a>
-<h1 class="page-title mt-4">Đơn hàng #@hd.MaHD <span class="badge align-middle @DinhDang.MauTrangThai(hd.TrangThai)">@hd.TrangThai</span></h1>
+<div class="@(nhung ? "" : "container mx-auto px-4 py-12")">
+@if (nhung)
+{
+    <h2 class="text-xl font-extrabold uppercase tracking-tight mb-4">Đơn hàng #@hd.MaHD <span class="badge align-middle @DinhDang.MauTrangThai(hd.TrangThai)">@hd.TrangThai</span></h2>
+}
+else
+{
+    <a asp-action="Index" class="text-xs font-bold uppercase underline hover:text-primary">&larr; Đơn hàng của tôi</a>
+    <h1 class="page-title mt-4">Đơn hàng #@hd.MaHD <span class="badge align-middle @DinhDang.MauTrangThai(hd.TrangThai)">@hd.TrangThai</span></h1>
 
-@if (TempData["ThongBao"] is string tb) { <div class="alert-ok">@tb</div> }
-@if (TempData["Loi"] is string loi) { <div class="alert-err">@loi</div> }
+    @if (TempData["ThongBao"] is string tb) { <div class="alert-ok">@tb</div> }
+    @if (TempData["Loi"] is string loi) { <div class="alert-err">@loi</div> }
+}
 
 @if (hd.TrangThai == "Đã hủy")
 {
@@ -70,6 +78,7 @@ else
             {
                 <form asp-action="Huy" asp-route-id="@hd.MaHD" method="post" class="mt-6"
                       onsubmit="return confirm('Bạn chắc chắn muốn hủy đơn hàng này?');">
+                    @if (nhung) { <input type="hidden" name="veDanhSach" value="true" /> }
                     <button type="submit" class="btn-outline w-full !border-red-500 !text-red-500 hover:!bg-red-500 hover:!text-white">Hủy đơn hàng</button>
                 </form>
             }

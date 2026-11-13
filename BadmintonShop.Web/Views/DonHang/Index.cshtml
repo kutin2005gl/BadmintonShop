@@ -1,9 +1,11 @@
-@model System.Data.DataTable
+﻿@model System.Data.DataTable
 @using System.Data
 @{ ViewData["Title"] = "Đơn hàng của tôi"; }
 
 <div class="container mx-auto px-4 py-12">
 <h1 class="page-title">Đơn hàng của tôi</h1>
+@if (TempData["ThongBao"] is string tb) { <div class="alert-ok">@tb</div> }
+@if (TempData["Loi"] is string loi) { <div class="alert-err">@loi</div> }
 
 @if (Model.Rows.Count == 0)
 {

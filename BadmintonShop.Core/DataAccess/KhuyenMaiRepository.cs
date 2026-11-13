@@ -102,6 +102,20 @@ public class KhuyenMaiRepository
         return r.Field<int>("DaDung") >= r.Field<int>("SoLuong") ? "Voucher đã hết lượt sử dụng." : null;
     }
 
+    // CO-02: mot khach chi duoc dung 1 lan moi ma voucher. Tinh theo don chua huy da gan voucher nay (HoaDon.MaCTKM),
+    // nen huy don thi duoc dung lai. Chi ap dung voi khach co ma (POS khong chon khach -> bo qua).
+    public bool KhachDaDungVoucher(int maKH, string maVoucher)
+    {
+        if (maKH <= 0 || string.IsNullOrWhiteSpace(maVoucher)) return false;
+        var n = Scalar(@"SELECT COUNT(*) FROM HoaDon h JOIN KM_TheoVoucher v ON v.MaCTKM = h.MaCTKM
+                         WHERE v.MaVoucher = @ma AND h.MaKH = @kh AND h.TrangThai <> N'Đã hủy'",
+            new SqlParameter("@ma", SqlDbType.VarChar, 30) { Value = maVoucher.Trim().ToUpperInvariant() },
+            new SqlParameter("@kh", maKH));
+        return n is int i && i > 0;
+    }
+
+    public const string ThongBaoDaDungVoucher = "Bạn đã dùng mã này rồi, mỗi khách chỉ được dùng một mã voucher một lần.";
+
     // TV3/SV4: increment only within checkout transaction; false means no longer eligible.
     public bool DungVoucher(SqlConnection conn, SqlTransaction tran, string maVoucher, DateTime? ngay=null, int? maCTKM=null)
     {

@@ -9,10 +9,27 @@
 <div class="flex flex-col lg:flex-row gap-12">
     <div class="w-full lg:w-3/5">
         <form asp-action="XacNhan" method="post" class="space-y-6">
-            <div>
-                <label class="block text-sm font-bold uppercase tracking-wider mb-2">Người nhận</label>
-                <input type="text" class="input-box bg-gray-50" value="@Model.HoTen" disabled />
-            </div>
+            @if (Model.DaDangNhap)
+            {
+                <div>
+                    <label class="block text-sm font-bold uppercase tracking-wider mb-2">Người nhận</label>
+                    <input type="text" class="input-box bg-gray-50" value="@Model.HoTen" disabled />
+                </div>
+            }
+            else
+            {
+                <p class="text-sm text-gray-600">Bạn có thể đặt hàng không cần đăng nhập. Đã có tài khoản?
+                    <a asp-controller="TaiKhoan" asp-action="DangNhap" asp-route-returnUrl="@Url.Action("Index", "DatHang")" class="font-bold underline hover:text-primary">Đăng nhập</a>.</p>
+                <div>
+                    <label for="hoTen" class="block text-sm font-bold uppercase tracking-wider mb-2">Họ và tên</label>
+                    <input type="text" id="hoTen" name="hoTen" class="input-box" value="@Model.HoTen" maxlength="100" autocomplete="name" required />
+                </div>
+                <div>
+                    <label for="sdt" class="block text-sm font-bold uppercase tracking-wider mb-2">Số điện thoại</label>
+                    <input type="tel" id="sdt" name="sdt" class="input-box" value="@Model.SDT" maxlength="15" inputmode="tel" autocomplete="tel" required />
+                    <p class="text-xs text-gray-500 mt-1">Đơn hàng được lưu theo số điện thoại này.</p>
+                </div>
+            }
             <div>
                 <label for="diaChi" class="block text-sm font-bold uppercase tracking-wider mb-2">Địa chỉ giao hàng</label>
                 <textarea id="diaChi" name="diaChi" class="input-box" rows="3" maxlength="255" required>@Model.DiaChi</textarea>

@@ -1,4 +1,4 @@
-using BadmintonShop.Core.DataAccess;
+﻿using BadmintonShop.Core.DataAccess;
 using BadmintonShop.Core.Services;
 using BadmintonShop.Web.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
@@ -67,6 +67,14 @@ public class GioHangController : Controller
     [HttpPost, ValidateAntiForgeryToken]
     public IActionResult ApDungVoucher(string? maVoucher)
     {
+        // CO-02: bao som neu khach dang nhap da dung ma nay (khach chua dang nhap duoc kiem luc dat hang)
+        var maKH = User.Identity?.IsAuthenticated == true ? User.LayMaKH() : null;
+        if (maKH != null && new KhuyenMaiRepository().KhachDaDungVoucher(maKH.Value, maVoucher ?? ""))
+        {
+            HttpContext.Session.LuuVoucher(null);
+            TempData["Loi"] = KhuyenMaiRepository.ThongBaoDaDungVoucher;
+            return RedirectToAction(nameof(Index));
+        }
         HttpContext.Session.LuuVoucher(maVoucher);
         return RedirectToAction(nameof(Index));
     }

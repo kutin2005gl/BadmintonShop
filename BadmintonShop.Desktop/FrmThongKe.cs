@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using BadmintonShop.Core.DataAccess;
 using BadmintonShop.Core.Services;
 
@@ -54,13 +54,37 @@ public class FrmThongKe : Form
                 chiPage.Controls.Add(chiGrid);tabs.TabPages.Add(chiPage);continue;
             }
             var page=new TabPage(ten);var split=new SplitContainer { Dock=DockStyle.Fill,Orientation=Orientation.Horizontal,Size=new Size(1100,600),SplitterDistance=290 };
-            var grid=Sv4Ui.Luoi();grid.DataSource=dt;split.Panel1.Controls.Add(grid);split.Panel2.Controls.Add(new BieuDoCot { DuLieu=dt });
+            var grid=Sv4Ui.Luoi();var chart=new BieuDoCot { DuLieu=dt };
+            if(ten.StartsWith("Sản phẩm × quý ",StringComparison.Ordinal))
+            {
+                // CO-06: chọn một dòng sản phẩm thì biểu đồ đổi sang doanh số Q1–Q4 của đúng sản phẩm đó (dòng "Tất cả" = cả cửa hàng).
+                var bang=dt;chart.DuLieu=QuyCuaDong(bang,null);
+                grid.CurrentCellChanged+=(_,_)=> { chart.DuLieu=QuyCuaDong(bang,grid);chart.Invalidate(); };
+            }
+            grid.DataSource=dt;split.Panel1.Controls.Add(grid);split.Panel2.Controls.Add(chart);
             page.Controls.Add(split);tabs.TabPages.Add(page);
         }
-        tong.Text=$"{kq.TuNgay:dd/MM/yyyy}–{kq.DenNgay:dd/MM/yyyy} | {kq.LoaiBan} | Doanh thu: {kq.TongDoanhThu:N0} đ";
+        tong.Text=$"{kq.TuNgay:dd/MM/yyyy}–{kq.DenNgay:dd/MM/yyyy} | {kq.LoaiBan} | Doanh thu: {kq.TongDoanhThu:N0} đ"+TomTatThuChi(kq);
         },kq=>kq.Bang["Theo ngày"].Rows.Count==0 && !kq.Bang
             .Where(b=>b.Key.StartsWith("Thu–chi ",StringComparison.Ordinal))
             .Any(b=>b.Value.Rows[1].Field<decimal>("Tổng")!=0));
+    }
+    // CO-06: tổng thu, tổng chi (tiền nhập hàng) và chênh lệch của cả khoảng lọc; chỉ có khi chọn "Tất cả loại bán".
+    private static string TomTatThuChi(KetQuaBaoCao kq)
+    {
+        var bangs=kq.Bang.Where(b=>b.Key.StartsWith("Thu–chi ",StringComparison.Ordinal)).Select(b=>b.Value).ToList();
+        if(bangs.Count==0)return "";
+        decimal thu=bangs.Sum(b=>b.Rows[0].Field<decimal>("Tổng")),chi=bangs.Sum(b=>b.Rows[1].Field<decimal>("Tổng"));
+        return $" | Thu: {thu:N0} đ | Chi nhập hàng: {chi:N0} đ | Chênh lệch: {thu-chi:N0} đ";
+    }
+    // CO-06: bảng "Quý — doanh thu" của dòng đang chọn (chưa chọn thì lấy dòng đầu); không có dòng thì bảng rỗng.
+    public static DataTable QuyCuaDong(DataTable nguon,DataGridView? grid,DataRow? dong=null)
+    {
+        var row=dong ?? (grid?.CurrentRow?.DataBoundItem as DataRowView)?.Row ?? nguon.Rows.Cast<DataRow>().FirstOrDefault();
+        var kq=new DataTable();kq.Columns.Add("Quý",typeof(string));
+        kq.Columns.Add(row==null?"Doanh thu":$"Doanh thu — {Convert.ToString(row["Sản phẩm"])}",typeof(decimal));
+        if(row!=null)for(int q=1;q<=4;q++)kq.Rows.Add($"Quý {q}",row.IsNull($"Q{q}")?0m:row.Field<decimal>($"Q{q}"));
+        return kq;
     }
     private void Xuat(bool pdf)
     {

@@ -78,7 +78,7 @@ erDiagram
     }
     HOADON {
         int MaHD PK "identity"
-        int MaKH FK "NULL = khach vang lai"
+        int MaKH FK "NULL = khach vang lai mua tai quay (POS); don web chua dang nhap -> KhachHang tao theo SDT"
         int MaNV FK "NULL = khach tu dat web"
         datetime NgayLap
         nvarchar LoaiBan "Online / Tai quay"
