@@ -1,8 +1,10 @@
-# Checklist công việc SV1 SV2 SV3 SV4 theo file phân công
+# Checklist công việc SV1 SV2 SV3 SV4 theo file phân công và góp ý của cô
 
 Ngày đối chiếu: **13/11/2026**, múi giờ Asia/Saigon. Phiên bản mã nguồn: nhánh `develop`, commit `52702741204edbdf4983716183e32413164e5666`.
 
-**Nguồn công việc duy nhất:** [CNPM_01_Phan_cong_cong_viec.docx][phan-cong] ở thư mục ngoài `BadmintonShop`. Ký hiệu **PC §5 SV1**, chẳng hạn, chỉ mục 5, phần SV1 của file này. Các file trong dự án chỉ là bằng chứng thực hiện, không bổ sung yêu cầu. Công việc lặp lại giữa bảng tổng quan, nhiệm vụ chi tiết và kế hoạch tuần đã được gộp.
+**Nguồn phân công gốc:** [CNPM_01_Phan_cong_cong_viec.docx][phan-cong] ở thư mục ngoài `BadmintonShop`, áp dụng cho các mục `SV1-*` đến `SV4-*` và `CHUNG-*`. Ký hiệu **PC §5 SV1**, chẳng hạn, chỉ mục 5, phần SV1 của file này. Các file trong dự án là bằng chứng thực hiện, không tự bổ sung yêu cầu vào phần phân công gốc. Công việc lặp lại giữa bảng tổng quan, nhiệm vụ chi tiết và kế hoạch tuần đã được gộp.
+
+**Nguồn góp ý bổ sung:** [ghi âm buổi góp ý ngày 12/11/2026][ghi-am-co], được theo dõi riêng tại phần **Góp ý bổ sung của cô ngày 12/11** bằng mã `CO-01` đến `CO-07`. Nội dung được diễn giải từ lời nhận dạng và [bản phụ đề tự động][phu-de-co], không phải trích nguyên văn. Mốc ghi âm dùng để nghe đối chiếu; các chỗ chưa rõ được ghi cần xác minh. Phân công ở phần này là dự kiến theo vai trò, không thay đổi phân công gốc.
 
 ## Cách đọc
 
@@ -23,7 +25,7 @@ Theo lựa chọn đã thống nhất, kiểm thử chéo lấy **PC §6** làm 
 | SV4 | 25 | 10 | 35 |
 | Quy tắc chung của cả bốn SV | 1 | 4 | 5 |
 
-Đây là số ô theo cách tách yêu cầu để đối chiếu, không phải phần trăm khối lượng hay điểm đóng góp cá nhân.
+Đây là số ô của **phần phân công gốc** theo cách tách yêu cầu để đối chiếu, không phải phần trăm khối lượng hay điểm đóng góp cá nhân. Các mục `CO-*` được đếm riêng ở phần góp ý bổ sung, không cộng vào bảng trên.
 
 ## SV1 Nền tảng và điều phối
 
@@ -197,7 +199,7 @@ Theo lựa chọn đã thống nhất, kiểm thử chéo lấy **PC §6** làm 
 - [ ] **SV4-26 Hoàn thiện chương tổng kết cho toàn hệ thống.** Nguồn: PC §3, §5 SV4, §7 T5. **Một phần:** chương 9 của báo cáo tổng hiện chủ yếu là SV4, vẫn TODO bổ sung kết quả SV1/SV2/SV3; chưa bao quát cả nhóm.
 - [x] **SV4-27 Viết đặc tả use case và test case phần mình.** Nguồn: PC §2, §3. Bằng chứng: [đặc tả SV4][spec4] UC4.1–UC4.5 và kế hoạch/test case liên kết.
 - [x] **SV4-28 Chụp màn hình giao diện phần mình.** Nguồn: PC §2, §3. Bằng chứng: [bộ ảnh SV4][images4] có danh mục, sản phẩm, sửa sản phẩm, đơn hàng, POS và thống kê. Các ảnh smoke/render có giới hạn được nêu trong kết quả kiểm thử.
-- [x] **SV4-29 Viết HDSD phần mình và dựng kịch bản demo.** Nguồn: PC §3, §7 T5. Bằng chứng: [HDSD SV4][guide4] có thao tác 4 nhóm chức năng và kịch bản 5–7 phút. Không dùng kịch bản 7 nhóm yêu cầu bổ sung để thêm việc vào checklist này.
+- [x] **SV4-29 Viết HDSD phần mình và dựng kịch bản demo.** Nguồn: PC §3, §7 T5. Bằng chứng: [HDSD SV4][guide4] có thao tác 4 nhóm chức năng và kịch bản 5–7 phút. Không dùng kịch bản 7 nhóm yêu cầu bổ sung để thêm việc vào phần phân công gốc; góp ý trong ghi âm được theo dõi riêng tại các mục `CO-*`.
 - [ ] **SV4-30 Chạy bộ test case và lập báo cáo lỗi.** Nguồn: PC §7 T5. **Một phần:** [kết quả kiểm thử][test-results4] có các đợt chạy, kết quả và lỗi/giới hạn; vẫn có ca chờ, chưa đủ bằng chứng đã chạy trọn bộ 61 ca. Lượt 86/86 của người rà soát không đóng thay các ca thủ công/sinh viên chưa xác nhận.
 - [ ] **SV4-31 Kiểm thử chéo phần SV1 trước gộp develop.** Nguồn: PC §2, §6. **Chưa xác minh:** [đặc tả SV1][spec1] còn ghi chờ SV4 kiểm chéo; chưa có người kiểm/ngày/kết quả xác nhận đủ phạm vi.
 - [ ] **SV4-32 Thống nhất với SV1/SV3 về tồn kho, trạng thái đơn và khuyến mãi.** Nguồn: PC §6. **Một phần:** có tài liệu tích hợp và code/test dùng chung; [checklist phối hợp][handoff4] còn chờ xác nhận của thành viên. Kết quả tích hợp kỹ thuật không chứng minh cuộc thống nhất đã hoàn tất.
@@ -213,7 +215,80 @@ Các mục dưới áp dụng cho **cả bốn SV**, được ghi chung một l�
 - [ ] **CHUNG-02 Commit nhỏ và mọi sửa đổi qua PR, có kiểm thử chéo trước gộp.** Nguồn: PC §2, §9. **Một phần:** có PR/nhánh tính năng, nhưng còn commit tổng hợp lớn, merge nhánh trực tiếp và thiếu xác nhận kiểm chéo. Đánh giá nhiệm vụ kiểm chéo cụ thể nằm trong từng SV ở trên.
 - [ ] **CHUNG-03 Mỗi máy quản lý cấu hình kết nối riêng, không commit mật khẩu CSDL hoặc đè cấu hình máy khác.** Nguồn: PC §9. **Một phần:** có App.config/appsettings.json, biến môi trường và mẫu kết nối Trusted Connection; chưa có bằng chứng cấu hình từng máy và toàn bộ lịch sử không ghi đè lẫn nhau. Không công bố thông tin bí mật khi rà soát.
 - [ ] **CHUNG-04 Khi trễ quá 2 ngày phải báo nhóm để chia lại việc.** Nguồn: PC §9. **Chưa xác minh:** chưa có bảng việc/hạn chót và thông báo để xác định trường hợp phát sinh, việc báo trễ và phân công lại.
-- [ ] **CHUNG-05 Tuần 5 chỉ sửa lỗi/hoàn thiện tài liệu; phần chưa xong cuối tuần 4 được cắt và ghi hướng phát triển.** Nguồn: PC §7, lưu ý cuối kế hoạch. **Một phần:** Git có commit `feat` ngày 05/11 và 09/11 trong tuần 5, báo cáo vẫn còn yêu cầu chưa hoàn chỉnh; chưa có hồ sơ chốt phạm vi/cắt chức năng theo mốc. Chỉ ghi nhận tuân thủ kế hoạch, không dùng yêu cầu bổ sung của các đợt sau làm công việc mới.
+- [ ] **CHUNG-05 Tuần 5 chỉ sửa lỗi/hoàn thiện tài liệu; phần chưa xong cuối tuần 4 được cắt và ghi hướng phát triển.** Nguồn: PC §7, lưu ý cuối kế hoạch. **Một phần:** Git có commit `feat` ngày 05/11 và 09/11 trong tuần 5, báo cáo vẫn còn yêu cầu chưa hoàn chỉnh; chưa có hồ sơ chốt phạm vi/cắt chức năng theo mốc. Chỉ ghi nhận tuân thủ kế hoạch gốc; yêu cầu bổ sung của các đợt sau không được tính ngược vào phân công gốc. Góp ý ngày 12/11 được theo dõi riêng bên dưới.
+
+## Góp ý bổ sung của cô ngày 12/11
+
+Nguồn: [ghi âm][ghi-am-co] và [phụ đề tự động][phu-de-co]. Bổ sung checklist ngày **13/11/2026**. Các tiêu chí dưới đây cụ thể hóa góp ý thành việc có thể kiểm tra; việc sửa tài liệu không xác nhận đã sửa phần mềm. Trạng thái hiện tại dựa trên đọc mã nguồn và bằng chứng cũ được dẫn lại, **chưa chạy nghiệm thu mới**. Chỉ đánh dấu `[x]` khi đủ toàn bộ tiêu chí và đã ghi người kiểm, ngày, kết quả cùng minh chứng. Chức năng đã có được kiểm tra tiếp, không mặc định phải làm lại.
+
+| Phần việc | Đã đánh dấu | Còn để trống | Tổng số mục |
+|---|---:|---:|---:|
+| Góp ý bổ sung `CO-*` | 0 | 7 | 7 |
+
+### CO-01 Mua hàng không cần đăng nhập
+
+- [ ] **CO-01 Cho khách đặt hàng khi chưa đăng nhập và liên kết khách bằng SĐT.**
+  - **Mốc ghi âm:** 01:16–03:09; 04:48–04:52.
+  - **Phụ trách dự kiến:** SV3 chính; SV1 hỗ trợ dữ liệu, SV2 hỗ trợ giao diện.
+  - **Trạng thái / bằng chứng hiện có — Thiếu:** [DatHangController][checkout-controller] vẫn có `[Authorize]` và lấy `MaKH` từ phiên đăng nhập; SV3-05 mới chứng minh đặt hàng có địa chỉ trong luồng đăng nhập, chưa đáp ứng đặt hàng cho khách chưa đăng nhập.
+  - **Tiêu chí nghiệm thu:** khách chưa đăng nhập nhập họ tên, SĐT, địa chỉ và đặt hàng được; lưu được khách và liên kết đơn tương ứng; thử khách mới và khách quay lại dùng cùng SĐT, không tạo khách trùng ngoài quy tắc đã chốt. Nhận diện theo SĐT không tự cấp quyền xem lịch sử hoặc thông tin riêng của người khác.
+  - **Ghi nhận nghiệm thu:** Người kiểm: chưa ghi; ngày: chưa ghi; kết quả/minh chứng: chưa có.
+
+### CO-02 Kiểm soát voucher
+
+- [ ] **CO-02 Phân biệt voucher dùng một lần với chương trình áp dụng chung và kiểm soát đủ điều kiện sử dụng.**
+  - **Mốc ghi âm:** 03:32–07:25, trọng tâm 06:02–07:25.
+  - **Phụ trách dự kiến:** SV3 chính; SV4 kiểm tra tích hợp POS.
+  - **Trạng thái / bằng chứng hiện có — Một phần:** SV3-11/12 có áp mã, ngày hiệu lực và lượt dùng; [KhuyenMaiRepository][promotion-repo] kiểm `SoLuong/DaDung` và tăng lượt trong transaction. Chưa đủ bằng chứng giới hạn theo từng khách và phân biệt đầy đủ các chính sách cô nêu.
+  - **Tiêu chí nghiệm thu:** ghi rõ chính sách của từng loại mã về tổng lượt, lượt mỗi khách, thời hạn và điều kiện hóa đơn; kiểm tra mã một lần không dùng lại được sau khi mua thành công, mã áp dụng chung được lặp theo chính sách, mã hết hạn/tắt/hết lượt bị từ chối. Áp/bỏ mã cập nhật đúng tổng tiền trên Web/POS; hai giao dịch tranh lượt cuối không vượt giới hạn và giao dịch thất bại không mất lượt. Các ngưỡng tiền/tỷ lệ trong lời cô là ví dụ, không cố định thành điều kiện cho mọi mã.
+  - **Ghi nhận nghiệm thu:** Người kiểm: chưa ghi; ngày: chưa ghi; kết quả/minh chứng: chưa có.
+
+### CO-03 Main–sub đơn hàng
+
+- [ ] **CO-03 Chọn dòng đơn hàng để xem chi tiết ngay trong cùng màn hình.**
+  - **Mốc ghi âm:** 07:32–08:15; 09:29–09:35.
+  - **Phụ trách dự kiến:** SV4 Desktop; SV3 Web.
+  - **Trạng thái / bằng chứng hiện có — Một phần:** [FrmDonHang][orders-form] đã có lưới chính/phụ và sự kiện `CurrentCellChanged` nạp chi tiết; SV4-08 có bằng chứng đọc chi tiết. Chưa có nghiệm thu đầy đủ thao tác chọn/đổi dòng của cả Desktop và [Web][orders-view] theo mục bổ sung này.
+  - **Tiêu chí nghiệm thu:** chọn một dòng bất kỳ thì hiện đúng chi tiết của đơn đó bên cạnh hoặc bên dưới; đổi dòng cập nhật mã đơn, thông tin và dòng hàng tương ứng; không giữ chi tiết đơn cũ khi danh sách rỗng hoặc đổi lựa chọn nhanh. Kiểm tra trên Desktop và trang đơn hàng Web của khách.
+  - **Ghi nhận nghiệm thu:** Người kiểm: chưa ghi; ngày: chưa ghi; kết quả/minh chứng: chưa có.
+
+### CO-04 Quan hệ khách hàng–hóa đơn
+
+- [ ] **CO-04 Đối chiếu bảng, khóa ngoại, ERD và dữ liệu ghép để hiển thị hóa đơn.**
+  - **Mốc ghi âm:** 08:27–09:35.
+  - **Phụ trách dự kiến:** SV1 chính; SV3/SV4 phối hợp phần truy vấn và hiển thị.
+  - **Trạng thái / bằng chứng hiện có — Một phần:** [schema][schema] đã có `HoaDon.MaKH` và khóa ngoại tới `KhachHang`; SV1-21 có ERD/lược đồ. Không kết luận hệ thống hiện tại đang lưu toàn bộ khách hàng trong bảng hóa đơn; cần đối chiếu thêm tài liệu và luồng ghi/đọc thực tế.
+  - **Tiêu chí nghiệm thu:** schema, script tổng, ERD và lược đồ quan hệ thống nhất về liên kết khách hàng–hóa đơn; chỉ ra thông tin thuộc bảng nào và tên/SĐT được ghép qua truy vấn hoặc view để hiển thị. Giải thích riêng `DiaChiGiao` là địa chỉ của đơn, không tự xóa dữ liệu giao hàng chỉ vì cô phản biện việc sao chép toàn bộ hồ sơ khách. Kiểm tra lưu/đọc lại đơn Online và đơn POS khách vãng lai.
+  - **Ghi nhận nghiệm thu:** Người kiểm: chưa ghi; ngày: chưa ghi; kết quả/minh chứng: chưa có.
+
+### CO-05 Tồn kho sau nhập và bán
+
+- [ ] **CO-05 Kiểm tra tồn kho xuyên suốt nhập hàng, bán Web/POS và mở lại sản phẩm.**
+  - **Mốc ghi âm:** 09:53–11:13; 12:34–12:42.
+  - **Phụ trách dự kiến:** SV1 cơ chế dữ liệu; SV3/SV4 luồng bán và giao diện.
+  - **Trạng thái / bằng chứng hiện có — Một phần:** SV1-06/07/08 và KT3 có kiểm tra tăng/giảm tồn, rollback và chặn quá tồn; chưa có ghi nhận demo xuyên suốt các thao tác giao diện theo mục này. Đoạn ghi âm có lời rời rạc nên không suy ra thêm lỗi tồn kho cụ thể.
+  - **Tiêu chí nghiệm thu:** ghi tồn ban đầu, nhập thêm và đối chiếu tăng đúng số lượng; bán Web rồi POS và đối chiếu giảm đúng số lượng; tải lại hoặc mở lại sản phẩm thấy tồn mới. Thử bán quá tồn bị chặn; thao tác thất bại hoặc gửi lại cùng giao dịch không làm cập nhật tồn hai lần. Lưu mã sản phẩm, mã phiếu/đơn và số lượng trước/sau làm minh chứng.
+  - **Ghi nhận nghiệm thu:** Người kiểm: chưa ghi; ngày: chưa ghi; kết quả/minh chứng: chưa có.
+
+### CO-06 Thống kê theo yêu cầu demo
+
+- [ ] **CO-06 Mở thống kê thấy dữ liệu năm hiện tại, thu–chi, sản phẩm bán chạy và biểu đồ từng sản phẩm theo quý.**
+  - **Mốc ghi âm:** 13:33–14:35.
+  - **Phụ trách dự kiến:** SV4 chính; SV1 hỗ trợ truy vấn.
+  - **Trạng thái / bằng chứng hiện có — Một phần:** [FrmThongKe][statistics-form] đã gọi nạp khi mở, mặc định từ đầu năm hiện tại đến ngày hiện tại và có chọn năm; SV4-15/16 có doanh thu và bảng bán chạy. Các thẻ đầu màn hình hiện là doanh thu, số đơn, số sản phẩm; thu–chi nằm ở tab riêng. Chưa có bằng chứng đủ cho luồng chọn từng sản phẩm xem biểu đồ quý.
+  - **Tiêu chí nghiệm thu:** mở màn hình tự hiện số liệu năm hiện tại và thể hiện rõ tổng thu/chi, danh sách sản phẩm bán chạy giảm dần; chọn sản phẩm xem doanh số theo từng quý của năm đang chọn; đổi năm cập nhật đúng số liệu, bảng và biểu đồ. Đối chiếu với dữ liệu mẫu đã biết; năm/sản phẩm không có giao dịch hiển thị rõ không có dữ liệu, không giữ số liệu lựa chọn cũ.
+  - **Ghi nhận nghiệm thu:** Người kiểm: chưa ghi; ngày: chưa ghi; kết quả/minh chứng: chưa có.
+
+### CO-07 Tự kiểm tra và luyện demo
+
+- [ ] **CO-07 Mỗi thành viên tự thử, nắm rõ chức năng phụ trách và luyện demo cùng nhóm.**
+  - **Mốc ghi âm:** 01:49–02:07.
+  - **Phụ trách dự kiến:** cả SV1, SV2, SV3, SV4; SV1 tổng hợp kết quả.
+  - **Trạng thái / bằng chứng hiện có — Chưa xác minh:** các mục SV1-39, SV2/SV3 về luyện demo và SV4-35 chưa đủ xác nhận thực hành; kịch bản hoặc log công cụ không thay cho việc thành viên tự thao tác.
+  - **Tiêu chí nghiệm thu:** từng SV chạy chức năng mình phụ trách, nêu dữ liệu đầu vào và kết quả mong đợi, trình bày được luồng thao tác; nhóm chạy liền mạch đặt hàng → xử lý đơn → kiểm tồn → thống kê. Ghi người thực hiện/người kiểm, ngày, kết quả và lỗi còn lại; các lỗi chưa xử lý phải có người phụ trách và lần kiểm lại.
+  - **Ghi nhận nghiệm thu:** Người kiểm: chưa ghi; ngày: chưa ghi; kết quả/minh chứng: chưa có.
+
+**Các chỗ cần xác minh thêm trong ghi âm:** 11:24–12:31 (thao tác reset/nhập liệu và hiển thị màu) và 12:51–13:03 (thuật ngữ nhận dạng chưa rõ). Chưa chuyển các câu này thành lỗi hoặc nhiệm vụ sửa giao diện cụ thể; cần nghe đối chiếu và xác định màn hình/thao tác trước khi bổ sung checklist.
 
 ## Bằng chứng kiểm tra trong phiên rà soát
 
@@ -280,6 +355,8 @@ Script kiểm độc lập cũ cố định 6 sheet/trang. Bản chạy tạm ch
 Đã mở nội dung Markdown và trích văn bản Word của báo cáo tổng, kiến trúc, mô tả CSDL, đặc tả SV1, hướng dẫn cài đặt và HDSD SV1 để kiểm nội dung/TODO. Đã đếm **36 test case SV1, 61 test case SV4** từ các dòng ca kiểm thử thực tế. Chưa có bằng chứng bản in, xác nhận họp, kiểm chéo hoặc luyện demo thay cho các thành viên. Log trong Temp chỉ phục vụ truy vết trên máy hiện tại; kết luận quan trọng đã ghi trực tiếp cạnh từng ô.
 
 [phan-cong]: ../../../CNPM_01_Phan_cong_cong_viec.docx
+[ghi-am-co]: <../../../16.10, 12 thg 11__1.m4a>
+[phu-de-co]: ../../../ban-chep-loi.txt
 [gitignore]: ../../.gitignore
 [solution]: ../../BadmintonShop.sln
 [schema]: ../../database/01_CreateDatabase.sql
