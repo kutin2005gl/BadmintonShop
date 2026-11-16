@@ -1,4 +1,4 @@
-using BadmintonShop.Core.Services;
+﻿using BadmintonShop.Core.Services;
 
 namespace BadmintonShop.Desktop;
 
@@ -46,6 +46,7 @@ public partial class FrmMain
         {
             Group("BÁN HÀNG"); Link("▤   Đơn hàng", () => mnuDonHang_Click(this, EventArgs.Empty), typeof(FrmDonHang));
             Link("▣   Bán tại quầy", () => mnuPOS_Click(this, EventArgs.Empty), typeof(FrmPOS));
+            Link("☺   Khách hàng", () => MoForm<FrmKhachHang>(ChucNang.DonHangPOS), typeof(FrmKhachHang));
         }
         if (PhienDangNhap.CoQuyen(ChucNang.NhaCungCapPhieuNhap))
         {

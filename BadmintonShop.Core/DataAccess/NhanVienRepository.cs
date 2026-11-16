@@ -7,7 +7,7 @@ namespace BadmintonShop.Core.DataAccess;
 /// <summary>Truy xuat bang NhanVien (SV1).</summary>
 public class NhanVienRepository
 {
-    private const string Cot = "MaNV, HoTen, SDT, Email, DiaChi, ChucVu, Luong, NgayVaoLam";
+    private const string Cot = "MaNV, HoTen, SDT, Email, DiaChi, ChucVu, Luong, NgaySinh, NgayVaoLam";
 
     // TV1: lay danh sach nhan vien, loc theo tu khoa (ho ten / SDT / email) neu co
     public List<NhanVien> LayTatCa(string? tuKhoa = null)
@@ -40,8 +40,8 @@ public class NhanVienRepository
     // TV1: them nhan vien moi, tra ve ma NV vua tao
     public int Them(NhanVien nv)
     {
-        const string sql = @"INSERT INTO NhanVien (HoTen, SDT, Email, DiaChi, ChucVu, Luong, NgayVaoLam)
-                             VALUES (@ten, @sdt, @email, @dc, @cv, @luong, @ngay);
+        const string sql = @"INSERT INTO NhanVien (HoTen, SDT, Email, DiaChi, ChucVu, Luong, NgaySinh, NgayVaoLam)
+                             VALUES (@ten, @sdt, @email, @dc, @cv, @luong, @ns, @ngay);
                              SELECT CAST(SCOPE_IDENTITY() AS INT);";
         return (int)DbHelper.ExecuteScalar(sql, ThamSo(nv))!;
     }
@@ -50,7 +50,7 @@ public class NhanVienRepository
     public bool Sua(NhanVien nv)
     {
         const string sql = @"UPDATE NhanVien SET HoTen = @ten, SDT = @sdt, Email = @email, DiaChi = @dc,
-                                    ChucVu = @cv, Luong = @luong, NgayVaoLam = @ngay
+                                    ChucVu = @cv, Luong = @luong, NgaySinh = @ns, NgayVaoLam = @ngay
                              WHERE MaNV = @ma";
         var ps = ThamSo(nv).Append(new SqlParameter("@ma", nv.MaNV)).ToArray();
         return DbHelper.ExecuteNonQuery(sql, ps) > 0;
@@ -79,6 +79,7 @@ public class NhanVienRepository
         new SqlParameter("@dc",    DbHelper.GiaTriHoacNull(nv.DiaChi)),
         new SqlParameter("@cv",    nv.ChucVu),
         new SqlParameter("@luong", DbHelper.GiaTriHoacNull(nv.Luong)),
+        new SqlParameter("@ns",    nv.NgaySinh.HasValue ? nv.NgaySinh.Value.Date : DBNull.Value),
         new SqlParameter("@ngay",  nv.NgayVaoLam == default ? DateTime.Today : nv.NgayVaoLam.Date),
     };
 
@@ -92,6 +93,7 @@ public class NhanVienRepository
         DiaChi     = r.Field<string?>("DiaChi"),
         ChucVu     = r.Field<string>("ChucVu")!,
         Luong      = r.Field<decimal?>("Luong"),
+        NgaySinh   = r.Field<DateTime?>("NgaySinh"),
         NgayVaoLam = r.Field<DateTime>("NgayVaoLam"),
     };
 }

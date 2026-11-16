@@ -48,8 +48,9 @@ public partial class FrmNhanVien : Form
         {
             dgvNV.DataSource = _nvRepo.LayTatCa(txtTimKiem.Text.Trim());
             DatTieuDe(dgvNV, ("MaNV", "Mã"), ("HoTen", "Họ tên"), ("SDT", "SĐT"), ("Email", "Email"),
-                      ("DiaChi", "Địa chỉ"), ("ChucVu", "Chức vụ"), ("Luong", "Lương"), ("NgayVaoLam", "Ngày vào làm"));
+                      ("DiaChi", "Địa chỉ"), ("ChucVu", "Chức vụ"), ("Luong", "Lương"), ("NgaySinh", "Ngày sinh"), ("NgayVaoLam", "Ngày vào làm"));
             dgvNV.Columns["Luong"]!.DefaultCellStyle.Format = "N0";
+            dgvNV.Columns["NgaySinh"]!.DefaultCellStyle.Format = "dd/MM/yyyy";
             dgvNV.Columns["NgayVaoLam"]!.DefaultCellStyle.Format = "dd/MM/yyyy";
             dgvNV.ClearSelection();
         }
@@ -63,6 +64,7 @@ public partial class FrmNhanVien : Form
         txtHoTen.Clear(); txtSDT.Clear(); txtEmail.Clear(); txtDiaChi.Clear(); txtLuong.Clear();
         cboChucVu.Text = "";
         dtpNgayVaoLam.Value = DateTime.Today;
+        dtpNgaySinh.Value = new DateTime(2000, 1, 1); dtpNgaySinh.Checked = false;
         btnThemNV.Enabled = true;
         btnSuaNV.Enabled = btnXoaNV.Enabled = false;
         dgvNV.ClearSelection();
@@ -81,6 +83,7 @@ public partial class FrmNhanVien : Form
         cboChucVu.Text = nv.ChucVu;
         txtLuong.Text = nv.Luong?.ToString("0", CultureInfo.InvariantCulture) ?? "";
         dtpNgayVaoLam.Value = nv.NgayVaoLam;
+        dtpNgaySinh.Value = nv.NgaySinh ?? new DateTime(2000, 1, 1); dtpNgaySinh.Checked = nv.NgaySinh.HasValue;
         btnThemNV.Enabled = false;
         btnSuaNV.Enabled = btnXoaNV.Enabled = true;
     }
@@ -117,10 +120,17 @@ public partial class FrmNhanVien : Form
         }
         if (dtpNgayVaoLam.Value.Date > DateTime.Today) { BaoLoi("Ngày vào làm không được ở tương lai.", dtpNgayVaoLam); return null; }
 
+        DateTime? ngaySinh = dtpNgaySinh.Checked ? dtpNgaySinh.Value.Date : null;
+        if (ngaySinh.HasValue)
+        {
+            if (ngaySinh.Value > DateTime.Today.AddYears(-16)) { BaoLoi("Nhân viên phải đủ 16 tuổi.", dtpNgaySinh); return null; }
+            if (ngaySinh.Value > dtpNgayVaoLam.Value.Date) { BaoLoi("Ngày sinh phải trước ngày vào làm.", dtpNgaySinh); return null; }
+        }
+
         return new NhanVien
         {
             MaNV = _maNVDangChon, HoTen = ten, SDT = sdt, Email = email,
-            DiaChi = txtDiaChi.Text.Trim(), ChucVu = chucVu, Luong = luong,
+            DiaChi = txtDiaChi.Text.Trim(), ChucVu = chucVu, Luong = luong, NgaySinh = ngaySinh,
             NgayVaoLam = dtpNgayVaoLam.Value.Date,
         };
     }

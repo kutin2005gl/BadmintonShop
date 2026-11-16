@@ -10,5 +10,6 @@ public class NhanVien
     public string? DiaChi { get; set; }
     public string ChucVu { get; set; } = "";
     public decimal? Luong { get; set; }
+    public DateTime? NgaySinh { get; set; }
     public DateTime NgayVaoLam { get; set; }
 }

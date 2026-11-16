@@ -41,6 +41,7 @@ CREATE TABLE NhanVien (
     DiaChi      NVARCHAR(255) NULL,
     ChucVu      NVARCHAR(50)  NOT NULL,             -- Quản lý / Nhân viên bán hàng / Kho
     Luong       DECIMAL(18,0) NULL CHECK (Luong IS NULL OR Luong >= 0),
+    NgaySinh    DATE NULL,                          -- ngay sinh (ERD co: NS)
     NgayVaoLam  DATE NOT NULL DEFAULT GETDATE()
 );
 
@@ -330,12 +331,12 @@ INSERT INTO NhaCungCap (TenNCC, DiaChi, SDT, Email) VALUES
  (N'Phụ kiện thể thao Hải Yến',     N'130 Lê Văn Sỹ, Q.3, TP.HCM',            '0286789012', 'haiyen@phukien.vn');
 
 -- Nhan vien (5)
-INSERT INTO NhanVien (HoTen, SDT, Email, DiaChi, ChucVu, Luong, NgayVaoLam) VALUES
- (N'Nguyễn Quản Trị',  '0901000001', 'admin@shopcaulong.vn',    N'Q.1, TP.HCM',       N'Quản lý',               15000000, '2024-01-02'),
- (N'Trần Thị Quản Lý', '0901000002', 'quanly@shopcaulong.vn',   N'Q.3, TP.HCM',       N'Quản lý',               12000000, '2024-03-01'),
- (N'Lê Văn Bán',       '0901000003', 'nhanvien@shopcaulong.vn', N'Q.5, TP.HCM',       N'Nhân viên bán hàng',     8000000, '2025-02-15'),
- (N'Phạm Thị Kho',     '0901000004', 'kho@shopcaulong.vn',      N'Tân Bình, TP.HCM',  N'Kho',                    8500000, '2025-06-01'),
- (N'Võ Văn Nghỉ',      '0901000005', 'nghi@shopcaulong.vn',     N'Gò Vấp, TP.HCM',    N'Nhân viên bán hàng',     7500000, '2025-09-10');
+INSERT INTO NhanVien (HoTen, SDT, Email, DiaChi, ChucVu, Luong, NgaySinh, NgayVaoLam) VALUES
+ (N'Nguyễn Quản Trị',  '0901000001', 'admin@shopcaulong.vn',    N'Q.1, TP.HCM',       N'Quản lý',               15000000, '1985-04-12', '2024-01-02'),
+ (N'Trần Thị Quản Lý', '0901000002', 'quanly@shopcaulong.vn',   N'Q.3, TP.HCM',       N'Quản lý',               12000000, '1990-08-23', '2024-03-01'),
+ (N'Lê Văn Bán',       '0901000003', 'nhanvien@shopcaulong.vn', N'Q.5, TP.HCM',       N'Nhân viên bán hàng',     8000000, '1998-01-15', '2025-02-15'),
+ (N'Phạm Thị Kho',     '0901000004', 'kho@shopcaulong.vn',      N'Tân Bình, TP.HCM',  N'Kho',                    8500000, '1995-11-05', '2025-06-01'),
+ (N'Võ Văn Nghỉ',      '0901000005', 'nghi@shopcaulong.vn',     N'Gò Vấp, TP.HCM',    N'Nhân viên bán hàng',     7500000, '1999-06-30', '2025-09-10');
 
 /* Tai khoan (5) - mat khau la chuoi BCrypt.
    3 chuoi HASH_ ben duoi duoc init-solution.bat tu thay bang chuoi bam that
@@ -357,18 +358,18 @@ INSERT INTO TaiKhoan (TenDangNhap, MatKhau, VaiTro, MaNV, TrangThai) VALUES
 -- San pham khoi dau (12) - ton kho = 0, phieu nhap ben duoi se tang ton.
 -- SV2/SV4 bo sung them cho du >= 40 san pham.
 INSERT INTO SanPham (TenSP, MaDM, ThuongHieu, DonGiaBan, DonViTinh, HinhAnh, MoTa) VALUES
- (N'Vợt Yonex Astrox 88D Pro',     1, N'Yonex',  4290000, N'Cây',   'astrox88d.jpg',  N'4U, thân cứng, thiên công'),
- (N'Vợt Yonex Nanoflare 700',      1, N'Yonex',  3590000, N'Cây',   'nf700.jpg',      N'4U, thân trung bình, thiên tốc độ'),
- (N'Vợt Victor Thruster K 9900',   1, N'Victor', 3890000, N'Cây',   'tk9900.jpg',     N'3U, thân cứng'),
- (N'Vợt Li-Ning Axforce 80',       1, N'Li-Ning',3690000, N'Cây',   'axforce80.jpg',  N'4U, cân bằng'),
- (N'Cầu Yonex AS-30',              2, N'Yonex',   890000, N'Ống',   'as30.jpg',       N'Ống 12 quả, lông ngỗng'),
- (N'Cầu Thành Công 77',            2, N'Thành Công', 245000, N'Ống', 'tc77.jpg',      N'Ống 12 quả, tập luyện'),
- (N'Giày Yonex Power Cushion 65Z3',3, N'Yonex',  2990000, N'Đôi',   'pc65z3.jpg',     N'Size 39-44'),
- (N'Giày Victor A970 ACE',         3, N'Victor', 2590000, N'Đôi',   'a970.jpg',       N'Size 38-44'),
- (N'Áo thi đấu Li-Ning AAYU',      4, N'Li-Ning', 450000, N'Cái',   'aayu.jpg',       N'Size S-XXL'),
- (N'Quần short Yonex 15048',       4, N'Yonex',   390000, N'Cái',   'short15048.jpg', N'Size S-XL'),
- (N'Cước Yonex BG80',              5, N'Yonex',   180000, N'Sợi',   'bg80.jpg',       N'0.68mm'),
- (N'Quấn cán Kumpoo KG-104',       5, N'Kumpoo',   35000, N'Cái',   'kg104.jpg',      N'Quấn cán gai');
+ (N'Vợt Yonex Astrox 88D Pro',     1, N'Yonex',  4290000, N'Cây',   'products/astrox88d.jpg',  N'4U, thân cứng, thiên công'),
+ (N'Vợt Yonex Nanoflare 700',      1, N'Yonex',  3590000, N'Cây',   'products/nf700.jpg',      N'4U, thân trung bình, thiên tốc độ'),
+ (N'Vợt Victor Thruster K 9900',   1, N'Victor', 3890000, N'Cây',   'products/tk9900.jpg',     N'3U, thân cứng'),
+ (N'Vợt Li-Ning Axforce 80',       1, N'Li-Ning',3690000, N'Cây',   'products/axforce80.jpg',  N'4U, cân bằng'),
+ (N'Cầu Yonex AS-30',              2, N'Yonex',   890000, N'Ống',   'products/as30.jpg',       N'Ống 12 quả, lông ngỗng'),
+ (N'Cầu Thành Công 77',            2, N'Thành Công', 245000, N'Ống', 'products/tc77.jpg',      N'Ống 12 quả, tập luyện'),
+ (N'Giày Yonex Power Cushion 65Z3',3, N'Yonex',  2990000, N'Đôi',   'products/pc65z3.jpg',     N'Size 39-44'),
+ (N'Giày Victor A970 ACE',         3, N'Victor', 2590000, N'Đôi',   'products/a970.jpg',       N'Size 38-44'),
+ (N'Áo thi đấu Li-Ning AAYU',      4, N'Li-Ning', 450000, N'Cái',   'products/aayu.jpg',       N'Size S-XXL'),
+ (N'Quần short Yonex 15048',       4, N'Yonex',   390000, N'Cái',   'products/short15048.jpg', N'Size S-XL'),
+ (N'Cước Yonex BG80',              5, N'Yonex',   180000, N'Sợi',   'products/bg80.jpg',       N'0.68mm'),
+ (N'Quấn cán Kumpoo KG-104',       5, N'Kumpoo',   35000, N'Cái',   'products/kg104.jpg',      N'Quấn cán gai');
 
 -- Phieu nhap (6) trai deu cac thang - trigger tu cong ton va tinh TongTien
 INSERT INTO PhieuNhap (NgayNhap, MaNCC, MaNV) VALUES
@@ -417,34 +418,34 @@ INSERT INTO KhachHang (HoTen, SDT, Email, MatKhau, DiaChi, NgayDangKy, TrangThai
 
 -- San pham bo sung (28) -> tong 40. Ton kho = 0, cac phieu nhap ben duoi se tang ton.
 INSERT INTO SanPham (TenSP, MaDM, ThuongHieu, DonGiaBan, DonViTinh, HinhAnh, MoTa) VALUES
- (N'Vợt Yonex Astrox 99 Pro', 1, N'Yonex', 4590000, N'Cây', 'astrox99pro.jpg', N'4U, thân cứng, thiên công'),
- (N'Vợt Yonex Arcsaber 11 Pro', 1, N'Yonex', 3990000, N'Cây', 'arc11pro.jpg', N'4U, thân trung bình, kiểm soát tốt'),
- (N'Vợt Victor Auraspeed 90K', 1, N'Victor', 3490000, N'Cây', 'auraspeed90k.jpg', N'4U, thiên tốc độ'),
- (N'Vợt Victor Jetspeed S 12', 1, N'Victor', 2790000, N'Cây', 'jetspeeds12.jpg', N'4U, phù hợp người chơi phong trào'),
- (N'Vợt Li-Ning Windstorm 72', 1, N'Li-Ning', 2890000, N'Cây', 'windstorm72.jpg', N'4U, nhẹ đầu, linh hoạt'),
- (N'Vợt Kumpoo Power Control 980', 1, N'Kumpoo', 1250000, N'Cây', 'pc980.jpg', N'3U, giá mềm cho người mới'),
- (N'Cầu Victor Gold No.1', 2, N'Victor', 520000, N'Ống', 'goldno1.jpg', N'Ống 12 quả, lông ngỗng, thi đấu'),
- (N'Cầu Li-Ning A+300', 2, N'Li-Ning', 480000, N'Ống', 'aplus300.jpg', N'Ống 12 quả, độ bền cao'),
- (N'Cầu Thành Công 88', 2, N'Thành Công', 310000, N'Ống', 'tc88.jpg', N'Ống 12 quả, tập luyện nâng cao'),
- (N'Cầu nhựa Yonex Mavis 350', 2, N'Yonex', 290000, N'Ống', 'mavis350.jpg', N'Ống 6 quả, cầu nhựa tập luyện'),
- (N'Giày Yonex Eclipsion Z3', 3, N'Yonex', 2790000, N'Đôi', 'eclipsionz3.jpg', N'Size 38-44, đế bám sân tốt'),
- (N'Giày Victor P9200', 3, N'Victor', 3190000, N'Đôi', 'p9200.jpg', N'Size 38-45, hỗ trợ cổ chân'),
- (N'Giày Li-Ning Saga', 3, N'Li-Ning', 1850000, N'Đôi', 'saga.jpg', N'Size 38-44, êm chân'),
- (N'Giày Kumpoo KH-E36', 3, N'Kumpoo', 990000, N'Đôi', 'khe36.jpg', N'Size 37-43, giá phổ thông'),
- (N'Giày Yonex Comfort Z3', 3, N'Yonex', 2390000, N'Đôi', 'comfortz3.jpg', N'Size 36-42, form ôm chân'),
- (N'Áo thi đấu Yonex 10504', 4, N'Yonex', 420000, N'Cái', 'ao10504.jpg', N'Size S-XXL, thấm hút mồ hôi'),
- (N'Áo thi đấu Victor T-33001', 4, N'Victor', 380000, N'Cái', 't33001.jpg', N'Size S-XXL'),
- (N'Váy cầu lông Li-Ning AQXT', 4, N'Li-Ning', 520000, N'Cái', 'aqxt.jpg', N'Size S-XL, kèm quần trong'),
- (N'Quần short Victor R-3096', 4, N'Victor', 360000, N'Cái', 'r3096.jpg', N'Size S-XL'),
- (N'Áo thi đấu Kumpoo KW-2102', 4, N'Kumpoo', 290000, N'Cái', 'kw2102.jpg', N'Size S-XXL'),
- (N'Quần short Li-Ning AKSP', 4, N'Li-Ning', 340000, N'Cái', 'aksp.jpg', N'Size S-XL'),
- (N'Cước Victor VBS-66N', 5, N'Victor', 170000, N'Sợi', 'vbs66n.jpg', N'0.66mm, nảy tốt'),
- (N'Cước Li-Ning No.1', 5, N'Li-Ning', 150000, N'Sợi', 'lnno1.jpg', N'0.65mm, bền'),
- (N'Quấn cán Yonex AC102', 5, N'Yonex', 55000, N'Cái', 'ac102.jpg', N'Quấn cán thấm hút'),
- (N'Balo Yonex BA82212', 5, N'Yonex', 790000, N'Cái', 'ba82212.jpg', N'Balo đựng vợt và giày'),
- (N'Túi vợt Victor BR9213', 5, N'Victor', 1290000, N'Cái', 'br9213.jpg', N'Túi 6 cây, 2 ngăn'),
- (N'Băng trán Yonex', 5, N'Yonex', 90000, N'Cái', 'bangtran.jpg', N'Cotton co giãn'),
- (N'Vớ Victor SK', 5, N'Victor', 150000, N'Đôi', 'vosk.jpg', N'Vớ dày, chống trượt');
+ (N'Vợt Yonex Astrox 99 Pro', 1, N'Yonex', 4590000, N'Cây', 'products/astrox99pro.jpg', N'4U, thân cứng, thiên công'),
+ (N'Vợt Yonex Arcsaber 11 Pro', 1, N'Yonex', 3990000, N'Cây', 'products/arc11pro.jpg', N'4U, thân trung bình, kiểm soát tốt'),
+ (N'Vợt Victor Auraspeed 90K', 1, N'Victor', 3490000, N'Cây', 'products/auraspeed90k.jpg', N'4U, thiên tốc độ'),
+ (N'Vợt Victor Jetspeed S 12', 1, N'Victor', 2790000, N'Cây', 'products/jetspeeds12.jpg', N'4U, phù hợp người chơi phong trào'),
+ (N'Vợt Li-Ning Windstorm 72', 1, N'Li-Ning', 2890000, N'Cây', 'products/windstorm72.jpg', N'4U, nhẹ đầu, linh hoạt'),
+ (N'Vợt Kumpoo Power Control 980', 1, N'Kumpoo', 1250000, N'Cây', 'products/pc980.jpg', N'3U, giá mềm cho người mới'),
+ (N'Cầu Victor Gold No.1', 2, N'Victor', 520000, N'Ống', 'products/goldno1.jpg', N'Ống 12 quả, lông ngỗng, thi đấu'),
+ (N'Cầu Li-Ning A+300', 2, N'Li-Ning', 480000, N'Ống', 'products/aplus300.jpg', N'Ống 12 quả, độ bền cao'),
+ (N'Cầu Thành Công 88', 2, N'Thành Công', 310000, N'Ống', 'products/tc88.jpg', N'Ống 12 quả, tập luyện nâng cao'),
+ (N'Cầu nhựa Yonex Mavis 350', 2, N'Yonex', 290000, N'Ống', 'products/mavis350.jpg', N'Ống 6 quả, cầu nhựa tập luyện'),
+ (N'Giày Yonex Eclipsion Z3', 3, N'Yonex', 2790000, N'Đôi', 'products/eclipsionz3.jpg', N'Size 38-44, đế bám sân tốt'),
+ (N'Giày Victor P9200', 3, N'Victor', 3190000, N'Đôi', 'products/p9200.jpg', N'Size 38-45, hỗ trợ cổ chân'),
+ (N'Giày Li-Ning Saga', 3, N'Li-Ning', 1850000, N'Đôi', 'products/saga.jpg', N'Size 38-44, êm chân'),
+ (N'Giày Kumpoo KH-E36', 3, N'Kumpoo', 990000, N'Đôi', 'products/khe36.jpg', N'Size 37-43, giá phổ thông'),
+ (N'Giày Yonex Comfort Z3', 3, N'Yonex', 2390000, N'Đôi', 'products/comfortz3.jpg', N'Size 36-42, form ôm chân'),
+ (N'Áo thi đấu Yonex 10504', 4, N'Yonex', 420000, N'Cái', 'products/ao10504.jpg', N'Size S-XXL, thấm hút mồ hôi'),
+ (N'Áo thi đấu Victor T-33001', 4, N'Victor', 380000, N'Cái', 'products/t33001.jpg', N'Size S-XXL'),
+ (N'Váy cầu lông Li-Ning AQXT', 4, N'Li-Ning', 520000, N'Cái', 'products/aqxt.jpg', N'Size S-XL, kèm quần trong'),
+ (N'Quần short Victor R-3096', 4, N'Victor', 360000, N'Cái', 'products/r3096.jpg', N'Size S-XL'),
+ (N'Áo thi đấu Kumpoo KW-2102', 4, N'Kumpoo', 290000, N'Cái', 'products/kw2102.jpg', N'Size S-XXL'),
+ (N'Quần short Li-Ning AKSP', 4, N'Li-Ning', 340000, N'Cái', 'products/aksp.jpg', N'Size S-XL'),
+ (N'Cước Victor VBS-66N', 5, N'Victor', 170000, N'Sợi', 'products/vbs66n.jpg', N'0.66mm, nảy tốt'),
+ (N'Cước Li-Ning No.1', 5, N'Li-Ning', 150000, N'Sợi', 'products/lnno1.jpg', N'0.65mm, bền'),
+ (N'Quấn cán Yonex AC102', 5, N'Yonex', 55000, N'Cái', 'products/ac102.jpg', N'Quấn cán thấm hút'),
+ (N'Balo Yonex BA82212', 5, N'Yonex', 790000, N'Cái', 'products/ba82212.jpg', N'Balo đựng vợt và giày'),
+ (N'Túi vợt Victor BR9213', 5, N'Victor', 1290000, N'Cái', 'products/br9213.jpg', N'Túi 6 cây, 2 ngăn'),
+ (N'Băng trán Yonex', 5, N'Yonex', 90000, N'Cái', 'products/bangtran.jpg', N'Cotton co giãn'),
+ (N'Vớ Victor SK', 5, N'Victor', 150000, N'Đôi', 'products/vosk.jpg', N'Vớ dày, chống trượt');
 
 -- Phieu nhap cho cac san pham moi (moi hang 1 phieu, nhan vien kho = 4)
 DECLARE @pn INT;
