@@ -4,7 +4,20 @@ namespace BadmintonShop.Core.Services;
 public static class KhoAnhSanPham
 {
     public static string ThuMucGoc => Path.GetFullPath(Environment.GetEnvironmentVariable("BadmintonShop__MediaRoot")
-        ?? Path.Combine(AppContext.BaseDirectory, "media"));
+        ?? TimThuMucMediaDuAn() ?? Path.Combine(AppContext.BaseDirectory, "media"));
+
+    // Khong dat bien moi truong: di nguoc len tu thu muc chay de tim "media/products" da co anh
+    // (thu muc media o goc du an) -> Web va Desktop tu dung chung, khong can cau hinh.
+    private static string? TimThuMucMediaDuAn()
+    {
+        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
+        {
+            var products = Path.Combine(dir.FullName, "media", "products");
+            if (Directory.Exists(products) && Directory.EnumerateFiles(products).Any())
+                return Path.Combine(dir.FullName, "media");
+        }
+        return null;
+    }
 
     // SV4: từ chối URL, ổ đĩa, traversal và đường dẫn không đúng vùng ảnh sản phẩm.
     public static string? DuongDanDayDu(string? khoa)

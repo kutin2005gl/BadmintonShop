@@ -41,6 +41,7 @@ CREATE TABLE NhanVien (
     DiaChi      NVARCHAR(255) NULL,
     ChucVu      NVARCHAR(50)  NOT NULL,             -- Quản lý / Nhân viên bán hàng / Kho
     Luong       DECIMAL(18,0) NULL CHECK (Luong IS NULL OR Luong >= 0),
+    NgaySinh    DATE NULL,                          -- ngay sinh (ERD co: NS)
     NgayVaoLam  DATE NOT NULL DEFAULT GETDATE()
 );
 

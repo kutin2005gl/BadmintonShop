@@ -12,7 +12,7 @@
 
     <a asp-controller="SanPham" asp-action="ChiTiet" asp-route-id="@sp.MaSP" tabindex="-1" aria-hidden="true"
        class="relative bg-gray-50 aspect-square overflow-hidden mb-4 flex items-center justify-center">
-        <img src="@AnhMinhHoa.TheoDanhMuc(Model.TenDanhMuc)" alt="" loading="lazy" data-chu="@sp.TenSP.Substring(0, 1)"
+        <img src="@AnhMinhHoa.CuaSanPham(sp.HinhAnh, Model.TenDanhMuc)" alt="@sp.TenSP" loading="lazy" data-chu="@sp.TenSP.Substring(0, 1)"
              class="w-full h-full object-cover mix-blend-multiply transition-transform duration-500 group-hover:scale-110" />
     </a>
 

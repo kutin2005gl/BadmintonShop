@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using BadmintonShop.Core.Models;
 using BadmintonShop.Core.Services;
 using Microsoft.Data.SqlClient;
@@ -142,6 +142,27 @@ public class KhachHangRepository
             return vuaTao.Value;
         }
     }
+
+    // Danh sach khach hang cho man hinh quan ly (khong tra mat khau): loc theo ten/SDT/email,
+    // kem so don va tong tien da mua (khong tinh don huy)
+    public DataTable LayDanhSach(string? tuKhoa = null)
+    {
+        const string sql = @"
+            SELECT kh.MaKH, kh.HoTen, kh.SDT, kh.Email, kh.DiaChi, kh.NgayDangKy, kh.TrangThai,
+                   COUNT(hd.MaHD) AS SoDon, ISNULL(SUM(hd.TongTien), 0) AS TongMua
+            FROM KhachHang kh
+            LEFT JOIN HoaDon hd ON hd.MaKH = kh.MaKH AND hd.TrangThai <> N'Đã hủy'
+            WHERE @tk = N'' OR kh.HoTen LIKE N'%' + @tk + N'%'
+                  OR kh.SDT LIKE N'%' + @tk + N'%' OR kh.Email LIKE N'%' + @tk + N'%'
+            GROUP BY kh.MaKH, kh.HoTen, kh.SDT, kh.Email, kh.DiaChi, kh.NgayDangKy, kh.TrangThai
+            ORDER BY kh.MaKH DESC";
+        return DbHelper.ExecuteQuery(sql, new SqlParameter("@tk", (tuKhoa ?? "").Trim()));
+    }
+
+    // Khoa / mo khoa tai khoan khach hang (khach bi khoa khong dang nhap Web duoc)
+    public bool DatTrangThai(int maKH, bool hoatDong)
+        => DbHelper.ExecuteNonQuery("UPDATE KhachHang SET TrangThai = @tt WHERE MaKH = @ma",
+                                    new SqlParameter("@tt", hoatDong), new SqlParameter("@ma", maKH)) > 0;
 
     private static string ChuanHoaEmail(string email) => email.Trim().ToLowerInvariant();
 

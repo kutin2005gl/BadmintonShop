@@ -10,6 +10,13 @@ public static class AnhMinhHoa
     public const string BannerGiay = Goc + "photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=1000";
     public const string BannerVot = Goc + "photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&q=80&w=1000";
 
+    // Anh cua tung san pham (khoa products/... trong CSDL, phuc vu qua /media); khong co thi dung anh theo danh muc
+    public static string CuaSanPham(string? hinhAnh, string? tenDanhMuc)
+        => !string.IsNullOrWhiteSpace(hinhAnh) && hinhAnh.StartsWith("products/", StringComparison.Ordinal)
+           && !hinhAnh.Contains("..") && !hinhAnh.Contains('\\')
+            ? "/media/" + hinhAnh
+            : TheoDanhMuc(tenDanhMuc);
+
     // Giao dien: chon anh minh hoa theo ten danh muc (vot / giay / ao quan / tui / phu kien)
     public static string TheoDanhMuc(string? tenDanhMuc)
     {

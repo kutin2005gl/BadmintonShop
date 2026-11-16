@@ -22,6 +22,7 @@ partial class FrmNhanVien
         lblEmail = new Label(); txtEmail = new TextBox(); lblDiaChi = new Label(); txtDiaChi = new TextBox();
         lblChucVu = new Label(); cboChucVu = new ComboBox(); lblLuong = new Label(); txtLuong = new TextBox();
         lblNgay = new Label(); dtpNgayVaoLam = new DateTimePicker();
+        lblNgaySinh = new Label(); dtpNgaySinh = new DateTimePicker();
         btnThemNV = new Button(); btnSuaNV = new Button(); btnXoaNV = new Button(); btnLamMoiNV = new Button();
         // --- tab tai khoan
         dgvTK = new DataGridView(); pnlTK = new Panel();
@@ -58,9 +59,9 @@ partial class FrmNhanVien
         dgvNV.SelectionChanged += dgvNV_SelectionChanged;
 
         // ---- tab nhan vien: o nhap
-        pnlNhapNV.Dock = DockStyle.Bottom; pnlNhapNV.Height = 200;
+        pnlNhapNV.Dock = DockStyle.Bottom; pnlNhapNV.Height = 235;
         pnlNhapNV.Controls.AddRange(new Control[] { lblHoTen, txtHoTen, lblSDT, txtSDT, lblEmail, txtEmail,
-            lblDiaChi, txtDiaChi, lblChucVu, cboChucVu, lblLuong, txtLuong, lblNgay, dtpNgayVaoLam,
+            lblDiaChi, txtDiaChi, lblChucVu, cboChucVu, lblLuong, txtLuong, lblNgay, dtpNgayVaoLam, lblNgaySinh, dtpNgaySinh,
             btnThemNV, btnSuaNV, btnXoaNV, btnLamMoiNV });
         lblHoTen.AutoSize = true; lblHoTen.Location = new Point(10, 18); lblHoTen.Text = "Họ tên (*)";
         txtHoTen.Location = new Point(100, 15); txtHoTen.Size = new Size(240, 27); txtHoTen.MaxLength = 100; txtHoTen.TabIndex = 2;
@@ -77,10 +78,13 @@ partial class FrmNhanVien
         lblNgay.AutoSize = true; lblNgay.Location = new Point(535, 98); lblNgay.Text = "Vào làm";
         dtpNgayVaoLam.Location = new Point(605, 95); dtpNgayVaoLam.Size = new Size(130, 27);
         dtpNgayVaoLam.Format = DateTimePickerFormat.Short; dtpNgayVaoLam.TabIndex = 8;
-        btnThemNV.Location = new Point(100, 145); btnThemNV.Size = new Size(95, 34); btnThemNV.Text = "Thêm"; btnThemNV.TabIndex = 9; btnThemNV.Click += btnThemNV_Click;
-        btnSuaNV.Location = new Point(205, 145); btnSuaNV.Size = new Size(95, 34); btnSuaNV.Text = "Lưu sửa"; btnSuaNV.TabIndex = 10; btnSuaNV.Click += btnSuaNV_Click;
-        btnXoaNV.Location = new Point(310, 145); btnXoaNV.Size = new Size(95, 34); btnXoaNV.Text = "Xóa"; btnXoaNV.TabIndex = 11; btnXoaNV.Click += btnXoaNV_Click;
-        btnLamMoiNV.Location = new Point(415, 145); btnLamMoiNV.Size = new Size(95, 34); btnLamMoiNV.Text = "Làm mới"; btnLamMoiNV.TabIndex = 12; btnLamMoiNV.Click += btnLamMoiNV_Click;
+        lblNgaySinh.AutoSize = true; lblNgaySinh.Location = new Point(10, 138); lblNgaySinh.Text = "Ngày sinh";
+        dtpNgaySinh.Location = new Point(100, 135); dtpNgaySinh.Size = new Size(150, 27);
+        dtpNgaySinh.Format = DateTimePickerFormat.Short; dtpNgaySinh.ShowCheckBox = true; dtpNgaySinh.Checked = false; dtpNgaySinh.TabIndex = 9;
+        btnThemNV.Location = new Point(100, 180); btnThemNV.Size = new Size(95, 34); btnThemNV.Text = "Thêm"; btnThemNV.TabIndex = 10; btnThemNV.Click += btnThemNV_Click;
+        btnSuaNV.Location = new Point(205, 180); btnSuaNV.Size = new Size(95, 34); btnSuaNV.Text = "Lưu sửa"; btnSuaNV.TabIndex = 11; btnSuaNV.Click += btnSuaNV_Click;
+        btnXoaNV.Location = new Point(310, 180); btnXoaNV.Size = new Size(95, 34); btnXoaNV.Text = "Xóa"; btnXoaNV.TabIndex = 12; btnXoaNV.Click += btnXoaNV_Click;
+        btnLamMoiNV.Location = new Point(415, 180); btnLamMoiNV.Size = new Size(95, 34); btnLamMoiNV.Text = "Làm mới"; btnLamMoiNV.TabIndex = 13; btnLamMoiNV.Click += btnLamMoiNV_Click;
 
         // ---- tab tai khoan
         CauHinhLuoi(dgvTK);
@@ -136,9 +140,9 @@ partial class FrmNhanVien
     private TabControl tabs; private TabPage tabNV, tabTK;
     private Panel pnlTim, pnlNhapNV, pnlTK; private Label lblTim; private TextBox txtTimKiem; private Button btnTim;
     private DataGridView dgvNV, dgvTK;
-    private Label lblHoTen, lblSDT, lblEmail, lblDiaChi, lblChucVu, lblLuong, lblNgay;
+    private Label lblHoTen, lblSDT, lblEmail, lblDiaChi, lblChucVu, lblLuong, lblNgay, lblNgaySinh;
     private TextBox txtHoTen, txtSDT, txtEmail, txtDiaChi, txtLuong;
-    private ComboBox cboChucVu; private DateTimePicker dtpNgayVaoLam;
+    private ComboBox cboChucVu; private DateTimePicker dtpNgayVaoLam, dtpNgaySinh;
     private Button btnThemNV, btnSuaNV, btnXoaNV, btnLamMoiNV;
     private GroupBox grpCap, grpSua;
     private Label lblNV, lblTenDN, lblMK, lblVTCap, lblVTDoi;
