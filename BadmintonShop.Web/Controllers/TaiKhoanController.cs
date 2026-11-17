@@ -97,6 +97,7 @@ public class TaiKhoanController : Controller
         await HttpContext.DangXuatKhachHangAsync();
         return RedirectToAction("Index", "Home");
     }
+
     // GET: /TaiKhoan/DangKy
     [HttpGet]
     [AllowAnonymous]
@@ -117,6 +118,14 @@ public class TaiKhoanController : Controller
         if (!ModelState.IsValid)
             return View(model);
 
+        if (!MatKhauHelper.LaMatKhauManh(model.MatKhau))
+        {
+            ModelState.AddModelError(
+                nameof(model.MatKhau),
+                "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường và chữ số.");
+            return View(model);
+        }
+
         if (_khachHangRepository.EmailDaTonTai(model.Email))
         {
             ModelState.AddModelError(
@@ -124,6 +133,14 @@ public class TaiKhoanController : Controller
                 "Email này đã được đăng ký."
             );
 
+            return View(model);
+        }
+
+        if (_khachHangRepository.SdtDaTonTai(model.SDT))
+        {
+            ModelState.AddModelError(
+                nameof(model.SDT),
+                "Số điện thoại này đã được đăng ký.");
             return View(model);
         }
 

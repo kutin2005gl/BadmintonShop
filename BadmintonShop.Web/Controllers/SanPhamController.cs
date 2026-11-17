@@ -148,6 +148,14 @@ public class SanPhamController : Controller
 
         var sanPham = _sanPhamRepository.LayTheoMa(model.MaSP);
 
+        if (!_danhGiaRepository.KhachDaMuaSanPham(maKH.Value, model.MaSP))
+        {
+            TempData["LoiDanhGia"] =
+                "Chỉ khách đã mua sản phẩm này (đơn đã hoàn thành) mới được đánh giá.";
+
+            return RedirectToAction("ChiTiet", new { id = model.MaSP });
+        }
+
         if (sanPham == null || sanPham.TrangThai != "Đang bán")
         {
             return NotFound();
