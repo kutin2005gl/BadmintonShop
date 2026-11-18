@@ -6,6 +6,10 @@
     string? tuKhoa = ViewBag.TuKhoa;
     int? maDM = ViewBag.MaDM;
     string? sapXep = ViewBag.SapXep;
+    string? thuongHieu = ViewBag.ThuongHieu;
+    decimal? giaTu = ViewBag.GiaTu;
+    decimal? giaDen = ViewBag.GiaDen;
+    var dsThuongHieu = (ViewBag.DanhSachThuongHieu as IEnumerable<string>)?.ToList() ?? new List<string>();
 
     int trangHienTai = ViewBag.TrangHienTai ?? 1;
     int tongSoTrang = ViewBag.TongSoTrang ?? 1;
@@ -15,7 +19,8 @@
                   ?? new List<BadmintonShop.Core.Models.DanhMuc>();
 
     string? TenDM(int ma) => danhMuc.FirstOrDefault(d => d.MaDM == ma)?.TenDanhMuc;
-    bool dangLoc = !string.IsNullOrWhiteSpace(tuKhoa) || maDM != null || !string.IsNullOrEmpty(sapXep);
+    bool dangLoc = !string.IsNullOrWhiteSpace(tuKhoa) || maDM != null || !string.IsNullOrEmpty(sapXep)
+                   || !string.IsNullOrEmpty(thuongHieu) || giaTu != null || giaDen != null;
 }
 
 <div class="container mx-auto px-4 py-12">
@@ -40,17 +45,39 @@
             </select>
         </div>
 
-        <div class="md:col-span-2">
+        <div class="md:col-span-3">
+            <label for="thuongHieu" class="field-label">Thương hiệu</label>
+            <select id="thuongHieu" name="thuongHieu" class="input-box">
+                <option value="">Tất cả thương hiệu</option>
+                @foreach (var th in dsThuongHieu)
+                {
+                    <option value="@th" selected="@(string.Equals(thuongHieu, th, StringComparison.CurrentCultureIgnoreCase))">@th</option>
+                }
+            </select>
+        </div>
+
+        <div class="md:col-span-3">
+            <label for="giaTu" class="field-label">Giá từ (đ)</label>
+            <input id="giaTu" type="number" name="giaTu" value="@giaTu" min="0" step="1000" class="input-box" placeholder="0" />
+        </div>
+
+        <div class="md:col-span-3">
+            <label for="giaDen" class="field-label">Giá đến (đ)</label>
+            <input id="giaDen" type="number" name="giaDen" value="@giaDen" min="0" step="1000" class="input-box" placeholder="Không giới hạn" />
+        </div>
+
+        <div class="md:col-span-3">
             <label for="sapXep" class="field-label">Sắp xếp</label>
             <select id="sapXep" name="sapXep" class="input-box">
                 <option value="" selected="@(string.IsNullOrEmpty(sapXep))">Tên A - Z</option>
                 <option value="ten-z-a" selected="@(sapXep == "ten-z-a")">Tên Z - A</option>
                 <option value="gia-tang" selected="@(sapXep == "gia-tang")">Giá thấp đến cao</option>
                 <option value="gia-giam" selected="@(sapXep == "gia-giam")">Giá cao đến thấp</option>
+                <option value="moi-nhat" selected="@(sapXep == "moi-nhat")">Mới nhất</option>
             </select>
         </div>
 
-        <div class="md:col-span-2 flex items-end">
+        <div class="md:col-span-3 flex items-end">
             <button type="submit" class="btn-dark w-full">Áp dụng</button>
             <button type="submit" name="lamMoi" value="true" class="btn-outline">Làm mới</button>
         </div>
@@ -98,7 +125,7 @@
             else
             {
                 <a asp-controller="SanPham" asp-action="Index" asp-route-tuKhoa="@tuKhoa" asp-route-maDM="@maDM"
-                   asp-route-sapXep="@sapXep" asp-route-trang="@(trangHienTai - 1)">Trước</a>
+                   asp-route-sapXep="@sapXep" asp-route-thuongHieu="@thuongHieu" asp-route-giaTu="@giaTu" asp-route-giaDen="@giaDen" asp-route-trang="@(trangHienTai - 1)">Trước</a>
             }
 
             @for (int i = 1; i <= tongSoTrang; i++)
@@ -110,7 +137,7 @@
                 else
                 {
                     <a asp-controller="SanPham" asp-action="Index" asp-route-tuKhoa="@tuKhoa" asp-route-maDM="@maDM"
-                       asp-route-sapXep="@sapXep" asp-route-trang="@i">@i</a>
+                       asp-route-sapXep="@sapXep" asp-route-thuongHieu="@thuongHieu" asp-route-giaTu="@giaTu" asp-route-giaDen="@giaDen" asp-route-trang="@i">@i</a>
                 }
             }
 
@@ -121,7 +148,7 @@
             else
             {
                 <a asp-controller="SanPham" asp-action="Index" asp-route-tuKhoa="@tuKhoa" asp-route-maDM="@maDM"
-                   asp-route-sapXep="@sapXep" asp-route-trang="@(trangHienTai + 1)">Sau</a>
+                   asp-route-sapXep="@sapXep" asp-route-thuongHieu="@thuongHieu" asp-route-giaTu="@giaTu" asp-route-giaDen="@giaDen" asp-route-trang="@(trangHienTai + 1)">Sau</a>
             }
         </nav>
     }
