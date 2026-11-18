@@ -9,7 +9,7 @@ namespace BadmintonShop.Web.Controllers;
 public class SanPhamController : Controller
 {
     private readonly BadmintonShop.Web.Services.DanhMucCongKhai catalog;
-    public SanPhamController(BadmintonShop.Web.Services.DanhMucCongKhai catalog)=>this.catalog=catalog;
+    public SanPhamController(BadmintonShop.Web.Services.DanhMucCongKhai catalog) => this.catalog = catalog;
     private readonly SanPhamRepository _sanPhamRepository = new();
 
     // Repository lấy danh mục từ SQL Server
@@ -21,19 +21,29 @@ public class SanPhamController : Controller
         string? tuKhoa,
         int? maDM,
         string? sapXep,
-        int trang = 1,bool lamMoi=false)
+        string? thuongHieu,
+        decimal? giaTu,
+        decimal? giaDen,
+        int trang = 1, bool lamMoi = false)
     {
         const int soSanPhamMoiTrang = 8;
 
         // 1. Lấy danh mục từ SQL Server
-        var snapshot=catalog.Lay(lamMoi);
+        var snapshot = catalog.Lay(lamMoi);
         var danhMuc = snapshot.Categories;
 
         // 2. Lấy sản phẩm theo từ khóa và danh mục
-        var keyword=tuKhoa?.Trim();
-        var danhSach = snapshot.Products.Where(sp=>
-            (string.IsNullOrEmpty(keyword) || $"{sp.TenSP} {sp.ThuongHieu}".Contains(keyword,StringComparison.CurrentCultureIgnoreCase)) &&
-            (!maDM.HasValue || sp.MaDM==maDM)).ToList();
+        // Nếu nhập ngược khoảng giá thì tự đổi chỗ
+        if (giaTu.HasValue && giaDen.HasValue && giaTu > giaDen)
+            (giaTu, giaDen) = (giaDen, giaTu);
+
+        var keyword = tuKhoa?.Trim();
+        var danhSach = snapshot.Products.Where(sp =>
+            (string.IsNullOrEmpty(keyword) || $"{sp.TenSP} {sp.ThuongHieu}".Contains(keyword, StringComparison.CurrentCultureIgnoreCase)) &&
+            (!maDM.HasValue || sp.MaDM == maDM) &&
+            (string.IsNullOrEmpty(thuongHieu) || string.Equals(sp.ThuongHieu, thuongHieu, StringComparison.CurrentCultureIgnoreCase)) &&
+            (!giaTu.HasValue || sp.DonGiaBan >= giaTu) &&
+            (!giaDen.HasValue || sp.DonGiaBan <= giaDen)).ToList();
 
         // 3. Chỉ hiển thị sản phẩm đang bán
         danhSach = danhSach
@@ -56,6 +66,11 @@ public class SanPhamController : Controller
             "ten-z-a" => danhSach
                 .OrderByDescending(sp => sp.TenSP)
                 .ThenBy(sp => sp.MaSP)
+                .ToList(),
+
+            // Mới nhất: mã sản phẩm lớn hơn = thêm vào sau
+            "moi-nhat" => danhSach
+                .OrderByDescending(sp => sp.MaSP)
                 .ToList(),
 
             _ => danhSach
@@ -89,6 +104,17 @@ public class SanPhamController : Controller
         ViewBag.TuKhoa = tuKhoa;
         ViewBag.MaDM = maDM;
         ViewBag.SapXep = sapXep;
+        ViewBag.ThuongHieu = thuongHieu;
+        ViewBag.GiaTu = giaTu;
+        ViewBag.GiaDen = giaDen;
+
+        // Danh sách thương hiệu cho ô lọc (chỉ sản phẩm đang bán)
+        ViewBag.DanhSachThuongHieu = snapshot.Products
+            .Where(sp => sp.TrangThai == "Đang bán" && !string.IsNullOrWhiteSpace(sp.ThuongHieu))
+            .Select(sp => sp.ThuongHieu!.Trim())
+            .Distinct(StringComparer.CurrentCultureIgnoreCase)
+            .OrderBy(t => t)
+            .ToList();
 
         ViewBag.TrangHienTai = trang;
         ViewBag.TongSoTrang = tongSoTrang;
@@ -147,6 +173,14 @@ public class SanPhamController : Controller
         }
 
         var sanPham = _sanPhamRepository.LayTheoMa(model.MaSP);
+
+        if (!_danhGiaRepository.KhachDaMuaSanPham(maKH.Value, model.MaSP))
+        {
+            TempData["LoiDanhGia"] =
+                "Chỉ khách đã mua sản phẩm này (đơn đã hoàn thành) mới được đánh giá.";
+
+            return RedirectToAction("ChiTiet", new { id = model.MaSP });
+        }
 
         if (sanPham == null || sanPham.TrangThai != "Đang bán")
         {

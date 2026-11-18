@@ -68,6 +68,23 @@ public class DanhGiaRepository
         );
     }
 
+    // SV2: chỉ khách đã mua sản phẩm này (đơn Hoàn thành) mới được đánh giá
+    public bool KhachDaMuaSanPham(int maKH, int maSP)
+    {
+        const string sql = @"
+        SELECT COUNT(*)
+        FROM dbo.HoaDon hd
+        JOIN dbo.ChiTietHoaDon ct ON ct.MaHD = hd.MaHD
+        WHERE hd.MaKH = @maKH
+          AND ct.MaSP = @maSP
+          AND hd.TrangThai = N'Hoàn thành'";
+
+        return (int)DbHelper.ExecuteScalar(
+            sql,
+            new SqlParameter("@maKH", maKH),
+            new SqlParameter("@maSP", maSP))! > 0;
+    }
+
     // Lấy toàn bộ đánh giá để quản trị viên duyệt
     public List<DanhGia> LayTatCa()
     {
