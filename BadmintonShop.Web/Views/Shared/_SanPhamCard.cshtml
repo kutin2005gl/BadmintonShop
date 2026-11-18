@@ -1,9 +1,12 @@
 @model BadmintonShop.Web.Models.TheSanPham
-@{ var sp = Model.SanPham; }
+@{
+    var sp = Model.SanPham; var pt = KhuyenMaiHienThi.LayPhanTram(sp.MaSP);
+}
 <div class="sp-card group relative flex flex-col bg-white" data-dm="@sp.MaDM" data-ten="@((sp.TenSP + " " + sp.ThuongHieu).ToLowerInvariant())">
     <div class="absolute top-2 left-2 z-10 flex flex-col gap-2">
         @if (sp.SoLuongTon <= 0) { <span class="bg-gray-500 text-white text-[10px] font-bold px-2 py-1 tracking-wider uppercase">Hết hàng</span> }
         else if (sp.SoLuongTon <= 5) { <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-1 tracking-wider uppercase">Sắp hết</span> }
+        @if (pt > 0) { <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-1 tracking-wider uppercase">-@pt.ToString("0.##")%</span> }
         @if (!string.IsNullOrEmpty(Model.Nhan)) { <span class="bg-primary text-white text-[10px] font-bold px-2 py-1 tracking-wider uppercase">@Model.Nhan</span> }
     </div>
     <button type="button" class="absolute top-2 right-2 z-10 p-2 text-gray-400 hover:text-red-500 transition-colors" aria-label="Yêu thích">
@@ -20,7 +23,15 @@
         <a asp-controller="SanPham" asp-action="ChiTiet" asp-route-id="@sp.MaSP" class="font-bold text-sm mb-1 line-clamp-2 hover:text-primary transition-colors">@sp.TenSP</a>
         <div class="text-xs text-gray-500 mb-2 uppercase font-medium">@Model.TenDanhMuc@(sp.ThuongHieu != null ? " · " + sp.ThuongHieu : "")</div>
         <div class="mt-auto flex items-center gap-2 mb-3">
-            <span class="font-extrabold text-sm">@sp.DonGiaBan.Dong()</span>
+            @if (pt > 0)
+            {
+                <span class="font-extrabold text-sm text-red-500">@KhuyenMaiHienThi.GiaSauGiam(sp.DonGiaBan, pt).Dong()</span>
+                <span class="text-xs text-gray-400 line-through">@sp.DonGiaBan.Dong()</span>
+            }
+            else
+            {
+                <span class="font-extrabold text-sm">@sp.DonGiaBan.Dong()</span>
+            }
         </div>
         <form asp-controller="GioHang" asp-action="Them" method="post">
             <input type="hidden" name="maSP" value="@sp.MaSP" />

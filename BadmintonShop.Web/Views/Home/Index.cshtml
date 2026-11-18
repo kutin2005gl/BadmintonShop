@@ -1,5 +1,6 @@
 @model TrangChuViewModel
 @{
+    var dangKM = Model.SanPham.Where(x => KhuyenMaiHienThi.LayPhanTram(x.MaSP) > 0).Take(8).ToList();
     ViewData["Title"] = "Trang chủ";
     string? TenDM(int ma) => Model.DanhMuc.FirstOrDefault(d => d.MaDM == ma)?.TenDanhMuc;
     TheSanPham Tao(BadmintonShop.Core.Models.SanPham sp, string? nhan) => new TheSanPham { SanPham = sp, TenDanhMuc = TenDM(sp.MaDM), Nhan = nhan };
@@ -56,6 +57,27 @@
                     {
                         <div class="min-w-[240px] md:min-w-[280px] snap-start">
                             <partial name="_SanPhamCard" model="Tao(sp, nhanMoi)" />
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (dangKM.Count > 0)
+        {
+            <div class="my-16">
+                <div class="flex items-end justify-between mb-8">
+                    <h2 class="text-2xl md:text-3xl font-extrabold uppercase tracking-tight">Đang khuyến mãi</h2>
+                    <div class="flex gap-2">
+                        <button type="button" data-cuon="trai" data-muc="cr-km" class="w-10 h-10 border border-black flex items-center justify-center hover:bg-black hover:text-white transition-colors">&lsaquo;</button>
+                        <button type="button" data-cuon="phai" data-muc="cr-km" class="w-10 h-10 border border-black flex items-center justify-center hover:bg-black hover:text-white transition-colors">&rsaquo;</button>
+                    </div>
+                </div>
+                <div id="cr-km" class="flex gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory pb-4" style="scrollbar-width:none">
+                    @foreach (var sp in dangKM)
+                    {
+                        <div class="min-w-[240px] md:min-w-[280px] snap-start">
+                            <partial name="_SanPhamCard" model="Tao(sp, null)" />
                         </div>
                     }
                 </div>
