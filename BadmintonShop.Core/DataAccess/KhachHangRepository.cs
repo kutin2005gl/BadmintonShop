@@ -27,6 +27,15 @@ public class KhachHangRepository
         => (int)DbHelper.ExecuteScalar("SELECT COUNT(*) FROM KhachHang WHERE Email = @email",
                                        new SqlParameter("@email", ChuanHoaEmail(email)))! > 0;
 
+    // SV2: kiểm tra số điện thoại đã được đăng ký chưa
+    public bool SdtDaTonTai(string? sdt)
+    {
+        if (string.IsNullOrWhiteSpace(sdt)) return false;
+        return (int)DbHelper.ExecuteScalar(
+            "SELECT COUNT(*) FROM KhachHang WHERE SDT = @sdt",
+            new SqlParameter("@sdt", sdt.Trim()))! > 0;
+    }
+
     // TV1: dang ky khach hang moi (bam mat khau), tra ve MaKH. Goi EmailDaTonTai truoc de bao loi dep
     public int DangKy(KhachHang kh, string matKhauTho)
     {
