@@ -79,6 +79,17 @@ public class DonHangOnlineRepository
         return kq is int ma ? ma : null;
     }
 
+    // TV1: danh sach don ONLINE cua (cac) khach co SDT nay (da chuan hoa 0xxx), moi nhat truoc - dung sau khi xac thuc OTP
+    public DataTable LayDonTheoSDT(string sdtChuanHoa)
+        => DbHelper.ExecuteQuery(@"
+            SELECT h.MaHD, h.NgayLap, h.HinhThucTT, h.TongTien, h.TrangThai
+            FROM HoaDon h JOIN KhachHang k ON k.MaKH = h.MaKH
+            WHERE h.LoaiBan = N'Online'
+              AND REPLACE(REPLACE(REPLACE(REPLACE(k.SDT,' ',''),'-',''),'.',''),'+','') IN (@a, @b)
+            ORDER BY h.NgayLap DESC, h.MaHD DESC",
+            new SqlParameter("@a", sdtChuanHoa),
+            new SqlParameter("@b", "84" + sdtChuanHoa[1..]));
+
     // TV3: chi tiet don kem ten san pham (gia, giam la gia LUC DAT, khong phai gia hien tai)
     public DataTable LayChiTietHienThi(int maHD, int? maKH = null)
         => DbHelper.ExecuteQuery(@"SELECT ct.MaSP, sp.TenSP, sp.HinhAnh, ct.SoLuong, ct.DonGia, ct.GiamGia, ct.ThanhTien

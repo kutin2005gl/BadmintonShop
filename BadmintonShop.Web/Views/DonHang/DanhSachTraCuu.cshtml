@@ -1,0 +1,43 @@
+@model System.Data.DataTable
+@using System.Data
+@{ ViewData["Title"] = "Đơn hàng theo số điện thoại"; }
+
+<div class="container mx-auto px-4 py-12">
+<a asp-action="TraCuu" class="text-xs font-bold uppercase underline hover:text-primary">&larr; Tra cứu số khác</a>
+<h1 class="page-title mt-4">Đơn hàng của @ViewData["SDTChe"]</h1>
+
+@if (Model.Rows.Count == 0)
+{
+    <div class="flex flex-col items-center text-center py-16">
+        <p class="text-gray-500 mb-8">Không có đơn hàng nào với số điện thoại này.</p>
+        <a asp-controller="Home" asp-action="Index" class="btn-dark">Mua sắm ngay</a>
+    </div>
+}
+else
+{
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="border-b border-black text-left text-xs font-bold uppercase tracking-wider text-gray-500">
+                    <th class="py-3 pr-4">Mã đơn</th><th class="py-3 pr-4">Ngày đặt</th><th class="py-3 pr-4">Thanh toán</th>
+                    <th class="py-3 pr-4 text-right">Tổng tiền</th><th class="py-3 pr-4">Trạng thái</th><th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (DataRow r in Model.Rows)
+            {
+                var tt = (string)r["TrangThai"];
+                <tr class="border-b border-gray-200 hover:bg-gray-50">
+                    <td class="py-4 pr-4 font-bold">#@r["MaHD"]</td>
+                    <td class="py-4 pr-4">@(((DateTime)r["NgayLap"]).ToString("dd/MM/yyyy HH:mm"))</td>
+                    <td class="py-4 pr-4">@r["HinhThucTT"]</td>
+                    <td class="py-4 pr-4 text-right font-bold">@(((decimal)r["TongTien"]).Dong())</td>
+                    <td class="py-4 pr-4"><span class="badge @DinhDang.MauTrangThai(tt)">@tt</span></td>
+                    <td class="py-4 text-right"><a asp-action="XemDon" asp-route-id="@r["MaHD"]" class="text-xs font-bold uppercase underline hover:text-primary">Xem</a></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
+</div>

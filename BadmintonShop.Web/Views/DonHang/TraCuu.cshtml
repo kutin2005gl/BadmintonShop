@@ -4,14 +4,14 @@
 <div class="auth-khung">
     <div class="auth-card">
         <h1 class="auth-title">Tra cứu đơn hàng</h1>
-        <p class="auth-sub">Nhập mã đơn hàng và số điện thoại đã dùng khi đặt hàng để xem tình trạng đơn.</p>
+        <p class="auth-sub">Nhập số điện thoại đã dùng khi đặt hàng. Có mã đơn thì xem ngay đơn đó; không có mã đơn thì xác thực OTP để xem tất cả đơn của số này.</p>
 
         <form asp-controller="DonHang" asp-action="TraCuu" method="post" autocomplete="off">
             @if (Model.Loi != null) { <div class="alert-err">@Model.Loi</div> }
 
             <div class="field">
-                <label for="maDon" class="field-label">Mã đơn hàng</label>
-                <input id="maDon" name="maDon" value="@Model.MaDon" class="input-box" inputmode="numeric" placeholder="Ví dụ: 1234" required maxlength="20" />
+                <label for="maDon" class="field-label">Mã đơn hàng <span class="normal-case font-normal text-gray-500">(không bắt buộc)</span></label>
+                <input id="maDon" name="maDon" value="@Model.MaDon" class="input-box" inputmode="numeric" placeholder="Ví dụ: 1234" maxlength="20" />
             </div>
             <div class="field">
                 <label for="sdt" class="field-label">Số điện thoại đặt hàng</label>
