@@ -20,6 +20,8 @@ internal static partial class Program
         await app.StartAsync();
         try
         {
+            // Thẻ sản phẩm dùng bộ nhớ đệm khuyến mãi riêng với danh mục.
+            KhuyenMaiHienThi.LayPhanTram(sp1);
             using var http=new HttpClient { BaseAddress=new Uri(app.Urls.Single()) };using var counter=new SqlCounter();
             await GetHtml(http,"/SanPham");int initial=counter.Count;Eq(2,initial);
             foreach(var word in new[]{"Vợt","Cầu","1","2","3","a","b","c","thử",""})

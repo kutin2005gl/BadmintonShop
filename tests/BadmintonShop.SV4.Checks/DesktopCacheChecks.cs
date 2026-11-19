@@ -66,7 +66,14 @@ internal static partial class Program
             var grids=Controls(form).OfType<DataGridView>().ToArray();Eq(report.Bang.Count,grids.Length);
             foreach(var grid in grids)
             {
-                var data=(System.Data.DataTable)grid.DataSource!;True(report.Bang.Values.Contains(data));
+                var data=(System.Data.DataTable)grid.DataSource!;
+                if (grid.Parent is TabPage { Text: "Bán chạy" })
+                {
+                    var all = report.Bang["Bán chạy"];
+                    Eq(Math.Min(10, all.Rows.Count), data.Rows.Count);
+                    for (int r=0;r<data.Rows.Count;r++)for(int c=0;c<data.Columns.Count;c++)Eq(all.Rows[r][c],data.Rows[r][c]);
+                }
+                else True(report.Bang.Values.Contains(data));
                 for(int r=0;r<data.Rows.Count;r++)for(int c=0;c<data.Columns.Count;c++)Eq(data.Rows[r][c],grid.Rows[r].Cells[c].Value);
             }
             foreach(var chart in Controls(form).OfType<BieuDoCot>())

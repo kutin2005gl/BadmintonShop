@@ -66,6 +66,25 @@ internal static partial class Program
             Eq(0,repo.LayDuLieuBaoCao(from,to,"Online").NhapHang.Rows.Count);
             Eq(0m,Read(new(2024,1,1),new(2024,12,31)).TongDoanhThu);
         });
+        Test("DB-R03 desktop periods include zero rows and ignore channel for store totals", () =>
+        {
+            var start = new DateTime(2026, 1, 1);
+            var raw = repo.LayDuLieuBaoCao(start, to, null);
+            var quarterly = BaoCaoService.TaoTheoKy(raw, start, to, null, true).Bang[BaoCaoService.BangThuChi];
+            Eq(4, quarterly.Rows.Count);
+            Eq("Q1/2026", quarterly.Rows[0].Field<string>("Kỳ"));
+            Eq(70m, quarterly.Rows[0].Field<decimal>("Thu"));
+            Eq(0m, quarterly.Rows[1].Field<decimal>("Thu"));
+            Eq(30m, quarterly.Rows[2].Field<decimal>("Thu"));
+            Eq(150m, quarterly.Rows[3].Field<decimal>("Chi"));
+            var months = BaoCaoService.TaoTheoKy(repo.LayDuLieuBaoCao(from, to, null), from, to, "Online", false);
+            var store = months.Bang[BaoCaoService.BangThuChi];
+            Eq(24, store.Rows.Count);
+            Eq("01/2026", store.Rows[12].Field<string>("Kỳ"));
+            Eq(511m, store.AsEnumerable().Sum(r => r.Field<decimal>("Thu")));
+            Eq(650m, store.AsEnumerable().Sum(r => r.Field<decimal>("Chi")));
+            Eq(451m, months.TongDoanhThu);
+        });
         Ghi("Report fixture verified: "+catalog+"; --report-demo-only retains this fixture without subsequent mutation checks.");
     }
 }
