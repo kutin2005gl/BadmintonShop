@@ -1,3 +1,4 @@
+// TV1: khoi tao tuong tac gio hang
 (() => {
     const badge = document.getElementById('gio-so-luong');
     const cartButton = document.getElementById('btn-gio');
@@ -11,6 +12,7 @@
     let drawerRequest;
     let pendingAdd = Promise.resolve();
 
+    // TV1: doc diem quay lai tu phien trinh duyet
     function readPoint(key) {
         try {
             const point = JSON.parse(sessionStorage.getItem(key));
@@ -23,6 +25,7 @@
         }
     }
 
+    // TV1: luu hoac xoa diem quay lai
     function savePoint(key, point) {
         try {
             if (point) sessionStorage.setItem(key, JSON.stringify(point));
@@ -32,19 +35,24 @@
         }
     }
 
+    // TV1: hien thi thong bao gio hang
     function showToast(message, success) {
         clearTimeout(toastTimer);
         toast.textContent = message;
         toast.classList.toggle('cart-toast-error', !success);
-        toastTimer = setTimeout(() => { toast.textContent = ''; }, 4500);
+        toastTimer = setTimeout(
+            // TV1: an thong bao sau thoi gian hien thi
+            () => { toast.textContent = ''; }, 4500);
     }
 
+    // TV1: cap nhat tong so luong tren bieu tuong gio
     function setCount(count) {
         badge.textContent = count;
         badge.hidden = count === 0;
         cartButton.setAttribute('aria-label', `Giỏ hàng (${count})`);
     }
 
+    // TV1: tai lai noi dung ngan gio
     async function refreshDrawer() {
         drawerRequest?.abort();
         const request = new AbortController();
@@ -60,6 +68,7 @@
         }
     }
 
+    // TV1: dong ngan gio va tra tieu diem ve nut gio
     function closeDrawer() {
         drawerRequest?.abort();
         drawer.inert = true;
@@ -72,12 +81,16 @@
         document.getElementById('gio-dong').addEventListener('click', closeDrawer);
         document.getElementById('gio-tiep-tuc').addEventListener('click', closeDrawer);
         overlay.addEventListener('click', closeDrawer);
-        document.addEventListener('keydown', event => {
+        document.addEventListener('keydown',
+        // TV1: dong ngan gio khi bam Escape
+        event => {
             if (event.key === 'Escape' && !drawer.inert) closeDrawer();
         });
     }
 
-    document.addEventListener('click', event => {
+    document.addEventListener('click',
+    // TV1: xu ly lien ket mo gio va tiep tuc chon hang
+    event => {
         const link = event.target.closest('[data-cart-link], [data-cart-return]');
         if (!link || event.defaultPrevented || event.button !== 0 ||
             event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
@@ -106,7 +119,9 @@
         }
     });
 
-    document.addEventListener('submit', event => {
+    document.addEventListener('submit',
+    // TV1: gui form them hang bang AJAX
+    event => {
         const form = event.target;
         if (!form.matches('[data-cart-add]') || !window.fetch || event.defaultPrevented) return;
         event.preventDefault();
@@ -115,7 +130,9 @@
         const body = new URLSearchParams(new FormData(form));
         button.disabled = true;
         // Queue requests on this page so each submission sees the saved session.
-        pendingAdd = pendingAdd.then(async () => {
+        pendingAdd = pendingAdd.then(
+        // TV1: gui lan luot cac yeu cau ghi gio
+        async () => {
             try {
                 const response = await fetch(form.action, {
                     method: 'POST',
@@ -140,7 +157,9 @@
         savePoint(restoreKey, null);
         window.scrollTo(0, restore.scroll);
         if (window.scrollY < restore.scroll && document.readyState !== 'complete') {
-            window.addEventListener('load', () => window.scrollTo(0, restore.scroll), { once: true });
+            window.addEventListener('load',
+                // TV1: khoi phuc vi tri cuon sau khi tai trang
+                () => window.scrollTo(0, restore.scroll), { once: true });
         }
     }
 })();

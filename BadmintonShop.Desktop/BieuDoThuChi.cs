@@ -5,6 +5,7 @@ namespace BadmintonShop.Desktop;
 
 internal sealed class BieuDoThuChi : Panel
 {
+    // TV1: khoi tao bieu do thu chi tu bang du lieu
     public BieuDoThuChi(DataTable bang)
     {
         Dock = DockStyle.Fill;
@@ -33,6 +34,7 @@ internal sealed class BieuDoThuChi : Panel
         private readonly (string Ky, decimal Thu, decimal Chi)[] ky = bang.AsEnumerable()
             .Select(r => (r.Field<string>("Kỳ")!, r.Field<decimal>("Thu"), r.Field<decimal>("Chi"))).ToArray();
 
+        // TV1: ve cac cot thu chi theo ky
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
@@ -82,6 +84,7 @@ internal sealed class BieuDoThuChi : Panel
             }
         }
 
+        // TV1: bat dem ve va ve lai khi doi kich thuoc
         protected override void OnHandleCreated(EventArgs e)
         {
             DoubleBuffered = true;

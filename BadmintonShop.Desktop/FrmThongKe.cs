@@ -57,12 +57,14 @@ public class FrmThongKe : Form
         ShopTheme.Apply(this);
     }
 
+    // TV1: tao o chon thang va nam
     private static DateTimePicker TaoChonThang() => new()
     {
         Format = DateTimePickerFormat.Custom, CustomFormat = "MM/yyyy", ShowUpDown = true,
         Width = 100, MinDate = new DateTime(1753, 1, 1), MaxDate = new DateTime(9998, 12, 31)
     };
 
+    // TV1: tao nut chon ky thong ke
     private RadioButton TaoLuaChon(string ten, int thang)
     {
         var nut = new RadioButton { Text = ten, AutoSize = true, Checked = thang == 0, Margin = new Padding(3, 7, 3, 3) };
@@ -78,6 +80,7 @@ public class FrmThongKe : Form
         return nut;
     }
 
+    // TV1: tao the hien thi so tien tong hop
     private static Panel TaoThe(string ten, Label giaTri)
     {
         var the = new Panel { Dock = DockStyle.Fill, BackColor = Color.White, Padding = new Padding(12, 8, 12, 4), Margin = new Padding(4) };
@@ -90,6 +93,7 @@ public class FrmThongKe : Form
     { base.OnLoad(e);if(DesignMode || !QuyenForm.KiemTraKhiMo(this,Quyen))return;Chay(Nap); }
     private void Chay(Action a)=>Sv4Ui.Chay(this,Quyen,a);
     // SV4: nạp thành công mới thay kết quả, bảng và biểu đồ cùng dùng snapshot này.
+    // TV1: nap bao cao theo ky va kenh ban da chon
     private async void Nap()
     {
         var homNay = DateTime.Today;
@@ -113,6 +117,7 @@ public class FrmThongKe : Form
                 && kq.Bang["Trạng thái đơn"].AsEnumerable().All(r => r.Field<int>("Số đơn") == 0));
     }
 
+    // TV1: hien thi so tong hop, bang va bieu do
     private void HienThi(KetQuaBaoCao kq)
     {
         var thuChi = kq.Bang[BaoCaoService.BangThuChi].AsEnumerable();
@@ -182,6 +187,7 @@ public class FrmThongKe : Form
         tabs.SelectedTab = tabs.TabPages.Cast<TabPage>().FirstOrDefault(p => p.Text == tabDangXem) ?? tabs.TabPages[0];
     }
 
+    // TV1: mo danh sach day du san pham da ban trong ky
     private void XemTatCa(KetQuaBaoCao kq, DataTable dt)
     {
         using var form = new Form { Text = "Tất cả sản phẩm đã bán", Size = new Size(760, 570), MinimumSize = new Size(520, 360) };

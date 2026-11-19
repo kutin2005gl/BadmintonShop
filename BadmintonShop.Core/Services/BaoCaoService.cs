@@ -14,6 +14,7 @@ public static class BaoCaoService
     public const string BangThuChi = "Thu–chi toàn cửa hàng";
 
     // Nguồn bán hàng của màn hình này gồm cả hai kênh. Chỉ các bảng chi tiết lọc theo kênh.
+    // TV1: tao bao cao theo quy hoac theo thang
     public static KetQuaBaoCao TaoTheoKy(DuLieuBaoCao source, DateTime tu, DateTime den, string? loai, bool theoQuy)
     {
         var chiTiet = Tao(source.BanHang, tu, den, loai);

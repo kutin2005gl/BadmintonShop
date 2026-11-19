@@ -15,6 +15,7 @@ public class GioHangController : Controller
     public IActionResult Index() => View(_gioHang.TinhTuSession(HttpContext.Session));
 
     [HttpGet, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    // TV1: tai noi dung ngan gio theo phien
     public IActionResult NganGio()
     {
         var session = HttpContext.Session;
@@ -22,11 +23,12 @@ public class GioHangController : Controller
         return PartialView("_NganGio", gio);
     }
 
-    // TV3: them vao gio - SV2 goi tu trang chi tiet san pham: POST /GioHang/Them (maSP, soLuong, returnUrl)
     [HttpPost, ValidateAntiForgeryToken]
+    // TV1: them san pham vao gio va tra ket qua
     public IActionResult Them(int maSP, int soLuong = 1, string? returnUrl = null)
     {
         var gio = HttpContext.Session.LayGio();
+        // TV1: tra ket qua them hang theo loai yeu cau
         IActionResult TraKetQua(bool thanhCong, string thongBao)
         {
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
