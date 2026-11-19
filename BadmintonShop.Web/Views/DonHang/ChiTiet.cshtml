@@ -18,7 +18,11 @@
 }
 else
 {
-    @if (traCuu)
+    @if (ViewData["TuDanhSach"] is true)
+    {
+        <a asp-action="DanhSachTraCuu" class="text-xs font-bold uppercase underline hover:text-primary">&larr; Danh sách đơn</a>
+    }
+    else if (traCuu)
     {
         <a asp-action="TraCuu" class="text-xs font-bold uppercase underline hover:text-primary">&larr; Tra cứu đơn khác</a>
     }

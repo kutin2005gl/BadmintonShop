@@ -22,15 +22,17 @@ public class DonHangController : Controller
     private const string TraCuuKHKey = "TraCuu.MaKH";
     private const string SoLanSaiKey = "TraCuu.SoLanSai";
     private const string KhoaDenKey = "TraCuu.KhoaDen";
+    private const string SdtChoOtpKey = "TraCuu.SdtChoOtp";       // SDT dang cho nhap OTP
+    private const string SdtDaXacThucKey = "TraCuu.SdtDaXacThuc"; // SDT da qua OTP -> xem duoc moi don cua SDT nay
     private const int SoLanSaiToiDa = 5;
     private static readonly TimeSpan ThoiGianKhoa = TimeSpan.FromMinutes(15);
     private const string LoiChung = "Không tìm thấy đơn hàng với thông tin đã nhập.";
 
-    // TV1: trang tra cuu don bang ma don + SDT (khong can dang nhap)
+    // TV1: trang tra cuu don bang ma don + SDT, hoac chi SDT + OTP (khong can dang nhap)
     [HttpGet, AllowAnonymous]
     public IActionResult TraCuu() => View(new TraCuuDonViewModel());
 
-    // TV1: kiem ma don + SDT, khop thi luu quyen xem DUNG don do trong session; sai qua 5 lan khoa 15 phut
+    // TV1: chi co SDT -> chuyen sang nhap OTP; co ca ma don + SDT -> kiem khop thi luu quyen xem DUNG don do trong session; sai qua 5 lan khoa 15 phut
     [HttpPost, AllowAnonymous, ValidateAntiForgeryToken]
     public IActionResult TraCuu(string? maDon, string? sdt)
     {
@@ -43,13 +45,26 @@ public class DonHangController : Controller
             vm.Loi = $"Bạn đã nhập sai quá nhiều lần. Vui lòng thử lại sau {conKhoa} phút.";
             return View(vm);
         }
-        if (string.IsNullOrWhiteSpace(maDon) || string.IsNullOrWhiteSpace(sdt))
+        if (string.IsNullOrWhiteSpace(sdt))
         {
-            vm.Loi = "Vui lòng nhập mã đơn hàng và số điện thoại.";
+            vm.Loi = "Vui lòng nhập số điện thoại đặt hàng.";
             return View(vm);
         }
 
         var so = KhachHangRepository.ChuanHoaSDT(sdt);
+
+        // Chi nhap SDT -> xac thuc OTP roi xem danh sach don cua SDT do
+        if (string.IsNullOrWhiteSpace(maDon))
+        {
+            if (so == null)
+            {
+                vm.Loi = "Số điện thoại không hợp lệ.";
+                return View(vm);
+            }
+            s.SetString(SdtChoOtpKey, so);
+            return RedirectToAction(nameof(NhapOtp));
+        }
+
         int? maKH = null;
         if (int.TryParse(maDon.Trim().TrimStart('#'), out var maHD) && maHD > 0 && so != null)
             maKH = _donHang.TraCuuMaKHTheoSDT(maHD, so);
@@ -76,13 +91,58 @@ public class DonHangController : Controller
         return RedirectToAction(nameof(XemDon), new { id = maHD });
     }
 
-    // TV1: xem 1 don da tra cuu dung trong phien nay (chi xem, khong huy)
+    // TV1: trang nhap OTP gui toi SDT (DEMO: chua gui SMS that)
+    [HttpGet, AllowAnonymous]
+    public IActionResult NhapOtp()
+    {
+        var so = HttpContext.Session.GetString(SdtChoOtpKey);
+        if (so == null) return RedirectToAction(nameof(TraCuu));
+        return View(new TraCuuDonViewModel { SDT = DinhDang.CheSDT(so) });
+    }
+
+    // TV1: xac nhan OTP; DEMO chap nhan moi ma 6 chu so, dung thi cho xem danh sach don cua SDT trong phien nay
+    [HttpPost, AllowAnonymous, ValidateAntiForgeryToken]
+    public IActionResult NhapOtp(string? otp)
+    {
+        var s = HttpContext.Session;
+        var so = s.GetString(SdtChoOtpKey);
+        if (so == null) return RedirectToAction(nameof(TraCuu));
+
+        otp = otp?.Trim() ?? "";
+        // TODO (sau demo): sinh OTP ngau nhien luc gui, luu session kem han 5 phut, so sanh o day + gioi han so lan sai
+        if (otp.Length != 6 || !otp.All(char.IsDigit))
+            return View(new TraCuuDonViewModel { SDT = DinhDang.CheSDT(so), Loi = "Mã OTP gồm 6 chữ số." });
+
+        s.Remove(SdtChoOtpKey);
+        s.SetString(SdtDaXacThucKey, so);
+        return RedirectToAction(nameof(DanhSachTraCuu));
+    }
+
+    // TV1: danh sach don cua SDT da xac thuc OTP trong phien nay
+    [HttpGet, AllowAnonymous, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public IActionResult DanhSachTraCuu()
+    {
+        var so = HttpContext.Session.GetString(SdtDaXacThucKey);
+        if (so == null) return RedirectToAction(nameof(TraCuu));
+        ViewData["SDTChe"] = DinhDang.CheSDT(so);
+        return View(_donHang.LayDonTheoSDT(so));
+    }
+
+    // TV1: xem 1 don da tra cuu dung (ma don + SDT) hoac thuoc SDT da xac thuc OTP trong phien nay (chi xem, khong huy)
     [HttpGet, AllowAnonymous, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public IActionResult XemDon(int id)
     {
         var s = HttpContext.Session;
-        if (s.GetInt32(TraCuuHDKey) != id) return RedirectToAction(nameof(TraCuu));
-        var maKH = s.GetInt32(TraCuuKHKey) ?? 0;
+        int maKH;
+        var sdtXacThuc = s.GetString(SdtDaXacThucKey);
+        if (s.GetInt32(TraCuuHDKey) == id) maKH = s.GetInt32(TraCuuKHKey) ?? 0;
+        else if (sdtXacThuc != null && _donHang.TraCuuMaKHTheoSDT(id, sdtXacThuc) is int kh)
+        {
+            maKH = kh;
+            ViewData["TuDanhSach"] = true;
+        }
+        else return RedirectToAction(nameof(TraCuu));
+
         var hd = _donHang.LayDonCuaKhach(id, maKH);
         if (hd == null) return RedirectToAction(nameof(TraCuu));
         ViewData["TraCuu"] = true;
