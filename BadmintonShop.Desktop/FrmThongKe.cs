@@ -9,6 +9,7 @@ public class FrmThongKe : Form
     private readonly DateTimePicker tu = TaoChonThang();
     private readonly DateTimePicker den = TaoChonThang();
     private readonly NumericUpDown nam = new() { Minimum = 1753, Maximum = 9998, Width = 90, Value = DateTime.Today.Year, AccessibleName = "Năm thống kê" };
+    private readonly System.Windows.Forms.Timer henNapNam = new() { Interval = 400 };
     private readonly ComboBox loai = Sv4Ui.Chon("Tất cả loại bán", "Online", "Tại quầy");
     private readonly Label tong = new() { Dock = DockStyle.Top, Height = 34, Padding = new Padding(14, 8, 0, 0), ForeColor = ShopTheme.Muted };
     private readonly TabControl tabs = new() { Dock = DockStyle.Fill };
@@ -19,6 +20,7 @@ public class FrmThongKe : Form
     private const ChucNang Quyen=ChucNang.ThongKeBinhLuan;
     private readonly BoNhoPhien<(DateTime, DateTime, string?, bool), KetQuaBaoCao> boNho = new(BoNhoPhien<int, int>.ThoiHanMacDinh);
     public FrmThongKe() { InitializeComponent(); }
+    // TV1: khoi tao giao dien thong ke va hen nap khi doi nam
     private void InitializeComponent()
     {
         Text = "Thống kê — báo cáo";
@@ -52,7 +54,16 @@ public class FrmThongKe : Form
         Controls.Add(cards);
         Controls.Add(bar);
         Controls.Add(ky);
-        nam.ValueChanged += (_, _) => Chay(Nap);
+        nam.ValueChanged += (_, _) =>
+        {
+            henNapNam.Stop();
+            henNapNam.Start();
+        };
+        henNapNam.Tick += (_, _) =>
+        {
+            henNapNam.Stop();
+            Chay(Nap);
+        };
         loai.SelectedIndexChanged += (_, _) => Chay(Nap);
         ShopTheme.Apply(this);
     }
@@ -71,6 +82,7 @@ public class FrmThongKe : Form
         nut.CheckedChanged += (_, _) =>
         {
             if (!nut.Checked) return;
+            henNapNam.Stop();
             soThang = thang;
             nam.Enabled = thang == 0;
             tu.Enabled = den.Enabled = thang < 0;
@@ -91,11 +103,20 @@ public class FrmThongKe : Form
     }
     protected override void OnLoad(EventArgs e)
     { base.OnLoad(e);if(DesignMode || !QuyenForm.KiemTraKhiMo(this,Quyen))return;Chay(Nap); }
+
+    // TV1: huy bo hen nap nam khi giai phong form
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing) henNapNam.Dispose();
+        base.Dispose(disposing);
+    }
+
     private void Chay(Action a)=>Sv4Ui.Chay(this,Quyen,a);
     // SV4: nạp thành công mới thay kết quả, bảng và biểu đồ cùng dùng snapshot này.
     // TV1: nap bao cao theo ky va kenh ban da chon
     private async void Nap()
     {
+        henNapNam.Stop();
         var homNay = DateTime.Today;
         var dauThang = new DateTime(homNay.Year, homNay.Month, 1);
         var theoQuy = soThang == 0;
