@@ -40,6 +40,20 @@ public class KhuyenMaiRepository
         return kq is decimal d ? d : 0m;
     }
 
+    // SV2: lay % giam dang ap dung cua TAT CA san pham trong 1 truy van (dung cho hien thi trang chu / danh sach)
+    public Dictionary<int, decimal> LayPhanTramTatCaSanPham(DateTime ngay)
+    {
+        const string sql = @"SELECT sp.MaSP, MAX(sp.PhanTramGG) AS PhanTram
+                             FROM KM_TheoSP sp JOIN CTKM k ON k.MaCTKM = sp.MaCTKM
+                             WHERE k.LoaiKM = 'SANPHAM' AND k.TrangThai = 1
+                               AND @ngay BETWEEN k.NgayBatDau AND k.NgayKetThuc
+                             GROUP BY sp.MaSP";
+        var dt = Query(sql, new SqlParameter("@ngay", SqlDbType.Date) { Value = ngay.Date });
+        var kq = new Dictionary<int, decimal>();
+        foreach (DataRow r in dt.Rows) kq[r.Field<int>("MaSP")] = r.Field<decimal>("PhanTram");
+        return kq;
+    }
+
     // TV3: bac giam theo hoa don cao nhat dat duoc (TongTienToiThieu lon nhat <= tongTienHang), khong co tra ve null
     public KMTheoHD? LayBacHoaDon(decimal tongTienHang, DateTime ngay)
     {

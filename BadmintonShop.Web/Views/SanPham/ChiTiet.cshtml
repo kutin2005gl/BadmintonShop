@@ -55,7 +55,21 @@
                 }
             </a>
 
-            <p class="text-3xl font-extrabold tracking-tight mb-8 tabular-nums">@Model.DonGiaBan.Dong()</p>
+            @{
+                var ptKM = KhuyenMaiHienThi.LayPhanTram(Model.MaSP);
+            }
+            @if (ptKM > 0)
+            {
+                <div class="mb-8 flex flex-wrap items-baseline gap-3">
+                    <p class="text-3xl font-extrabold tracking-tight tabular-nums text-red-500">@KhuyenMaiHienThi.GiaSauGiam(Model.DonGiaBan, ptKM).Dong()</p>
+                    <p class="text-lg text-gray-400 line-through tabular-nums">@Model.DonGiaBan.Dong()</p>
+                    <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 tracking-wider">-@ptKM.ToString("0.##")%</span>
+                </div>
+            }
+            else
+            {
+                <p class="text-3xl font-extrabold tracking-tight mb-8 tabular-nums">@Model.DonGiaBan.Dong()</p>
+            }
 
             <dl class="thong-so mb-8">
                 <dt>Thương hiệu</dt><dd>@(Model.ThuongHieu ?? "Đang cập nhật")</dd>
