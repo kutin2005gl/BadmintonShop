@@ -55,6 +55,7 @@ internal static partial class Program
             try
             {
                 using var report=new FrmThongKe();report.Show();WaitUi(report);
+                Controls(report).OfType<RadioButton>().Single(b=>b.Text=="Từ tháng").Checked=true;
                 var dates=Controls(report).OfType<DateTimePicker>().ToArray();dates[0].Value=new(2025,1,1);dates[1].Value=new(2026,12,31);
                 var view=Controls(report).OfType<Button>().Single(b=>b.Text=="Xem báo cáo");view.PerformClick();WaitUi(report);
                 KetQuaBaoCao Snapshot()=>(KetQuaBaoCao)typeof(FrmThongKe).GetField("ketQua",BindingFlags.Instance|BindingFlags.NonPublic)!.GetValue(report)!;

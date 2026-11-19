@@ -33,10 +33,10 @@
                 <span class="font-extrabold text-sm">@sp.DonGiaBan.Dong()</span>
             }
         </div>
-        <form asp-controller="GioHang" asp-action="Them" method="post">
+        <form asp-controller="GioHang" asp-action="Them" method="post" data-cart-add>
             <input type="hidden" name="maSP" value="@sp.MaSP" />
             <input type="hidden" name="soLuong" value="1" />
-            <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString + "#gio")" />
+            <input type="hidden" name="returnUrl" value="@(Context.Request.PathBase + Context.Request.Path + Context.Request.QueryString)" />
             <button type="submit" class="btn-dark w-full" disabled="@(sp.SoLuongTon <= 0)">Thêm vào giỏ</button>
         </form>
     </div>

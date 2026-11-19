@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Text.Json;
 using BadmintonShop.Core.DataAccess;
 using BadmintonShop.Core.Services;
 using BadmintonShop.Web.Controllers;
@@ -37,6 +38,7 @@ internal static partial class Program
         try
         {
             var origin=new Uri(app.Urls.Single());
+            await CheckAddCart(origin, product);
             using var handler=new HttpClientHandler { CookieContainer=new CookieContainer(),AllowAutoRedirect=false };
             using var http=new HttpClient(handler) { BaseAddress=origin };
             Eq(HttpStatusCode.Redirect,(await http.GetAsync("/DonHang")).StatusCode);
@@ -72,6 +74,51 @@ internal static partial class Program
         }
         finally { await app.StopAsync(); }
     }
+    private static async Task CheckAddCart(Uri origin, int product)
+    {
+        using var handler = new HttpClientHandler { CookieContainer = new CookieContainer(), AllowAutoRedirect = false };
+        using var client = new HttpClient(handler) { BaseAddress = origin };
+        var token = await client.GetStringAsync("/__test/token");
+        const string catalog = "/SanPham?sapXep=gia-tang&trang=2";
+        async Task<HttpResponseMessage> Add(int quantity, bool ajax, bool csrf = true)
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, "/GioHang/Them");
+            if (ajax) request.Headers.Add("X-Requested-With", "XMLHttpRequest");
+            request.Content = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["__RequestVerificationToken"] = csrf ? token : "",
+                ["maSP"] = product.ToString(), ["soLuong"] = quantity.ToString(), ["returnUrl"] = catalog
+            });
+            return await client.SendAsync(request);
+        }
+
+        using var noCsrf = await Add(1, true, false);
+        Eq(HttpStatusCode.BadRequest, noCsrf.StatusCode);
+        using var added = await Add(1, true);
+        Eq(HttpStatusCode.OK, added.StatusCode);
+        using var accepted = JsonDocument.Parse(await added.Content.ReadAsStringAsync());
+        True(accepted.RootElement.GetProperty("thanhCong").GetBoolean());
+        Eq(1, accepted.RootElement.GetProperty("tongSoLuong").GetInt32());
+
+        using var overflow = await Add(Stock(product), true);
+        Eq(HttpStatusCode.BadRequest, overflow.StatusCode);
+        using var rejected = JsonDocument.Parse(await overflow.Content.ReadAsStringAsync());
+        True(!rejected.RootElement.GetProperty("thanhCong").GetBoolean());
+        Eq(1, rejected.RootElement.GetProperty("tongSoLuong").GetInt32());
+
+        using var fallback = await Add(1, false);
+        Eq(HttpStatusCode.Redirect, fallback.StatusCode);
+        Eq(catalog, fallback.Headers.Location!.ToString());
+        using var drawer = await client.GetAsync("/GioHang/NganGio");
+        Eq(HttpStatusCode.OK, drawer.StatusCode);
+        True(drawer.Headers.CacheControl!.NoStore);
+        True(WebUtility.HtmlDecode(await drawer.Content.ReadAsStringAsync()).Contains("Xem giỏ hàng"));
+
+        // TV1: trang mua hang phai danh dau "false" de cart.js luu diem quay lai, trang gio danh dau "true"
+        True((await client.GetStringAsync(catalog)).Contains("<body data-cart-page=\"false\">"));
+        True((await client.GetStringAsync("/GioHang")).Contains("<body data-cart-page=\"true\">"));
+    }
+
     private static async Task<string> GetHtml(HttpClient client,string url)
     {
         var response=await client.GetAsync(url);var html=await response.Content.ReadAsStringAsync();

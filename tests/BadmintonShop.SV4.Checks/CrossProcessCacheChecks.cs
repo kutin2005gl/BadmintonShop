@@ -28,6 +28,7 @@ internal static partial class Program
                 var catalog=new BadmintonShop.Web.Services.DanhMucCongKhai();catalog.Lay();
                 using var form=new FrmSanPham();form.Show();WaitUi(form);
                 using var reportForm=new FrmThongKe();reportForm.Show();WaitUi(reportForm);
+                Controls(reportForm).OfType<RadioButton>().Single(b=>b.Text=="Từ tháng").Checked=true;
                 var dates=Controls(reportForm).OfType<DateTimePicker>().ToArray();dates[0].Value=new DateTime(2026,1,1);dates[1].Value=new DateTime(2026,12,31);
                 var view=Controls(reportForm).OfType<Button>().Single(b=>b.Text=="Xem báo cáo");view.PerformClick();WaitUi(reportForm);
                 var resultField=typeof(FrmThongKe).GetField("ketQua",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic)!;

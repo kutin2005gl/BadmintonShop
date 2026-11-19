@@ -1,0 +1,19 @@
+.cart-count[hidden] { display: none; }
+.cart-drawer-content { min-height: 0; }
+
+.cart-toast {
+    position: fixed;
+    z-index: 60;
+    right: 1rem;
+    bottom: 1rem;
+    max-width: min(24rem, calc(100vw - 2rem));
+    padding: .75rem 1rem;
+    border-radius: .35rem;
+    background: #14532d;
+    color: white;
+    box-shadow: 0 4px 16px #0003;
+    pointer-events: none;
+}
+
+.cart-toast:empty { padding: 0; box-shadow: none; }
+.cart-toast-error { background: #991b1b; }
