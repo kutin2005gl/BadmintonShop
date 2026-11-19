@@ -80,9 +80,10 @@ internal static partial class Program
         using var client = new HttpClient(handler) { BaseAddress = origin };
         var token = await client.GetStringAsync("/__test/token");
         const string catalog = "/SanPham?sapXep=gia-tang&trang=2";
-        async Task<HttpResponseMessage> Add(int quantity, bool ajax, bool csrf = true)
+        // TV1: gui form gio hang voi tuy chon AJAX va token
+        async Task<HttpResponseMessage> PostCart(string action, int quantity, bool ajax, bool csrf = true)
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, "/GioHang/Them");
+            using var request = new HttpRequestMessage(HttpMethod.Post, $"/GioHang/{action}");
             if (ajax) request.Headers.Add("X-Requested-With", "XMLHttpRequest");
             request.Content = new FormUrlEncodedContent(new Dictionary<string, string>
             {
@@ -92,27 +93,59 @@ internal static partial class Program
             return await client.SendAsync(request);
         }
 
-        using var noCsrf = await Add(1, true, false);
+        // TV1: doi chieu trang thai HTTP, cau truc JSON va tong so luong
+        async Task<string> CheckJson(HttpResponseMessage response, HttpStatusCode status, bool success, int count)
+        {
+            Eq(status, response.StatusCode);
+            Eq("application/json", response.Content.Headers.ContentType?.MediaType);
+            using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            var result = json.RootElement;
+            Eq(3, result.EnumerateObject().Count());
+            Eq(success, result.GetProperty("thanhCong").GetBoolean());
+            Eq(count, result.GetProperty("tongSoLuong").GetInt32());
+            var message = result.GetProperty("thongBao").GetString();
+            True(!string.IsNullOrWhiteSpace(message));
+            return message!;
+        }
+
+        using var noCsrf = await PostCart("Them", 1, true, false);
         Eq(HttpStatusCode.BadRequest, noCsrf.StatusCode);
-        using var added = await Add(1, true);
-        Eq(HttpStatusCode.OK, added.StatusCode);
-        using var accepted = JsonDocument.Parse(await added.Content.ReadAsStringAsync());
-        True(accepted.RootElement.GetProperty("thanhCong").GetBoolean());
-        Eq(1, accepted.RootElement.GetProperty("tongSoLuong").GetInt32());
+        using var added = await PostCart("Them", 1, true);
+        await CheckJson(added, HttpStatusCode.OK, true, 1);
 
-        using var overflow = await Add(Stock(product), true);
-        Eq(HttpStatusCode.BadRequest, overflow.StatusCode);
-        using var rejected = JsonDocument.Parse(await overflow.Content.ReadAsStringAsync());
-        True(!rejected.RootElement.GetProperty("thanhCong").GetBoolean());
-        Eq(1, rejected.RootElement.GetProperty("tongSoLuong").GetInt32());
+        int stock = Stock(product);
+        using var overflow = await PostCart("Them", stock, true);
+        var stockMessage = await CheckJson(overflow, HttpStatusCode.BadRequest, false, 1);
 
-        using var fallback = await Add(1, false);
+        using var fallback = await PostCart("Them", 1, false);
         Eq(HttpStatusCode.Redirect, fallback.StatusCode);
         Eq(catalog, fallback.Headers.Location!.ToString());
         using var drawer = await client.GetAsync("/GioHang/NganGio");
         Eq(HttpStatusCode.OK, drawer.StatusCode);
         True(drawer.Headers.CacheControl!.NoStore);
         True(WebUtility.HtmlDecode(await drawer.Content.ReadAsStringAsync()).Contains("Xem giỏ hàng"));
+
+        using var increased = await PostCart("CapNhat", 3, true);
+        await CheckJson(increased, HttpStatusCode.OK, true, 3);
+        using var beyondStock = await PostCart("CapNhat", stock + 1, true);
+        Eq(stockMessage, await CheckJson(beyondStock, HttpStatusCode.BadRequest, false, 3));
+        using var decreased = await PostCart("CapNhat", 1, true);
+        await CheckJson(decreased, HttpStatusCode.OK, true, 1);
+        using var removed = await PostCart("Xoa", 0, true);
+        await CheckJson(removed, HttpStatusCode.OK, true, 0);
+
+        using var readded = await PostCart("Them", 1, true);
+        await CheckJson(readded, HttpStatusCode.OK, true, 1);
+        using var updateFallback = await PostCart("CapNhat", 2, false);
+        Eq(HttpStatusCode.Redirect, updateFallback.StatusCode);
+        Eq(catalog, updateFallback.Headers.Location!.ToString());
+        using var confirmed = await PostCart("Them", 1, true);
+        await CheckJson(confirmed, HttpStatusCode.OK, true, 3);
+        using var removeFallback = await PostCart("Xoa", 0, false);
+        Eq(HttpStatusCode.Redirect, removeFallback.StatusCode);
+        Eq(catalog, removeFallback.Headers.Location!.ToString());
+        using var emptyDrawer = await client.GetAsync("/GioHang/NganGio");
+        True(WebUtility.HtmlDecode(await emptyDrawer.Content.ReadAsStringAsync()).Contains("Giỏ hàng của bạn đang trống."));
 
         // TV1: trang mua hang phai danh dau "false" de cart.js luu diem quay lai, trang gio danh dau "true"
         True((await client.GetStringAsync(catalog)).Contains("<body data-cart-page=\"false\">"));
