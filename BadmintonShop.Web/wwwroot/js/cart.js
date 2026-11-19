@@ -8,6 +8,7 @@
     const drawerContent = document.getElementById('gio-noi-dung');
     const returnKey = 'cart.return';
     const restoreKey = 'cart.restore';
+    const pointLifetime = 30 * 60 * 1000;
     let toastTimer;
     let drawerRequest;
     let pendingAdd = Promise.resolve();
@@ -17,9 +18,12 @@
     function readPoint(key) {
         try {
             const point = JSON.parse(sessionStorage.getItem(key));
+            if (!Number.isFinite(point?.ts)) return null;
+            const age = Date.now() - point.ts;
+            if (age < 0 || age > pointLifetime) return null;
             const url = new URL(point.url, location.origin);
             return url.origin === location.origin && Number.isFinite(point.scroll)
-                ? { url: url.href, scroll: point.scroll }
+                ? { url: url.href, scroll: point.scroll, ts: point.ts }
                 : null;
         } catch {
             return null;
@@ -106,8 +110,8 @@
         }
 
         // TV1: chi luu diem quay lai khi dang o trang mua hang (khong phai trang gio/dat hang)
-        if (document.body.dataset.cartPage !== 'true' &&!link.closest('#gio-drawer')) {
-            savePoint(returnKey, { url: location.href, scroll: window.scrollY });
+        if (document.body.dataset.cartPage !== 'true' && !link.closest('#gio-drawer')) {
+            savePoint(returnKey, { url: location.href, scroll: window.scrollY, ts: Date.now() });
         }
         if (link === cartButton && drawer) {
             event.preventDefault();
@@ -158,6 +162,11 @@
 
     document.addEventListener('click', clickCart);
     document.addEventListener('submit', submitCart);
+
+    if (document.querySelector('[data-cart-return]') &&
+        (!document.referrer || new URL(document.referrer).origin !== location.origin)) {
+        savePoint(returnKey, null);
+    }
 
     const restore = readPoint(restoreKey);
     if (restore?.url === location.href) {
