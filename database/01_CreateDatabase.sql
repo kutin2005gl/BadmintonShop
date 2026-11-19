@@ -157,6 +157,7 @@ CREATE TABLE HoaDon (
     TienGiamGia DECIMAL(18,0) NOT NULL DEFAULT 0 CHECK (TienGiamGia >= 0),  -- giam o cap hoa don (ERD)
     TongTien    DECIMAL(18,0) NOT NULL DEFAULT 0,   -- trigger tu tinh = tong ThanhTien - TienGiamGia
     TrangThai   NVARCHAR(30) NOT NULL DEFAULT N'Chờ xác nhận',
+    GhiChu      NVARCHAR(500) NULL,                 -- SV3: ghi chu khach nhap khi dat don online (xem 11_SV3_GhiChuDon.sql)
     CONSTRAINT CK_HoaDon_TrangThai CHECK (TrangThai IN
         (N'Chờ xác nhận', N'Đã xác nhận', N'Đang giao', N'Hoàn thành', N'Đã hủy')),
     CONSTRAINT FK_HoaDon_KH   FOREIGN KEY (MaKH)   REFERENCES KhachHang(MaKH),
