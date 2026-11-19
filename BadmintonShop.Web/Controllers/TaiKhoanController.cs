@@ -138,6 +138,18 @@ public class TaiKhoanController : Controller
 
         if (_khachHangRepository.SdtDaTonTai(model.SDT))
         {
+            // Khach da mua vang lai bang SDT nay: cho nang cap len tai khoan that sau khi xac thuc OTP (chi demo/Development)
+            var vangLai = _environment.IsDevelopment() ? _khachHangRepository.LayKhachVangLaiTheoSdt(model.SDT) : null;
+            if (vangLai != null)
+            {
+                var s = HttpContext.Session;
+                s.SetInt32(DkMaKHKey, vangLai.MaKH);
+                s.SetString(DkEmailKey, model.Email.Trim().ToLowerInvariant());
+                s.SetString(DkMatKhauKey, MatKhauHelper.BamMatKhau(model.MatKhau));
+                s.Remove(DkDaXacThucKey);
+                TempData["OtpDemo"] = _otpService.TaoOtp(DkOtpKhoa(vangLai.MaKH));
+                return RedirectToAction(nameof(XacThucSdt));
+            }
             ModelState.AddModelError(
                 nameof(model.SDT),
                 "Số điện thoại này đã được đăng ký.");
@@ -189,6 +201,71 @@ public class TaiKhoanController : Controller
         }
     }
 
+    private const string DkMaKHKey = "DangKy.MaKH";
+    private const string DkEmailKey = "DangKy.Email";
+    private const string DkMatKhauKey = "DangKy.MatKhauBam";
+    private const string DkDaXacThucKey = "DangKy.DaXacThuc";
+
+    private static string DkOtpKhoa(int maKH) => "dangky:" + maKH;
+
+    // GET: /TaiKhoan/XacThucSdt
+    // TV1: man hinh nhap OTP xac nhan quyen so huu SDT cua khach vang lai dang muon dang ky
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult XacThucSdt()
+    {
+        if (!_environment.IsDevelopment() || HttpContext.Session.GetInt32(DkMaKHKey) == null)
+            return RedirectToAction(nameof(DangKy));
+        return View(new XacThucOtpViewModel());
+    }
+
+    // POST: /TaiKhoan/XacThucSdt
+    // TV1: dung OTP -> nang cap khach vang lai thanh tai khoan that (email + mat khau da nhap) va dang nhap luon
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> XacThucSdt(XacThucOtpViewModel model)
+    {
+        var s = HttpContext.Session;
+        if (!_environment.IsDevelopment() || s.GetInt32(DkMaKHKey) is not int maKH
+            || s.GetString(DkEmailKey) is not string email || s.GetString(DkMatKhauKey) is not string matKhauBam)
+            return RedirectToAction(nameof(DangKy));
+
+        if (!ModelState.IsValid)
+            return View(model);
+
+        if (!_otpService.XacThucOtp(DkOtpKhoa(maKH), model.MaOtp))
+        {
+            ModelState.AddModelError(nameof(model.MaOtp), "OTP không chính xác, đã hết hạn hoặc vượt quá số lần thử.");
+            return View(model);
+        }
+
+        string? loi = null;
+        try
+        {
+            if (_khachHangRepository.EmailDaTonTai(email))
+                loi = "Email này đã được đăng ký.";
+            else if (!_khachHangRepository.NangCapKhachVangLaiDaBam(maKH, email, matKhauBam))
+                loi = "Không thể tạo tài khoản cho số điện thoại này. Vui lòng liên hệ cửa hàng.";
+        }
+        catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number is 2627 or 2601)
+        {
+            loi = "Email này đã được đăng ký.";
+        }
+
+        foreach (var k in new[] { DkMaKHKey, DkEmailKey, DkMatKhauKey, DkDaXacThucKey }) s.Remove(k);
+
+        if (loi != null)
+        {
+            ModelState.AddModelError(string.Empty, loi + " Vui lòng đăng ký lại.");
+            return View("DangKy", new DangKyViewModel());
+        }
+
+        var khachHang = _khachHangRepository.LayTheoMa(maKH)!;
+        await HttpContext.DangNhapKhachHangAsync(khachHang, false);
+        TempData["ThongBao"] = "Đã tạo tài khoản. Các đơn bạn đã đặt bằng số điện thoại này nay nằm trong lịch sử đơn hàng.";
+        return RedirectToAction("Index", "DonHang");
+    }
 
     // GET: /TaiKhoan/HoSo
     [HttpGet]

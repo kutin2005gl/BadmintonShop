@@ -154,10 +154,28 @@ public class KhachHangRepository
 
     // TV1: nang cap khach vang lai (email gia @khach.invalid) thanh tai khoan that: dat email + mat khau cho CHINH khach do
     public bool NangCapKhachVangLai(int maKH, string email, string matKhauTho)
+        => NangCapKhachVangLaiDaBam(maKH, email, MatKhauHelper.BamMatKhau(matKhauTho));
+
+    // TV1: tim khach vang lai (con hoat dong, email gia) theo SDT da chuan hoa; khong co tra ve null
+    public KhachHang? LayKhachVangLaiTheoSdt(string? sdt)
+    {
+        var so = ChuanHoaSDT(sdt);
+        if (so == null) return null;
+        var dt = DbHelper.ExecuteQuery($@"
+            SELECT TOP 1 {Cot} FROM KhachHang
+            WHERE REPLACE(REPLACE(REPLACE(REPLACE(SDT,' ',''),'-',''),'.',''),'+','') IN (@a, @b)
+                  AND TrangThai = 1 AND Email LIKE N'%' + @duoi
+            ORDER BY MaKH",
+            new SqlParameter("@a", so), new SqlParameter("@b", "84" + so[1..]), new SqlParameter("@duoi", DuoiEmailVangLai));
+        return dt.Rows.Count == 0 ? null : LayTheoMa(dt.Rows[0].Field<int>("MaKH"));
+    }
+
+    // TV1: nhu NangCapKhachVangLai nhung nhan mat khau DA bam (de khong phai giu mat khau tho trong session)
+    public bool NangCapKhachVangLaiDaBam(int maKH, string email, string matKhauDaBam)
         => DbHelper.ExecuteNonQuery(@"UPDATE KhachHang SET Email = @email, MatKhau = @mk
                                       WHERE MaKH = @ma AND TrangThai = 1 AND Email LIKE N'%' + @duoi",
                                     new SqlParameter("@email", ChuanHoaEmail(email)),
-                                    new SqlParameter("@mk", MatKhauHelper.BamMatKhau(matKhauTho)),
+                                    new SqlParameter("@mk", matKhauDaBam),
                                     new SqlParameter("@ma", maKH),
                                     new SqlParameter("@duoi", DuoiEmailVangLai)) > 0;
 
