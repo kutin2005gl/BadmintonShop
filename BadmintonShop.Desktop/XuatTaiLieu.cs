@@ -21,8 +21,8 @@ public static class XuatTaiLieu
         {
             var ws=wb.Worksheets.Add(ten);
             ws.Cell(1,1).Value="BADMINTONSHOP — "+ten;ws.Cell(1,1).Style.Font.Bold=true;
-            ws.Cell(2,1).Value=$"{kq.TuNgay:dd/MM/yyyy} – {kq.DenNgay:dd/MM/yyyy}; loại bán: {kq.LoaiBan}";
-            ws.Cell(3,1).Value="Tổng doanh thu";ws.Cell(3,2).Value=kq.TongDoanhThu;ws.Cell(3,2).Style.NumberFormat.Format="#,##0";
+            ws.Cell(2,1).Value=MoTaKy(kq,ten);
+            ws.Cell(3,1).Value="Tổng doanh thu";ws.Cell(3,2).Value=DoanhThuBang(kq,ten,dt);ws.Cell(3,2).Style.NumberFormat.Format="#,##0";
             ws.Cell(4,1).Value=QuyTac;
             for(int c=0;c<dt.Columns.Count;c++)
             {
@@ -50,14 +50,20 @@ public static class XuatTaiLieu
             {
             var s=doc.AddSection();CauHinhTrang(s);
             s.AddParagraph("BADMINTONSHOP — "+ten+(parts.Length>1?$" (phần {part+1}/{parts.Length})":""),"Heading1");
-            s.AddParagraph($"{kq.TuNgay:dd/MM/yyyy} – {kq.DenNgay:dd/MM/yyyy}; loại bán: {kq.LoaiBan}");
-            s.AddParagraph($"Tổng doanh thu: {kq.TongDoanhThu:N0} đồng");s.AddParagraph(QuyTac);
+            s.AddParagraph(MoTaKy(kq,ten));
+            s.AddParagraph($"Tổng doanh thu: {DoanhThuBang(kq,ten,dt):N0} đồng");s.AddParagraph(QuyTac);
             if(parts.Length>1)s.AddParagraph("Các năm chia thành nhiều phần; mã/tên và Tổng toàn kỳ lặp lại để đối chiếu. Không cộng lại tổng giữa các phần.");
             ThemBang(s,parts[part]);
             }
         }
         LuuPdf(doc,path);
     }
+
+    private static string MoTaKy(KetQuaBaoCao kq,string ten)
+        => $"{kq.TuNgay:dd/MM/yyyy} – {kq.DenNgay:dd/MM/yyyy}; loại bán: {(ten == BaoCaoService.BangThuChi ? "Tất cả" : kq.LoaiBan)}";
+
+    private static decimal DoanhThuBang(KetQuaBaoCao kq,string ten,DataTable dt)
+        => ten == BaoCaoService.BangThuChi ? dt.AsEnumerable().Sum(r => r.Field<decimal>("Thu")) : kq.TongDoanhThu;
 
     private static IEnumerable<DataTable> ChiaBangPdf(DataTable source)
     {

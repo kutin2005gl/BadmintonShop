@@ -6,29 +6,85 @@ namespace BadmintonShop.Desktop;
 
 public class FrmThongKe : Form
 {
-    private DateTimePicker tu=null!,den=null!;private ComboBox loai=null!;private Label tong=null!;private TabControl tabs=null!;
-    private KetQuaBaoCao? ketQua;private Label revenue=null!,count=null!,sold=null!;
+    private readonly DateTimePicker tu = TaoChonThang();
+    private readonly DateTimePicker den = TaoChonThang();
+    private readonly NumericUpDown nam = new() { Minimum = 1753, Maximum = 9998, Width = 90, Value = DateTime.Today.Year, AccessibleName = "Năm thống kê" };
+    private readonly ComboBox loai = Sv4Ui.Chon("Tất cả loại bán", "Online", "Tại quầy");
+    private readonly Label tong = new() { Dock = DockStyle.Top, Height = 34, Padding = new Padding(14, 8, 0, 0), ForeColor = ShopTheme.Muted };
+    private readonly TabControl tabs = new() { Dock = DockStyle.Fill };
+    private readonly Label tongThu = ShopTheme.Title("—", 20);
+    private readonly Label tongChi = ShopTheme.Title("—", 20);
+    private int soThang;
+    private KetQuaBaoCao? ketQua;
     private const ChucNang Quyen=ChucNang.ThongKeBinhLuan;
-    private readonly BoNhoPhien<(DateTime,DateTime,string?),KetQuaBaoCao> boNho=new(BoNhoPhien<int,int>.ThoiHanMacDinh);
+    private readonly BoNhoPhien<(DateTime, DateTime, string?, bool), KetQuaBaoCao> boNho = new(BoNhoPhien<int, int>.ThoiHanMacDinh);
     public FrmThongKe() { InitializeComponent(); }
     private void InitializeComponent()
     {
-        Text="Thống kê — báo cáo";Size=new Size(1200,820);MinimumSize=new Size(950,650);AutoScaleMode=AutoScaleMode.Font;
-        tu=new DateTimePicker { Format=DateTimePickerFormat.Custom,CustomFormat="dd/MM/yyyy",Width=130,Value=new DateTime(DateTime.Today.Year,1,1) };
-        den=new DateTimePicker { Format=DateTimePickerFormat.Custom,CustomFormat="dd/MM/yyyy",Width=130 };loai=Sv4Ui.Chon("Tất cả loại bán","Online","Tại quầy");
-        tong=new Label { AutoSize=true,Margin=new Padding(8),Font=new Font("Segoe UI",11,FontStyle.Bold) };
-        var nam=new NumericUpDown { Minimum=1753,Maximum=9998,Value=DateTime.Today.Year,Width=75 };
-        var bar=Sv4Ui.ThanhCongCu(130);bar.Controls.AddRange([Sv4Ui.Nhan("Từ"),tu,Sv4Ui.Nhan("đến"),den,loai,
-            Sv4Ui.Nut("Xem báo cáo",()=>Chay(Nap)),Sv4Ui.Nut("Làm mới",()=>Chay(()=> { boNho.Xoa();Nap(); })),Sv4Ui.Nut("Xuất Excel",()=>Chay(()=>Xuat(false))),Sv4Ui.Nut("Xuất PDF",()=>Chay(()=>Xuat(true))),tong,
-            Sv4Ui.Nhan("Năm"),nam,Sv4Ui.Nut("Xem cả năm",()=>Chay(()=>
-            { tu.Value=new DateTime((int)nam.Value,1,1);den.Value=new DateTime((int)nam.Value,12,31);Nap(); })),
-            Sv4Ui.Nhan("Đơn Hoàn thành; ngày lập trong khoảng lọc; đơn vị: đồng. Thu–chi (tiền nhập hàng): chọn Tất cả loại bán.")]);
-        tabs=new TabControl { Dock=DockStyle.Fill };
-        var cards=new TableLayoutPanel { Dock=DockStyle.Top,Height=100,ColumnCount=3,Padding=new Padding(8) };
-        revenue=ShopTheme.Title("—",18);count=ShopTheme.Title("—",18);sold=ShopTheme.Title("—",18);
-        var fields=new[]{("DOANH THU HOÀN THÀNH",revenue),("TỔNG SỐ ĐƠN",count),("SỐ SẢN PHẨM ĐÃ BÁN",sold)};
-        for(int i=0;i<3;i++) { cards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,33.33f));var card=new Panel { Dock=DockStyle.Fill,BackColor=Color.White,Padding=new Padding(10),Margin=new Padding(4) };fields[i].Item2.Dock=DockStyle.Fill;card.Controls.Add(fields[i].Item2);card.Controls.Add(new Label { Text=fields[i].Item1,Dock=DockStyle.Top,Height=25,ForeColor=ShopTheme.Muted });cards.Controls.Add(card,i,0); }
-        Controls.Add(tabs);Controls.Add(cards);Controls.Add(bar);ShopTheme.Apply(this);
+        Text = "Thống kê — báo cáo";
+        Size = new Size(1200, 820);
+        MinimumSize = new Size(780, 540);
+        AutoScaleMode = AutoScaleMode.Font;
+        tu.AccessibleName = "Từ tháng";
+        den.AccessibleName = "Đến tháng";
+        tu.Value = new DateTime(DateTime.Today.Year, 1, 1);
+        tu.Enabled = den.Enabled = false;
+        loai.AccessibleName = "Kênh bán hàng chi tiết";
+
+        var ky = Sv4Ui.ThanhCongCu();
+        ky.MinimumSize = Size.Empty;
+        ky.Controls.AddRange([TaoLuaChon("Theo quý", 0), nam, TaoLuaChon("3 tháng", 3),
+            TaoLuaChon("6 tháng", 6), TaoLuaChon("9 tháng", 9), TaoLuaChon("12 tháng", 12),
+            TaoLuaChon("Từ tháng", -1), tu, Sv4Ui.Nhan("đến tháng"), den]);
+        var bar = Sv4Ui.ThanhCongCu();
+        bar.Controls.AddRange([Sv4Ui.Nhan("Kênh bán hàng chi tiết"), loai,
+            Sv4Ui.Nut("Xem báo cáo", () => Chay(Nap)),
+            Sv4Ui.Nut("Làm mới", () => Chay(() => { boNho.Xoa(); Nap(); })),
+            Sv4Ui.Nut("Xuất Excel", () => Chay(() => Xuat(false))),
+            Sv4Ui.Nut("Xuất PDF", () => Chay(() => Xuat(true)))]);
+        var cards = new TableLayoutPanel { Dock = DockStyle.Top, Height = 96, ColumnCount = 2, Padding = new Padding(8) };
+        cards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        cards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        cards.Controls.Add(TaoThe("Tổng thu", tongThu), 0, 0);
+        cards.Controls.Add(TaoThe("Tổng chi", tongChi), 1, 0);
+        Controls.Add(tabs);
+        Controls.Add(tong);
+        Controls.Add(cards);
+        Controls.Add(bar);
+        Controls.Add(ky);
+        nam.ValueChanged += (_, _) => Chay(Nap);
+        loai.SelectedIndexChanged += (_, _) => Chay(Nap);
+        ShopTheme.Apply(this);
+    }
+
+    private static DateTimePicker TaoChonThang() => new()
+    {
+        Format = DateTimePickerFormat.Custom, CustomFormat = "MM/yyyy", ShowUpDown = true,
+        Width = 100, MinDate = new DateTime(1753, 1, 1), MaxDate = new DateTime(9998, 12, 31)
+    };
+
+    private RadioButton TaoLuaChon(string ten, int thang)
+    {
+        var nut = new RadioButton { Text = ten, AutoSize = true, Checked = thang == 0, Margin = new Padding(3, 7, 3, 3) };
+        nut.CheckedChanged += (_, _) =>
+        {
+            if (!nut.Checked) return;
+            soThang = thang;
+            nam.Enabled = thang == 0;
+            tu.Enabled = den.Enabled = thang < 0;
+            if (thang >= 0) Chay(Nap);
+            else tu.Focus();
+        };
+        return nut;
+    }
+
+    private static Panel TaoThe(string ten, Label giaTri)
+    {
+        var the = new Panel { Dock = DockStyle.Fill, BackColor = Color.White, Padding = new Padding(12, 8, 12, 4), Margin = new Padding(4) };
+        giaTri.Dock = DockStyle.Fill;
+        the.Controls.Add(giaTri);
+        the.Controls.Add(new Label { Text = ten, Dock = DockStyle.Top, Height = 24, ForeColor = ShopTheme.Muted });
+        return the;
     }
     protected override void OnLoad(EventArgs e)
     { base.OnLoad(e);if(DesignMode || !QuyenForm.KiemTraKhiMo(this,Quyen))return;Chay(Nap); }
@@ -36,51 +92,109 @@ public class FrmThongKe : Form
     // SV4: nạp thành công mới thay kết quả, bảng và biểu đồ cùng dùng snapshot này.
     private async void Nap()
     {
-        var from=tu.Value.Date;var to=den.Value.Date;var saleType=Sv4Ui.Loc(loai);
-        var scope=$"{DbHelper.ConnectionString}|{PhienDangNhap.MaTK}|{PhienDangNhap.VaiTro}|{DbHelper.DauHieuDuLieu}";
-        await ShopTheme.Load(this,()=>boNho.Lay((from,to,saleType),scope,
-            ()=>BaoCaoService.Tao(new BaoCaoRepository().LayDuLieuBaoCao(from,to,saleType),from,to,saleType)),kq=>
+        var homNay = DateTime.Today;
+        var dauThang = new DateTime(homNay.Year, homNay.Month, 1);
+        var theoQuy = soThang == 0;
+        var from = theoQuy ? new DateTime((int)nam.Value, 1, 1)
+            : soThang > 0 ? dauThang.AddMonths(1 - soThang) : new DateTime(tu.Value.Year, tu.Value.Month, 1);
+        var thangCuoi = theoQuy ? from.AddMonths(11)
+            : soThang > 0 ? dauThang : new DateTime(den.Value.Year, den.Value.Month, 1);
+        if (from > thangCuoi)
         {
-        revenue.Text=$"{kq.TongDoanhThu:N0} đ";
-        count.Text=kq.Bang["Trạng thái đơn"].AsEnumerable().Sum(r=>r.Field<int>("Số đơn")).ToString("N0");
-        sold.Text=kq.Bang["Bán chạy"].AsEnumerable().Sum(r=>r.Field<long>("Số lượng")).ToString("N0");
-        var tabDangXem=tabs.SelectedTab?.Text;
-        ketQua=kq;while(tabs.TabPages.Count>0) { var old=tabs.TabPages[0];tabs.TabPages.RemoveAt(0);old.Dispose(); }
-        foreach(var (ten,dt) in kq.Bang)
-        {
-            if(ten.StartsWith("Thu–chi ",StringComparison.Ordinal))
-            {
-                // Các chỉ tiêu thu, chi, chênh lệch không được cộng thành một tổng trên biểu đồ.
-                var chiPage=new TabPage(ten);var chiGrid=Sv4Ui.Luoi();chiGrid.DataSource=dt;
-                chiPage.Controls.Add(chiGrid);tabs.TabPages.Add(chiPage);continue;
-            }
-            var page=new TabPage(ten);var split=new SplitContainer { Dock=DockStyle.Fill,Orientation=Orientation.Horizontal,Size=new Size(1100,600),SplitterDistance=290 };
-            var grid=Sv4Ui.Luoi();var chart=new BieuDoCot { DuLieu=dt };
-            if(ten.StartsWith("Sản phẩm × quý ",StringComparison.Ordinal))
-            {
-                // CO-06: chọn một dòng sản phẩm thì biểu đồ đổi sang doanh số Q1–Q4 của đúng sản phẩm đó (dòng "Tất cả" = cả cửa hàng).
-                var bang=dt;chart.DuLieu=QuyCuaDong(bang,null);
-                grid.CurrentCellChanged+=(_,_)=> { chart.DuLieu=QuyCuaDong(bang,grid);chart.Invalidate(); };
-            }
-            grid.DataSource=dt;split.Panel1.Controls.Add(grid);split.Panel2.Controls.Add(chart);
-            page.Controls.Add(split);tabs.TabPages.Add(page);
+            MessageBox.Show(this, "Tháng bắt đầu phải trước hoặc bằng tháng kết thúc.", "Kỳ thống kê", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
         }
-        // CO-06: mở màn hình mặc định xem tab "Sản phẩm × quý"; nạp lại thì giữ tab đang xem nếu còn tồn tại.
-        tabs.SelectedTab=tabs.TabPages.Cast<TabPage>().FirstOrDefault(p=>p.Text==tabDangXem)
-            ?? tabs.TabPages.Cast<TabPage>().FirstOrDefault(p=>p.Text.StartsWith("Sản phẩm × quý ",StringComparison.Ordinal))
-            ?? (tabs.TabPages.Count>0?tabs.TabPages[0]:null);
-        tong.Text=$"{kq.TuNgay:dd/MM/yyyy}–{kq.DenNgay:dd/MM/yyyy} | {kq.LoaiBan} | Doanh thu: {kq.TongDoanhThu:N0} đ"+TomTatThuChi(kq);
-        },kq=>kq.Bang["Theo ngày"].Rows.Count==0 && !kq.Bang
-            .Where(b=>b.Key.StartsWith("Thu–chi ",StringComparison.Ordinal))
-            .Any(b=>b.Value.Rows[1].Field<decimal>("Tổng")!=0));
+        var to = thangCuoi.AddMonths(1).AddDays(-1);
+        var saleType = Sv4Ui.Loc(loai);
+        var scope=$"{DbHelper.ConnectionString}|{PhienDangNhap.MaTK}|{PhienDangNhap.VaiTro}|{DbHelper.DauHieuDuLieu}";
+        await ShopTheme.Load(this, () => boNho.Lay((from, to, saleType, theoQuy), scope,
+            () => BaoCaoService.TaoTheoKy(new BaoCaoRepository().LayDuLieuBaoCao(from, to, null), from, to, saleType, theoQuy)), HienThi,
+            kq => kq.Bang[BaoCaoService.BangThuChi].AsEnumerable().All(r => r.Field<decimal>("Thu") == 0 && r.Field<decimal>("Chi") == 0)
+                && kq.Bang["Trạng thái đơn"].AsEnumerable().All(r => r.Field<int>("Số đơn") == 0));
     }
-    // CO-06: tổng thu, tổng chi (tiền nhập hàng) và chênh lệch của cả khoảng lọc; chỉ có khi chọn "Tất cả loại bán".
-    private static string TomTatThuChi(KetQuaBaoCao kq)
+
+    private void HienThi(KetQuaBaoCao kq)
     {
-        var bangs=kq.Bang.Where(b=>b.Key.StartsWith("Thu–chi ",StringComparison.Ordinal)).Select(b=>b.Value).ToList();
-        if(bangs.Count==0)return "";
-        decimal thu=bangs.Sum(b=>b.Rows[0].Field<decimal>("Tổng")),chi=bangs.Sum(b=>b.Rows[1].Field<decimal>("Tổng"));
-        return $" | Thu: {thu:N0} đ | Chi nhập hàng: {chi:N0} đ | Chênh lệch: {thu-chi:N0} đ";
+        var thuChi = kq.Bang[BaoCaoService.BangThuChi].AsEnumerable();
+        tongThu.Text = $"{thuChi.Sum(r => r.Field<decimal>("Thu")):N0} đ";
+        tongChi.Text = $"{thuChi.Sum(r => r.Field<decimal>("Chi")):N0} đ";
+        int soDon = kq.Bang["Trạng thái đơn"].AsEnumerable().Sum(r => r.Field<int>("Số đơn"));
+        long daBan = kq.Bang["Bán chạy"].AsEnumerable().Sum(r => r.Field<long>("Số lượng"));
+        tong.Text = $"{kq.TuNgay:dd/MM/yyyy} – {kq.DenNgay:dd/MM/yyyy} | {kq.LoaiBan}: {soDon:N0} đơn, {daBan:N0} sản phẩm đã bán";
+
+        var tabDangXem = tabs.SelectedTab?.Text;
+        ketQua = kq;
+        while (tabs.TabPages.Count > 0)
+        {
+            var old = tabs.TabPages[0];
+            tabs.TabPages.RemoveAt(0);
+            old.Dispose();
+        }
+        foreach (var (ten, dt) in kq.Bang)
+        {
+            var page = new TabPage(ten);
+            var grid = Sv4Ui.Luoi();
+            if (ten == BaoCaoService.BangThuChi)
+            {
+                grid.DataBindingComplete += (_, _) =>
+                {
+                    grid.Columns["Kỳ"].MinimumWidth = 75;
+                    grid.Columns["Thu"].MinimumWidth = 92;
+                    grid.Columns["Chi"].MinimumWidth = 92;
+                };
+                grid.DataSource = dt;
+                var chia = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, BackColor = Color.White, Padding = new Padding(8) };
+                chia.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 43));
+                chia.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 57));
+                chia.Controls.Add(grid, 0, 0);
+                chia.Controls.Add(new BieuDoThuChi(dt), 1, 0);
+                page.Controls.Add(chia);
+            }
+            else if (ten == "Bán chạy")
+            {
+                var top = dt.Clone();
+                foreach (var row in dt.AsEnumerable().Take(10)) top.ImportRow(row);
+                grid.DataSource = top;
+                var bar = Sv4Ui.ThanhCongCu();
+                bar.Controls.Add(Sv4Ui.Nhan("10 sản phẩm bán chạy nhất"));
+                var xem = Sv4Ui.Nut("Xem tất cả", () => Chay(() => XemTatCa(kq, dt)));
+                ShopTheme.StyleButton(xem);
+                bar.Controls.Add(xem);
+                page.Controls.Add(grid);
+                page.Controls.Add(bar);
+            }
+            else
+            {
+                var split = new SplitContainer { Dock = DockStyle.Fill, Orientation = Orientation.Horizontal, Size = new Size(1100, 600), SplitterDistance = 290 };
+                var chart = new BieuDoCot { DuLieu = dt };
+                if (ten.StartsWith("Sản phẩm × quý ", StringComparison.Ordinal))
+                {
+                    chart.DuLieu = QuyCuaDong(dt, null);
+                    grid.CurrentCellChanged += (_, _) => { chart.DuLieu = QuyCuaDong(dt, grid); chart.Invalidate(); };
+                }
+                grid.DataSource = dt;
+                split.Panel1.Controls.Add(grid);
+                split.Panel2.Controls.Add(chart);
+                page.Controls.Add(split);
+            }
+            tabs.TabPages.Add(page);
+        }
+        tabs.SelectedTab = tabs.TabPages.Cast<TabPage>().FirstOrDefault(p => p.Text == tabDangXem) ?? tabs.TabPages[0];
+    }
+
+    private void XemTatCa(KetQuaBaoCao kq, DataTable dt)
+    {
+        using var form = new Form { Text = "Tất cả sản phẩm đã bán", Size = new Size(760, 570), MinimumSize = new Size(520, 360) };
+        var grid = Sv4Ui.Luoi();
+        grid.DataSource = dt;
+        form.Controls.Add(grid);
+        form.Controls.Add(new Label
+        {
+            Text = $"{kq.TuNgay:dd/MM/yyyy} – {kq.DenNgay:dd/MM/yyyy} | {kq.LoaiBan} | {dt.Rows.Count:N0} mặt hàng",
+            Dock = DockStyle.Top, Height = 42, Padding = new Padding(12, 10, 0, 0)
+        });
+        ShopTheme.Apply(form);
+        form.ShowDialog(this);
     }
     // CO-06: bảng "Quý — doanh thu" của dòng đang chọn (chưa chọn thì lấy dòng đầu); không có dòng thì bảng rỗng.
     public static DataTable QuyCuaDong(DataTable nguon,DataGridView? grid,DataRow? dong=null)

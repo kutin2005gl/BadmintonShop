@@ -11,6 +11,39 @@ public sealed record KetQuaBaoCao(DateTime TuNgay,DateTime DenNgay,string LoaiBa
 
 public static class BaoCaoService
 {
+    public const string BangThuChi = "Thu–chi toàn cửa hàng";
+
+    // Nguồn bán hàng của màn hình này gồm cả hai kênh. Chỉ các bảng chi tiết lọc theo kênh.
+    public static KetQuaBaoCao TaoTheoKy(DuLieuBaoCao source, DateTime tu, DateTime den, string? loai, bool theoQuy)
+    {
+        var chiTiet = Tao(source.BanHang, tu, den, loai);
+        DateTime DauKy(DateTime ngay) => new(ngay.Year, theoQuy ? (ngay.Month - 1) / 3 * 3 + 1 : ngay.Month, 1);
+        bool TrongKhoang(DateTime ngay) => ngay.Date >= tu.Date && ngay.Date <= den.Date;
+
+        var thu = source.BanHang.AsEnumerable()
+            .Where(r => r.Field<string>("TrangThai") == "Hoàn thành" && TrongKhoang(r.Field<DateTime>("NgayLap")))
+            .DistinctBy(r => r.Field<int>("MaHD"))
+            .GroupBy(r => DauKy(r.Field<DateTime>("NgayLap")))
+            .ToDictionary(g => g.Key, g => g.Sum(r => r.Field<decimal>("TongTien")));
+        var chi = source.NhapHang.AsEnumerable()
+            .Where(r => TrongKhoang(r.Field<DateTime>("NgayNhap")))
+            .DistinctBy(r => r.Field<int>("MaPN"))
+            .GroupBy(r => DauKy(r.Field<DateTime>("NgayNhap")))
+            .ToDictionary(g => g.Key, g => g.Sum(r => r.Field<decimal>("TongTien")));
+
+        var thuChi = Bang("Kỳ", typeof(string), "Thu", typeof(decimal), "Chi", typeof(decimal));
+        for (var ky = DauKy(tu); ; ky = ky.AddMonths(theoQuy ? 3 : 1))
+        {
+            var ten = theoQuy ? $"Q{(ky.Month - 1) / 3 + 1}/{ky.Year}" : ky.ToString("MM/yyyy", CultureInfo.InvariantCulture);
+            thuChi.Rows.Add(ten, thu.GetValueOrDefault(ky), chi.GetValueOrDefault(ky));
+            if (ky == DauKy(den)) break;
+        }
+        var bang = new Dictionary<string, DataTable> { [BangThuChi] = thuChi };
+        foreach (var (ten, duLieu) in chiTiet.Bang)
+            bang.Add(ten, duLieu);
+        return chiTiet with { Bang = bang };
+    }
+
     // Chi là tổng tiền phiếu nhập trong kỳ, không phải giá vốn hàng đã bán.
     // Chỉ lập thu–chi toàn cửa hàng; không trừ chi nhập chung khỏi thu riêng một kênh bán.
     public static KetQuaBaoCao Tao(DuLieuBaoCao source,DateTime tu,DateTime den,string? loai)
