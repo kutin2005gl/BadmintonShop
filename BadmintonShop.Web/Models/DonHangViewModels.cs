@@ -10,6 +10,7 @@ public class DatHangViewModel
     public string SDT { get; set; } = "";
     public bool DaDangNhap { get; set; }
     public string DiaChi { get; set; } = "";
+    public string GhiChu { get; set; } = "";
     public string HinhThucTT { get; set; } = "COD";
     public string? Loi { get; set; }
 }

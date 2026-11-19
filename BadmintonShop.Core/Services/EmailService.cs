@@ -45,7 +45,7 @@ public static class EmailService
             {
                 From = new MailAddress(CauHinh.TaiKhoan, CauHinh.TenNguoiGui, Encoding.UTF8),
                 Subject = $"Xác nhận đơn hàng #{maHD} - {CauHinh.TenNguoiGui}",
-                Body = XayDungNoiDung(khach.HoTen, maHD, don.HinhThucTT, don.DiaChiGiao, don.TienGiamGia, don.TongTien, dong),
+                Body = XayDungNoiDung(khach.HoTen, maHD, don.HinhThucTT, don.DiaChiGiao, don.TienGiamGia, don.TongTien, dong, don.GhiChu),
                 IsBodyHtml = true,
                 SubjectEncoding = Encoding.UTF8,
                 BodyEncoding = Encoding.UTF8,
@@ -71,7 +71,7 @@ public static class EmailService
 
     // TV3: noi dung HTML (da ma hoa ky tu dac biet de tranh chen HTML tu ten / dia chi)
     private static string XayDungNoiDung(string hoTen, int maHD, string hinhThucTT, string? diaChi,
-                                         decimal tienGiam, decimal tongTien, DataTable dong)
+                                         decimal tienGiam, decimal tongTien, DataTable dong, string? ghiChu = null)
     {
         string E(string? s) => WebUtility.HtmlEncode(s ?? "");
         string Tien(decimal x) => x.ToString("N0", Vi) + " ₫";
@@ -89,6 +89,7 @@ public static class EmailService
         if (tienGiam > 0) sb.Append($"<p>Giảm giá đơn hàng: <b>-{Tien(tienGiam)}</b></p>");
         sb.Append($"<p style=\"font-size:18px\">Tổng thanh toán: <b>{Tien(tongTien)}</b></p>");
         sb.Append($"<p>Giao tới: {E(diaChi)}<br/>Thanh toán: {(hinhThucTT == "COD" ? "khi nhận hàng (COD)" : "online")}</p>");
+        if (!string.IsNullOrWhiteSpace(ghiChu)) sb.Append($"<p>Ghi chú của bạn: {E(ghiChu)}</p>");
         sb.Append("<p style=\"color:#64756e;font-size:12px\">Bạn có thể theo dõi trạng thái đơn trong mục “Đơn hàng của tôi” trên website.</p>");
         sb.Append("</div>");
         return sb.ToString();

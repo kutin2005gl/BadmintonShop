@@ -13,15 +13,19 @@ namespace BadmintonShop.Core.DataAccess;
 public class DonHangOnlineRepository
 {
     public static readonly string[] HinhThucHopLe = { "COD", "Online" };
+    public const int GhiChuToiDa = 500;
 
     // TV3: tao HoaDon + ChiTietHoaDon trong 1 transaction, tra ve MaHD; gio phai la ket qua cua GioHangService.Tinh
-    public int TaoDon(int maKH, string diaChiGiao, string hinhThucTT, KetQuaGioHang gio)
+    public int TaoDon(int maKH, string diaChiGiao, string hinhThucTT, KetQuaGioHang gio, string? ghiChu = null)
     {
         if (maKH <= 0) throw new ArgumentException("Cần khách hàng đã đăng nhập.");
         GiaoDichBanHang.KiemTraGio(gio);
         if (!gio.CoTheDatHang) throw new ArgumentException("Có sản phẩm không đủ tồn kho, vui lòng chỉnh lại giỏ hàng.");
         diaChiGiao = QuyTacBanHang.BatBuoc(diaChiGiao, 255, "Địa chỉ giao hàng");
         if (!HinhThucHopLe.Contains(hinhThucTT)) throw new ArgumentException("Hình thức thanh toán không hợp lệ.");
+        // TV3: ghi chu khong bat buoc, toi da 500 ky tu, rong -> NULL
+        ghiChu = string.IsNullOrWhiteSpace(ghiChu) ? null : ghiChu.Trim();
+        if (ghiChu != null && ghiChu.Length > GhiChuToiDa) throw new ArgumentException($"Ghi chú tối đa {GhiChuToiDa} ký tự.");
 
         return DbHelper.ExecuteTransaction((c, t) =>
         {
@@ -29,14 +33,15 @@ public class DonHangOnlineRepository
             var fresh = GiaoDichBanHang.TinhLai(c, t, gio, ngay);
             GiaoDichBanHang.DungVoucher(c, t, fresh, ngay, maKH);
 
-            using var hd = new SqlCommand(@"INSERT INTO HoaDon (MaKH, LoaiBan, HinhThucTT, DiaChiGiao, MaCTKM, TienGiamGia)
-                                            VALUES (@kh, N'Online', @tt, @dc, @ctkm, @giam);
+            using var hd = new SqlCommand(@"INSERT INTO HoaDon (MaKH, LoaiBan, HinhThucTT, DiaChiGiao, MaCTKM, TienGiamGia, GhiChu)
+                                            VALUES (@kh, N'Online', @tt, @dc, @ctkm, @giam, @gc);
                                             SELECT CAST(SCOPE_IDENTITY() AS INT);", c, t);
             hd.Parameters.AddWithValue("@kh", maKH);
             hd.Parameters.AddWithValue("@tt", hinhThucTT);
             hd.Parameters.AddWithValue("@dc", diaChiGiao.Trim());
             hd.Parameters.AddWithValue("@ctkm", DbHelper.GiaTriHoacNull(fresh.MaCTKM));
             hd.Parameters.AddWithValue("@giam", fresh.TienGiamHoaDon);
+            hd.Parameters.AddWithValue("@gc", DbHelper.GiaTriHoacNull(ghiChu));
             var maHD = (int)hd.ExecuteScalar()!;
 
             GiaoDichBanHang.GhiChiTiet(c, t, maHD, fresh);

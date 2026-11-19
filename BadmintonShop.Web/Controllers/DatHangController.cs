@@ -48,7 +48,7 @@ public class DatHangController : Controller
 
     // TV3: bam "Dat hang" -> tao don trong 1 transaction
     [HttpPost, ValidateAntiForgeryToken]
-    public IActionResult XacNhan(string? diaChi, string? hinhThucTT, string? hoTen, string? sdt)
+    public IActionResult XacNhan(string? diaChi, string? hinhThucTT, string? hoTen, string? sdt, string? ghiChu)
     {
         var gio = _gioHang.TinhTuSession(HttpContext.Session);
         if (gio.Dong.Count == 0) return RedirectToAction("Index", "GioHang");
@@ -61,6 +61,7 @@ public class DatHangController : Controller
             HoTen = DaDangNhap ? User.LayHoTen() ?? "" : hoTen ?? "",
             SDT = DaDangNhap ? "" : sdt ?? "",
             DiaChi = diaChi ?? "",
+            GhiChu = ghiChu ?? "",
             HinhThucTT = tt,
         };
 
@@ -73,7 +74,7 @@ public class DatHangController : Controller
                 return View("Index", vm);
             }
             var maKH = DaDangNhap ? MaKHDangNhap : _khachHang.LayHoacTaoKhachVangLai(vm.HoTen, vm.SDT, vm.DiaChi);
-            var maHD = _donHang.TaoDon(maKH, vm.DiaChi, tt, gio);
+            var maHD = _donHang.TaoDon(maKH, vm.DiaChi, tt, gio, vm.GhiChu);
             HttpContext.Session.XoaGio(); HttpContext.Session.Remove(QuoteKey);
             if (!DaDangNhap)
             {
