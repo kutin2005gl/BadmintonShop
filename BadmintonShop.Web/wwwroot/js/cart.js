@@ -1,3 +1,4 @@
+// TV1: khoi tao tuong tac gio hang
 (() => {
     const badge = document.getElementById('gio-so-luong');
     const cartButton = document.getElementById('btn-gio');
@@ -7,22 +8,29 @@
     const drawerContent = document.getElementById('gio-noi-dung');
     const returnKey = 'cart.return';
     const restoreKey = 'cart.restore';
+    const pointLifetime = 30 * 60 * 1000;
     let toastTimer;
     let drawerRequest;
     let pendingAdd = Promise.resolve();
+    let drawerUpdatePending = false;
 
+    // TV1: doc diem quay lai tu phien trinh duyet
     function readPoint(key) {
         try {
             const point = JSON.parse(sessionStorage.getItem(key));
+            if (!Number.isFinite(point?.ts)) return null;
+            const age = Date.now() - point.ts;
+            if (age < 0 || age > pointLifetime) return null;
             const url = new URL(point.url, location.origin);
             return url.origin === location.origin && Number.isFinite(point.scroll)
-                ? { url: url.href, scroll: point.scroll }
+                ? { url: url.href, scroll: point.scroll, ts: point.ts }
                 : null;
         } catch {
             return null;
         }
     }
 
+    // TV1: luu hoac xoa diem quay lai
     function savePoint(key, point) {
         try {
             if (point) sessionStorage.setItem(key, JSON.stringify(point));
@@ -32,19 +40,24 @@
         }
     }
 
+    // TV1: hien thi thong bao gio hang
     function showToast(message, success) {
         clearTimeout(toastTimer);
         toast.textContent = message;
         toast.classList.toggle('cart-toast-error', !success);
-        toastTimer = setTimeout(() => { toast.textContent = ''; }, 4500);
+        toastTimer = setTimeout(
+            // TV1: an thong bao sau thoi gian hien thi
+            () => { toast.textContent = ''; }, 4500);
     }
 
+    // TV1: cap nhat tong so luong tren bieu tuong gio
     function setCount(count) {
         badge.textContent = count;
         badge.hidden = count === 0;
         cartButton.setAttribute('aria-label', `Giỏ hàng (${count})`);
     }
 
+    // TV1: tai lai noi dung ngan gio
     async function refreshDrawer() {
         drawerRequest?.abort();
         const request = new AbortController();
@@ -60,6 +73,7 @@
         }
     }
 
+    // TV1: dong ngan gio va tra tieu diem ve nut gio
     function closeDrawer() {
         drawerRequest?.abort();
         drawer.inert = true;
@@ -72,12 +86,15 @@
         document.getElementById('gio-dong').addEventListener('click', closeDrawer);
         document.getElementById('gio-tiep-tuc').addEventListener('click', closeDrawer);
         overlay.addEventListener('click', closeDrawer);
-        document.addEventListener('keydown', event => {
-            if (event.key === 'Escape' && !drawer.inert) closeDrawer();
-        });
+        document.addEventListener('keydown',
+            // TV1: dong ngan gio khi bam Escape
+            event => {
+                if (event.key === 'Escape' && !drawer.inert) closeDrawer();
+            });
     }
 
-    document.addEventListener('click', event => {
+    // TV1: xu ly lien ket mo gio va tiep tuc chon hang
+    function clickCart(event) {
         const link = event.target.closest('[data-cart-link], [data-cart-return]');
         if (!link || event.defaultPrevented || event.button !== 0 ||
             event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
@@ -93,8 +110,8 @@
         }
 
         // TV1: chi luu diem quay lai khi dang o trang mua hang (khong phai trang gio/dat hang)
-        if (document.body.dataset.cartPage !== 'true' &&!link.closest('#gio-drawer')) {
-            savePoint(returnKey, { url: location.href, scroll: window.scrollY });
+        if (document.body.dataset.cartPage !== 'true' && !link.closest('#gio-drawer')) {
+            savePoint(returnKey, { url: location.href, scroll: window.scrollY, ts: Date.now() });
         }
         if (link === cartButton && drawer) {
             event.preventDefault();
@@ -104,43 +121,61 @@
             document.getElementById('gio-dong').focus({ preventScroll: true });
             refreshDrawer();
         }
-    });
+    }
 
-    document.addEventListener('submit', event => {
+    // TV1: gui form them hang va cap nhat ngan gio bang AJAX
+    function submitCart(event) {
         const form = event.target;
-        if (!form.matches('[data-cart-add]') || !window.fetch || event.defaultPrevented) return;
+        const inDrawer = Boolean(form.closest('#gio-drawer'));
+        if ((!inDrawer && !form.matches('[data-cart-add]')) || !window.fetch || event.defaultPrevented) return;
         event.preventDefault();
         const button = form.querySelector('button[type="submit"]');
-        if (button.disabled) return;
+        if (button.disabled || (inDrawer && drawerUpdatePending)) return;
         const body = new URLSearchParams(new FormData(form));
+        if (inDrawer) {
+            body.set('returnUrl', location.pathname + location.search);
+            drawerUpdatePending = true;
+        }
         button.disabled = true;
-        // Queue requests on this page so each submission sees the saved session.
-        pendingAdd = pendingAdd.then(async () => {
-            try {
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                    body
-                });
-                const result = await response.json();
-                if (typeof result.thanhCong !== 'boolean' || !Number.isInteger(result.tongSoLuong)) throw new Error();
-                setCount(result.tongSoLuong);
-                showToast(result.thongBao, result.thanhCong);
-                if (result.thanhCong && drawer && !drawer.inert) refreshDrawer();
-            } catch {
-                showToast('Chưa xác nhận được kết quả. Hãy kiểm tra giỏ hàng rồi thử lại.', false);
-            } finally {
-                button.disabled = false;
-            }
-        });
-    });
+        pendingAdd = pendingAdd.then(
+            // TV1: gui lan luot cac yeu cau ghi gio
+            async () => {
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body
+                    });
+                    const result = await response.json();
+                    if (typeof result.thanhCong !== 'boolean' || !Number.isInteger(result.tongSoLuong)) throw new Error();
+                    setCount(result.tongSoLuong);
+                    showToast(result.thongBao, result.thanhCong);
+                } catch {
+                    showToast('Chưa xác nhận được kết quả. Hãy kiểm tra giỏ hàng rồi thử lại.', false);
+                } finally {
+                    if (drawer && !drawer.inert) await refreshDrawer();
+                    if (inDrawer) drawerUpdatePending = false;
+                    button.disabled = false;
+                }
+            });
+    }
+
+    document.addEventListener('click', clickCart);
+    document.addEventListener('submit', submitCart);
+
+    if (document.querySelector('[data-cart-return]') &&
+        (!document.referrer || new URL(document.referrer).origin !== location.origin)) {
+        savePoint(returnKey, null);
+    }
 
     const restore = readPoint(restoreKey);
     if (restore?.url === location.href) {
         savePoint(restoreKey, null);
         window.scrollTo(0, restore.scroll);
         if (window.scrollY < restore.scroll && document.readyState !== 'complete') {
-            window.addEventListener('load', () => window.scrollTo(0, restore.scroll), { once: true });
+            window.addEventListener('load',
+                // TV1: khoi phuc vi tri cuon sau khi tai trang
+                () => window.scrollTo(0, restore.scroll), { once: true });
         }
     }
 })();

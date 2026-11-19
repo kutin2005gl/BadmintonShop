@@ -59,9 +59,11 @@ public static class XuatTaiLieu
         LuuPdf(doc,path);
     }
 
+    // TV1: ghi ky thong ke va kenh ban cua bang xuat
     private static string MoTaKy(KetQuaBaoCao kq,string ten)
         => $"{kq.TuNgay:dd/MM/yyyy} – {kq.DenNgay:dd/MM/yyyy}; loại bán: {(ten == BaoCaoService.BangThuChi ? "Tất cả" : kq.LoaiBan)}";
 
+    // TV1: lay tong doanh thu cho bang xuat
     private static decimal DoanhThuBang(KetQuaBaoCao kq,string ten,DataTable dt)
         => ten == BaoCaoService.BangThuChi ? dt.AsEnumerable().Sum(r => r.Field<decimal>("Thu")) : kq.TongDoanhThu;
 

@@ -9,6 +9,7 @@ public class FrmThongKe : Form
     private readonly DateTimePicker tu = TaoChonThang();
     private readonly DateTimePicker den = TaoChonThang();
     private readonly NumericUpDown nam = new() { Minimum = 1753, Maximum = 9998, Width = 90, Value = DateTime.Today.Year, AccessibleName = "Năm thống kê" };
+    private readonly System.Windows.Forms.Timer henNapNam = new() { Interval = 400 };
     private readonly ComboBox loai = Sv4Ui.Chon("Tất cả loại bán", "Online", "Tại quầy");
     private readonly Label tong = new() { Dock = DockStyle.Top, Height = 34, Padding = new Padding(14, 8, 0, 0), ForeColor = ShopTheme.Muted };
     private readonly TabControl tabs = new() { Dock = DockStyle.Fill };
@@ -19,6 +20,7 @@ public class FrmThongKe : Form
     private const ChucNang Quyen=ChucNang.ThongKeBinhLuan;
     private readonly BoNhoPhien<(DateTime, DateTime, string?, bool), KetQuaBaoCao> boNho = new(BoNhoPhien<int, int>.ThoiHanMacDinh);
     public FrmThongKe() { InitializeComponent(); }
+    // TV1: khoi tao giao dien thong ke va hen nap khi doi nam
     private void InitializeComponent()
     {
         Text = "Thống kê — báo cáo";
@@ -52,23 +54,35 @@ public class FrmThongKe : Form
         Controls.Add(cards);
         Controls.Add(bar);
         Controls.Add(ky);
-        nam.ValueChanged += (_, _) => Chay(Nap);
+        nam.ValueChanged += (_, _) =>
+        {
+            henNapNam.Stop();
+            henNapNam.Start();
+        };
+        henNapNam.Tick += (_, _) =>
+        {
+            henNapNam.Stop();
+            Chay(Nap);
+        };
         loai.SelectedIndexChanged += (_, _) => Chay(Nap);
         ShopTheme.Apply(this);
     }
 
+    // TV1: tao o chon thang va nam
     private static DateTimePicker TaoChonThang() => new()
     {
         Format = DateTimePickerFormat.Custom, CustomFormat = "MM/yyyy", ShowUpDown = true,
         Width = 100, MinDate = new DateTime(1753, 1, 1), MaxDate = new DateTime(9998, 12, 31)
     };
 
+    // TV1: tao nut chon ky thong ke
     private RadioButton TaoLuaChon(string ten, int thang)
     {
         var nut = new RadioButton { Text = ten, AutoSize = true, Checked = thang == 0, Margin = new Padding(3, 7, 3, 3) };
         nut.CheckedChanged += (_, _) =>
         {
             if (!nut.Checked) return;
+            henNapNam.Stop();
             soThang = thang;
             nam.Enabled = thang == 0;
             tu.Enabled = den.Enabled = thang < 0;
@@ -78,6 +92,7 @@ public class FrmThongKe : Form
         return nut;
     }
 
+    // TV1: tao the hien thi so tien tong hop
     private static Panel TaoThe(string ten, Label giaTri)
     {
         var the = new Panel { Dock = DockStyle.Fill, BackColor = Color.White, Padding = new Padding(12, 8, 12, 4), Margin = new Padding(4) };
@@ -88,10 +103,20 @@ public class FrmThongKe : Form
     }
     protected override void OnLoad(EventArgs e)
     { base.OnLoad(e);if(DesignMode || !QuyenForm.KiemTraKhiMo(this,Quyen))return;Chay(Nap); }
+
+    // TV1: huy bo hen nap nam khi giai phong form
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing) henNapNam.Dispose();
+        base.Dispose(disposing);
+    }
+
     private void Chay(Action a)=>Sv4Ui.Chay(this,Quyen,a);
     // SV4: nạp thành công mới thay kết quả, bảng và biểu đồ cùng dùng snapshot này.
+    // TV1: nap bao cao theo ky va kenh ban da chon
     private async void Nap()
     {
+        henNapNam.Stop();
         var homNay = DateTime.Today;
         var dauThang = new DateTime(homNay.Year, homNay.Month, 1);
         var theoQuy = soThang == 0;
@@ -113,6 +138,7 @@ public class FrmThongKe : Form
                 && kq.Bang["Trạng thái đơn"].AsEnumerable().All(r => r.Field<int>("Số đơn") == 0));
     }
 
+    // TV1: hien thi so tong hop, bang va bieu do
     private void HienThi(KetQuaBaoCao kq)
     {
         var thuChi = kq.Bang[BaoCaoService.BangThuChi].AsEnumerable();
@@ -182,6 +208,7 @@ public class FrmThongKe : Form
         tabs.SelectedTab = tabs.TabPages.Cast<TabPage>().FirstOrDefault(p => p.Text == tabDangXem) ?? tabs.TabPages[0];
     }
 
+    // TV1: mo danh sach day du san pham da ban trong ky
     private void XemTatCa(KetQuaBaoCao kq, DataTable dt)
     {
         using var form = new Form { Text = "Tất cả sản phẩm đã bán", Size = new Size(760, 570), MinimumSize = new Size(520, 360) };
