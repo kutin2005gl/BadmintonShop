@@ -2,6 +2,8 @@
 
 Ngày đối chiếu: **13/11/2026**, múi giờ Asia/Saigon. Phiên bản mã nguồn: nhánh `develop`, commit `52702741204edbdf4983716183e32413164e5666`.
 
+**Cập nhật 19/11/2026:** đối chiếu lại với nhánh `develop` commit `c2a8753` (đã gộp PR #21–#28). Các mục đổi trạng thái ghi chú “*(cập nhật 19/11)*”; cách đối chiếu xem **KT7** cuối file.
+
 **Nguồn phân công gốc:** [CNPM_01_Phan_cong_cong_viec.docx][phan-cong] ở thư mục ngoài `BadmintonShop`, áp dụng cho các mục `SV1-*` đến `SV4-*` và `CHUNG-*`. Ký hiệu **PC §5 SV1**, chẳng hạn, chỉ mục 5, phần SV1 của file này. Các file trong dự án là bằng chứng thực hiện, không tự bổ sung yêu cầu vào phần phân công gốc. Công việc lặp lại giữa bảng tổng quan, nhiệm vụ chi tiết và kế hoạch tuần đã được gộp.
 
 **Nguồn góp ý bổ sung:** [ghi âm buổi góp ý ngày 12/11/2026][ghi-am-co], được theo dõi riêng tại phần **Góp ý bổ sung của cô ngày 12/11** bằng mã `CO-01` đến `CO-07`. Nội dung được diễn giải từ lời nhận dạng và [bản phụ đề tự động][phu-de-co], không phải trích nguyên văn. Mốc ghi âm dùng để nghe đối chiếu; các chỗ chưa rõ được ghi cần xác minh. Phân công ở phần này là dự kiến theo vai trò, không thay đổi phân công gốc.
@@ -20,8 +22,8 @@ Theo lựa chọn đã thống nhất, kiểm thử chéo lấy **PC §6** làm 
 | Phần việc | Đã đánh dấu | Còn để trống | Tổng số mục |
 |---|---:|---:|---:|
 | SV1 | 27 | 12 | 39 |
-| SV2 | 17 | 21 | 38 |
-| SV3 | 16 | 14 | 30 |
+| SV2 | 27 | 11 | 38 |
+| SV3 | 17 | 13 | 30 |
 | SV4 | 25 | 10 | 35 |
 | Quy tắc chung của cả bốn SV | 1 | 4 | 5 |
 
@@ -83,46 +85,46 @@ Theo lựa chọn đã thống nhất, kiểm thử chéo lấy **PC §6** làm 
 
 - [x] **SV2-01 Dựng project Web, layout và màn hình đăng ký/đăng nhập.** Nguồn: PC §7 T1. Bằng chứng: [Web project][web-project], [layout][layout], [TaiKhoanController][account-controller] và Views; KT1/KT5.
 - [x] **SV2-02 Đăng ký tài khoản và kiểm tra trùng email.** Nguồn: PC §5 SV2. Bằng chứng: account controller và KhachHangRepository; W01 đăng ký thành công, W08 chặn email đã tồn tại.
-- [ ] **SV2-03 Kiểm tra trùng SĐT khi đăng ký.** Nguồn: PC §5 SV2. **Thiếu:** controller/repository chỉ kiểm trùng email; GAP03 đăng ký được hai tài khoản khác email nhưng cùng SĐT trên CSDL thử.
-- [ ] **SV2-04 Yêu cầu mật khẩu mạnh khi đăng ký.** Nguồn: PC §5 SV2. **Một phần:** Core có `LaMatKhauManh`, nhưng [DangKyViewModel][registration-model] chỉ yêu cầu tối thiểu 6 ký tự và controller không gọi helper; GAP02 xác nhận mật khẩu `abc123` vẫn được nhận.
+- [x] **SV2-03 Kiểm tra trùng SĐT khi đăng ký.** Nguồn: PC §5 SV2. Bằng chứng *(cập nhật 19/11)*: `KhachHangRepository.SdtDaTonTai` và [TaiKhoanController][account-controller] báo “Số điện thoại này đã được đăng ký” trước khi tạo tài khoản (commit `32c2d3a`, PR #23). So khớp theo chuỗi SĐT đã nhập, chưa chuẩn hóa dạng `+84`.
+- [x] **SV2-04 Yêu cầu mật khẩu mạnh khi đăng ký.** Nguồn: PC §5 SV2. Bằng chứng *(cập nhật 19/11)*: controller gọi `MatKhauHelper.LaMatKhauManh` (≥8 ký tự, có chữ hoa, chữ thường, chữ số); [DangKyViewModel][registration-model] nâng tối thiểu lên 8 ký tự, nên `abc123` của GAP02 bị từ chối (commit `32c2d3a`).
 - [x] **SV2-05 Đăng nhập và đăng xuất Web.** Nguồn: PC §5 SV2, §7 T2. Bằng chứng: W05–W07 kiểm đăng xuất bảo vệ trang hồ sơ, sai mật khẩu bị chặn, mật khẩu đúng đăng nhập được.
 - [ ] **SV2-06 Quên mật khẩu.** Nguồn: PC §5 SV2. **Một phần:** W09/W10 chạy được OTP demo → đặt lại → đăng nhập; các action chỉ hoạt động khi `IsDevelopment()`, trả 404 ở môi trường khác, OTP hiển thị ngay trên trang. Chưa có luồng quên mật khẩu dùng được cho bản chạy thông thường ngoài Development.
 - [x] **SV2-07 Đổi mật khẩu.** Nguồn: PC §5 SV2. Bằng chứng: `DoiMatKhau` kiểm mật khẩu hiện tại và cập nhật hash; W04 xác nhận bằng phiên đăng nhập mới với mật khẩu đã đổi.
 - [x] **SV2-08 Hồ sơ: xem/sửa thông tin và địa chỉ nhận hàng.** Nguồn: PC §5 SV2, §7 T2. Bằng chứng: `HoSo`, `CapNhatHoSo`; W02/W03 kiểm hiển thị và lưu lại họ tên/địa chỉ.
 - [x] **SV2-09 Trang chủ hiển thị nhóm sản phẩm nổi bật.** Nguồn: PC §5 SV2. Bằng chứng: [Home/Index][home-view] có nhóm sản phẩm mới và nhóm gắn nhãn “BÁN CHẠY”. Nhóm này hiện chọn theo tên sau khi loại sản phẩm mới, không tính từ doanh số; file phân công không quy định thuật toán chọn nổi bật.
-- [ ] **SV2-10 Trang chủ hiển thị sản phẩm khuyến mãi.** Nguồn: PC §5 SV2. **Thiếu:** HomeController/Home view chỉ lấy sản phẩm đang bán, nhóm mới và nhóm nổi bật; chưa đọc CTKM để tạo nhóm sản phẩm khuyến mãi.
+- [x] **SV2-10 Trang chủ hiển thị sản phẩm khuyến mãi.** Nguồn: PC §5 SV2. Bằng chứng *(cập nhật 19/11)*: [Home/Index][home-view] có nhóm “Đang khuyến mãi” (tối đa 8 sản phẩm) lấy từ `KhuyenMaiHienThi` → `KhuyenMaiRepository.LayPhanTramTatCaSanPham` đọc `KM_TheoSP` còn hiệu lực; thẻ sản phẩm có nhãn `-x%`, giá giảm và giá gốc gạch ngang (commit `5217a6d`, PR #27).
 - [x] **SV2-11 Trang chủ có danh mục vợt, cầu, giày, quần áo, phụ kiện.** Nguồn: PC §5 SV2. Bằng chứng: Home view lấy danh mục từ CSDL và tạo liên kết lọc `maDM`; script mẫu có các danh mục này.
 
 ### Catalog và chi tiết sản phẩm
 
 - [x] **SV2-12 Hiển thị danh sách sản phẩm và tìm kiếm theo tên.** Nguồn: PC §5 SV2, §7 T2/T3. Bằng chứng: [SanPhamController.Index][product-controller], [catalog view][catalog-view]; W11 kiểm trang kết quả với từ khóa.
 - [x] **SV2-13 Lọc sản phẩm theo danh mục.** Nguồn: PC §5 SV2. Bằng chứng: tham số `maDM`, combobox danh mục và điều kiện lọc trong controller; W11.
-- [ ] **SV2-14 Lọc riêng theo thương hiệu.** Nguồn: PC §5 SV2. **Một phần:** ô từ khóa tìm cả tên lẫn thương hiệu, nhưng chưa có tham số/điều kiện lọc riêng theo thương hiệu để kết hợp với các bộ lọc khác; GAP04 và mã Index.
-- [ ] **SV2-15 Lọc theo khoảng giá.** Nguồn: PC §5 SV2. **Thiếu:** Index và form catalog chưa có giá từ/đến hoặc điều kiện tương ứng; GAP04.
+- [x] **SV2-14 Lọc riêng theo thương hiệu.** Nguồn: PC §5 SV2. Bằng chứng *(cập nhật 19/11)*: [SanPhamController.Index][product-controller] có tham số `thuongHieu` kết hợp với từ khóa/danh mục/giá; [catalog view][catalog-view] có combobox thương hiệu lấy từ sản phẩm đang bán (commit `a81f46e`, `b4ea6eb`).
+- [x] **SV2-15 Lọc theo khoảng giá.** Nguồn: PC §5 SV2. Bằng chứng *(cập nhật 19/11)*: tham số `giaTu/giaDen`, ô nhập “Giá từ/Giá đến” trên catalog; nhập ngược khoảng thì tự đổi chỗ. Lọc theo `DonGiaBan` (giá gốc), không theo giá sau khuyến mãi.
 - [x] **SV2-16 Sắp xếp theo giá và tên.** Nguồn: PC §5 SV2. Bằng chứng: `gia-tang`, `gia-giam`, `ten-z-a`, mặc định tên A–Z; các lựa chọn có trong controller/view.
-- [ ] **SV2-17 Sắp xếp theo mới nhất.** Nguồn: PC §5 SV2. **Thiếu:** catalog chưa có lựa chọn/nhánh sắp xếp mới nhất. Nhóm “mới” ở trang chủ không thay yêu cầu sắp xếp danh sách.
-- [x] **SV2-18 Phân trang và giữ tham số lọc trên URL.** Nguồn: PC §5 SV2. Bằng chứng: 8 sản phẩm/trang, `Skip/Take`, form GET và liên kết trang giữ `tuKhoa/maDM/sapXep`; W11. Chỉ xác nhận các bộ lọc hiện có, không tính các bộ lọc thiếu ở SV2-14/15.
-- [ ] **SV2-19 Trang chi tiết hiển thị ảnh của sản phẩm.** Nguồn: PC §5 SV2. **Một phần:** [ChiTiet.cshtml][detail-view] có ảnh nhưng gọi `AnhMinhHoa.TheoDanhMuc`, chưa dùng `Model.HinhAnh`; chưa hiển thị đúng ảnh sản phẩm được quản lý/tải lên từ Desktop.
+- [x] **SV2-17 Sắp xếp theo mới nhất.** Nguồn: PC §5 SV2. Bằng chứng *(cập nhật 19/11)*: lựa chọn `moi-nhat` trên catalog, sắp giảm dần theo `MaSP` (sản phẩm thêm sau có mã lớn hơn); commit `a81f46e`.
+- [x] **SV2-18 Phân trang và giữ tham số lọc trên URL.** Nguồn: PC §5 SV2. Bằng chứng: 8 sản phẩm/trang, `Skip/Take`, form GET và liên kết trang giữ `tuKhoa/maDM/sapXep`; W11. *(Cập nhật 19/11)*: liên kết Trước/số trang/Sau giữ thêm `thuongHieu/giaTu/giaDen`.
+- [x] **SV2-19 Trang chi tiết hiển thị ảnh của sản phẩm.** Nguồn: PC §5 SV2. Bằng chứng *(cập nhật 19/11)*: [ChiTiet.cshtml][detail-view] và thẻ sản phẩm gọi `AnhMinhHoa.CuaSanPham(Model.HinhAnh, …)`, phục vụ ảnh `products/...` qua `/media` (dùng chung thư mục `media/products` với Desktop qua `KhoAnhSanPham`); chỉ quay về ảnh theo danh mục khi sản phẩm chưa có ảnh. Dữ liệu mẫu đã có ảnh thật (`10_AnhSanPham.sql`, PR #22/#25).
 - [x] **SV2-20 Trang chi tiết hiển thị thông số sản phẩm.** Nguồn: PC §5 SV2. Bằng chứng: detail view hiển thị `MoTa`; dữ liệu mẫu có 3U/4U, độ cứng và size trong mô tả (truy vấn KT2 tìm được 25 sản phẩm có các thông số này). Không yêu cầu thêm cột thông số riêng ngoài file phân công.
 - [x] **SV2-21 Trang chi tiết hiển thị tồn kho.** Nguồn: PC §5 SV2. Bằng chứng: detail view dùng `SoLuongTon`, phân biệt hết/sắp hết/còn hàng và giới hạn số lượng thêm giỏ.
-- [ ] **SV2-22 Trang chi tiết hiển thị giá sau khuyến mãi.** Nguồn: PC §5 SV2. **Thiếu:** view in `Model.DonGiaBan`; action ChiTiet chưa lấy mức giảm theo sản phẩm từ service khuyến mãi. Giỏ tính giá giảm chưa thay việc hiển thị tại chi tiết.
+- [x] **SV2-22 Trang chi tiết hiển thị giá sau khuyến mãi.** Nguồn: PC §5 SV2. Bằng chứng *(cập nhật 19/11)*: trang chi tiết lấy % giảm từ `KhuyenMaiHienThi.LayPhanTram`, tính giá bằng `TinhKhuyenMaiService.TinhGiaSauGiam` (cùng công thức với giỏ), hiển thị giá giảm, giá gốc gạch ngang và nhãn `-x%` (commit `5217a6d`). Bảng % được đệm 30 giây chỉ để hiển thị; tiền thật vẫn tính lại khi đặt hàng.
 - [x] **SV2-23 Nút thêm giỏ gọi chức năng của SV3.** Nguồn: PC §5 SV2, §6. Bằng chứng: form POST `GioHang/Them` truyền `maSP/soLuong`; W12 thêm sản phẩm từ trang chi tiết thành công.
 
 ### Đánh giá, tài liệu và bàn giao
 
 - [x] **SV2-24 Gửi chấm sao và nội dung đánh giá.** Nguồn: PC §5 SV2. Bằng chứng: `GuiDanhGia`, [DanhGiaRepository][review-repo], view form; W/GAP01 xác nhận có ghi đánh giá chờ duyệt. Điều kiện đã mua được đánh giá riêng ở mục sau.
-- [ ] **SV2-25 Chỉ khách đã mua mới được đánh giá.** Nguồn: PC §5 SV2. **Thiếu:** controller và repository không kiểm HoaDon/ChiTietHoaDon; GAP01 xác nhận tài khoản vừa đăng ký, chưa mua sản phẩm, vẫn gửi đánh giá thành công.
+- [x] **SV2-25 Chỉ khách đã mua mới được đánh giá.** Nguồn: PC §5 SV2. Bằng chứng *(cập nhật 19/11)*: `DanhGiaRepository.KhachDaMuaSanPham` kiểm `HoaDon` + `ChiTietHoaDon` có sản phẩm đó với trạng thái **Hoàn thành**; `GuiDanhGia` từ chối và báo “Chỉ khách đã mua sản phẩm này (đơn đã hoàn thành) mới được đánh giá” (commit `32c2d3a`). Trường hợp GAP01 (tài khoản mới chưa mua) bị chặn theo mã nguồn.
 - [x] **SV2-26 Desktop duyệt bình luận, Web chỉ hiện bình luận đã duyệt.** Nguồn: PC §3, §5 SV2, §7 T4. Bằng chứng: [FrmQuanLyDanhGia][review-form], `CapNhatTrangThai`, `LayTheoSanPham`; A10 kiểm trước/sau duyệt và smoke mở form.
 - [ ] **SV2-27 Desktop ẩn bình luận đã hiển thị.** Nguồn: PC §5 SV2. **Một phần:** có nút từ chối đánh giá chờ duyệt, nhưng handler chặn mọi đánh giá không còn “Chờ duyệt”. Chưa ẩn lại được bình luận “Đã duyệt” qua màn hình này.
 - [ ] **SV2-28 Viết SRS gồm chức năng, phi chức năng và người dùng hệ thống.** Nguồn: PC §5 SV2, §7 T1. **Thiếu:** [báo cáo tổng][report] mục 2 còn `TODO(SV2): Cung cấp SRS...`; chưa thấy SRS riêng đáp ứng nội dung này.
 - [ ] **SV2-29 Sơ đồ use case tổng quát cho cả Web và Desktop.** Nguồn: PC §5 SV2, §7 T1. **Thiếu:** chưa thấy sơ đồ này trong tài liệu/sơ đồ bàn giao; mục 2 báo cáo còn TODO.
 - [ ] **SV2-30 Đặc tả chi tiết các use case phía khách hàng.** Nguồn: PC §5 SV2, §7 T4; §2/§3. **Thiếu:** phụ lục hiện có đặc tả SV1/SV4, chưa có bộ đặc tả use case tài khoản/catalog/đánh giá và các use case khách hàng được phân công cho SV2.
-- [ ] **SV2-31 Bàn giao module tài khoản, catalog và đánh giá đáp ứng đầy đủ yêu cầu.** Nguồn: PC §5 SV2, Bàn giao. **Một phần:** các module đã chạy nhưng còn các mục chưa đạt ở SV2-03/04/06/10/14/15/17/19/22/25/27; không đánh dấu hoàn tất cả module.
+- [ ] **SV2-31 Bàn giao module tài khoản, catalog và đánh giá đáp ứng đầy đủ yêu cầu.** Nguồn: PC §5 SV2, Bàn giao. **Một phần** *(cập nhật 19/11)*: SV2-03/04/10/14/15/17/19/22/25 đã xong; còn **SV2-06** (quên mật khẩu chỉ chạy ở Development) và **SV2-27** (chưa ẩn lại được bình luận đã duyệt) nên chưa đánh dấu hoàn tất cả module.
 - [x] **SV2-32 Dữ liệu mẫu ≥40 sản phẩm, ≥20 khách hàng và ≥30 đánh giá.** Nguồn: PC §5 SV2, Bàn giao; §3. Bằng chứng KT2 trước khi tạo dữ liệu thử: **40 / 23 / 34**. Đánh giá hiện lưu tại `DanhGiaSanPham`, bảng `PhanHoi` nền vẫn tồn tại nhưng rỗng; không coi bảng rỗng này là 34 đánh giá.
 - [ ] **SV2-33 Tự viết test case phần mình.** Nguồn: PC §2. **Chưa xác minh:** bộ 61 ca của SV4 có ca liên quan Web, nhưng chưa có bộ test/biên bản nhận trách nhiệm của SV2. Test do người rà soát chạy không thay nghĩa vụ này.
 - [ ] **SV2-34 Chụp màn hình và viết HDSD phần tài khoản/catalog/đánh giá.** Nguồn: PC §3, §7 T5. **Thiếu trong bộ bàn giao SV2:** chưa thấy bộ ảnh và HDSD đủ phạm vi; báo cáo mục 8.3 vẫn ghi TODO hướng dẫn khách hàng và đánh giá.
 - [ ] **SV2-35 Kiểm thử chéo phần SV4 trước khi gộp develop.** Nguồn: PC §2, §6. **Chưa xác minh:** [checklist SV2 kiểm Desktop][cross2] còn trống, chưa điền người kiểm/ngày/build/kết quả; các log tự động không thay chữ xác nhận của SV2.
-- [ ] **SV2-36 Phối hợp SV4 về sản phẩm và SV3 về thêm giỏ.** Nguồn: PC §6. **Một phần:** dùng chung dữ liệu và nút thêm giỏ đã nối, nhưng ảnh Desktop chưa được dùng đúng trên chi tiết Web; chưa có xác nhận phối hợp hoàn tất.
+- [x] **SV2-36 Phối hợp SV4 về sản phẩm và SV3 về thêm giỏ.** Nguồn: PC §6. Bằng chứng *(cập nhật 19/11)*: nút thêm giỏ gọi `GioHang/Them` của SV3 (W12); ảnh sản phẩm do Desktop quản lý nay hiển thị đúng trên Web (SV2-19); giá khuyến mãi trên Web dùng chung `TinhKhuyenMaiService` của SV3. Các PR #22–#27 đã gộp vào `develop`.
 - [ ] **SV2-37 Tham gia họp hằng tuần và cập nhật thẻ công việc có hạn chót.** Nguồn: PC §9. **Chưa xác minh:** phần SV2 trong biên bản còn trống/TODO; chưa có bằng chứng bảng thẻ công việc.
 - [ ] **SV2-38 Sửa lỗi phần mình và luyện demo ở tuần cuối.** Nguồn: PC §3, §7 T5. **Một phần:** Git có các cập nhật module SV2; chưa có hồ sơ sửa lỗi/kiểm lại và xác nhận luyện demo đủ để đóng nhiệm vụ tuần cuối; các thiếu sót đang thấy vẫn giữ ô trống.
 
@@ -135,7 +137,7 @@ Theo lựa chọn đã thống nhất, kiểm thử chéo lấy **PC §6** làm 
 - [x] **SV3-03 Lưu giỏ bằng session hoặc CSDL.** Nguồn: PC §5 SV3. Bằng chứng: [GioHangSession][cart-session] lưu mã/số lượng vào session; KT5 dùng cùng cookie qua nhiều request, giỏ vẫn còn.
 - [x] **SV3-04 Kiểm tra tồn kho trước khi đặt.** Nguồn: PC §5 SV3. Bằng chứng: [GioHangService][cart-service] đọc tồn, transaction tính lại và chặn thiếu tồn; I05, P11/P16/P19. Tồn thực tế do trigger SV1 cập nhật.
 - [x] **SV3-05 Đặt hàng có địa chỉ nhận hàng.** Nguồn: PC §5 SV3. Bằng chứng: [checkout view][checkout-view], [DatHangController][checkout-controller], [DonHangOnlineRepository][online-repo]; W15 tạo đơn COD và Online với địa chỉ thử.
-- [ ] **SV3-06 Đặt hàng có ghi chú.** Nguồn: PC §5 SV3. **Thiếu:** view, action XacNhan, model và thao tác ghi HoaDon hiện chưa có trường ghi chú.
+- [x] **SV3-06 Đặt hàng có ghi chú.** Nguồn: PC §5 SV3. Bằng chứng *(cập nhật 19/11)*: cột `HoaDon.GhiChu NVARCHAR(500) NULL` (`11_SV3_GhiChuDon.sql`, đã gộp vào script tổng); ô “Ghi chú đơn hàng (không bắt buộc)” ở [checkout view][checkout-view]; `XacNhan` → `DonHangOnlineRepository.TaoDon(..., ghiChu)` kiểm tối đa 500 ký tự, rỗng ghi NULL; ghi chú hiện ở trang thành công, chi tiết đơn và email xác nhận (commit `23e3202`, PR #28).
 - [x] **SV3-07 Thanh toán COD.** Nguồn: PC §5 SV3, §7 T3. Bằng chứng: W15 COD và H01 tạo hóa đơn, chi tiết, trạng thái chờ và trừ tồn thành công.
 - [x] **SV3-08 Thanh toán online giả lập.** Nguồn: PC §5 SV3, §7 T3. Bằng chứng: W15 Online chuyển đến màn hình giả lập, W16 xác nhận rồi đến trang thành công; `HinhThucTT=Online`. Hiện xác nhận chỉ báo thành công, không có trạng thái thanh toán riêng; file phân công không yêu cầu tích hợp cổng thật.
 - [x] **SV3-09 Khuyến mãi theo sản phẩm.** Nguồn: PC §5 SV3, §7 T4. Bằng chứng: [TinhKhuyenMaiService][promotion-service], [KhuyenMaiRepository][promotion-repo], `KM_TheoSP`; P02/P06.
@@ -158,7 +160,7 @@ Theo lựa chọn đã thống nhất, kiểm thử chéo lấy **PC §6** làm 
 - [ ] **SV3-23 Tự viết đặc tả use case và test case phần mình.** Nguồn: PC §2, §3. **Chưa xác minh:** có bộ P/H trong kiểm thử tích hợp SV3–SV4 nhưng chưa có bộ đặc tả/use case và test case do SV3 nhận trách nhiệm; không lấy test của SV4/người rà soát làm bằng chứng tự viết của SV3.
 - [ ] **SV3-24 Chụp màn hình và viết HDSD phần giỏ/đặt hàng/khuyến mãi.** Nguồn: PC §3, §7 T5. **Một phần:** có ảnh trạng thái đơn Web trong minh chứng đợt 5/6 và ảnh POS khuyến mãi; chưa có bộ ảnh đủ phần giỏ/thanh toán/quản lý CTKM, báo cáo mục 8.3 vẫn TODO HDSD của SV3.
 - [x] **SV3-25 Dữ liệu mẫu ≥3 CTKM và ≥20 đơn ở đủ trạng thái.** Nguồn: PC §5 SV3, Bàn giao; §3. Bằng chứng KT2 trước thử: **4 CTKM** gồm 1 theo SP, 1 theo HĐ, 2 voucher; **28 đơn** gồm 4 Chờ xác nhận, 3 Đã xác nhận, 3 Đang giao, 15 Hoàn thành, 3 Đã hủy.
-- [ ] **SV3-26 Bàn giao module giỏ – đặt hàng – khuyến mãi hoàn chỉnh.** Nguồn: PC §5 SV3, Bàn giao. **Một phần:** các luồng chính chạy được, nhưng còn thiếu ghi chú đặt hàng, chưa xác minh sinh voucher từ UI và gửi email thật; chưa đánh dấu toàn bộ phần bàn giao.
+- [ ] **SV3-26 Bàn giao module giỏ – đặt hàng – khuyến mãi hoàn chỉnh.** Nguồn: PC §5 SV3, Bàn giao. **Một phần** *(cập nhật 19/11)*: ghi chú đặt hàng đã có (SV3-06); còn chưa xác minh sinh voucher từ UI (SV3-19) và gửi email thật (SV3-17); chưa đánh dấu toàn bộ phần bàn giao.
 - [ ] **SV3-27 Kiểm thử chéo tài khoản/catalog/đánh giá của SV2 trước gộp develop.** Nguồn: PC §2, §6. **Chưa xác minh:** chưa có biên bản SV3 kiểm SV2; việc phát hiện lỗi Web ở KT5 là kết quả người rà soát, không phải SV3.
 - [ ] **SV3-28 Thống nhất với SV1/SV4 về transaction, tồn kho, trạng thái đơn và khuyến mãi.** Nguồn: PC §6. **Một phần:** code dùng chung đã tích hợp và kiểm thành công; [checklist phối hợp][handoff4] vẫn chờ xác nhận quy tắc của SV3, chưa có bằng chứng nhóm đã chốt đầy đủ.
 - [ ] **SV3-29 Tham gia họp hằng tuần và cập nhật thẻ công việc có hạn chót.** Nguồn: PC §9. **Chưa xác minh:** biên bản còn trống/TODO ở thông tin họp và phần xác nhận; chưa có bảng thẻ công việc.
@@ -223,61 +225,68 @@ Nguồn: [ghi âm][ghi-am-co] và [phụ đề tự động][phu-de-co]. Bổ su
 
 | Phần việc | Đã đánh dấu | Còn để trống | Tổng số mục |
 |---|---:|---:|---:|
-| Góp ý bổ sung `CO-*` | 0 | 7 | 7 |
+| Góp ý bổ sung `CO-*` | 6 | 1 | 7 |
+
+*Cập nhật 19/11:* CO-01 đến CO-06 đã được xử lý trong commit `3cc29ee` (PR #21) và ghi nghiệm thu tại [nghiem-thu-gop-y-co-12-11.md][nghiem-thu-co]. Tên người kiểm chéo chưa được ghi trong tài liệu nghiệm thu; nhóm bổ sung khi chạy lại trên máy mình.
 
 ### CO-01 Mua hàng không cần đăng nhập
 
-- [ ] **CO-01 Cho khách đặt hàng khi chưa đăng nhập và liên kết khách bằng SĐT.**
+- [x] **CO-01 Cho khách đặt hàng khi chưa đăng nhập và liên kết khách bằng SĐT.**
   - **Mốc ghi âm:** 01:16–03:09; 04:48–04:52.
   - **Phụ trách dự kiến:** SV3 chính; SV1 hỗ trợ dữ liệu, SV2 hỗ trợ giao diện.
   - **Trạng thái / bằng chứng hiện có — Thiếu:** [DatHangController][checkout-controller] vẫn có `[Authorize]` và lấy `MaKH` từ phiên đăng nhập; SV3-05 mới chứng minh đặt hàng có địa chỉ trong luồng đăng nhập, chưa đáp ứng đặt hàng cho khách chưa đăng nhập.
   - **Tiêu chí nghiệm thu:** khách chưa đăng nhập nhập họ tên, SĐT, địa chỉ và đặt hàng được; lưu được khách và liên kết đơn tương ứng; thử khách mới và khách quay lại dùng cùng SĐT, không tạo khách trùng ngoài quy tắc đã chốt. Nhận diện theo SĐT không tự cấp quyền xem lịch sử hoặc thông tin riêng của người khác.
-  - **Ghi nhận nghiệm thu:** Người kiểm: chưa ghi; ngày: chưa ghi; kết quả/minh chứng: chưa có.
+  - **Cập nhật 19/11 — Đạt theo mã nguồn:** bỏ `[Authorize]` ở [DatHangController][checkout-controller]; khách chưa đăng nhập nhập họ tên/SĐT/địa chỉ, `KhachHangRepository.LayHoacTaoKhachVangLai` chuẩn hóa SĐT (`+84`, khoảng trắng, dấu chấm), dùng lại khách cũ hoặc tạo khách mới email `@khach.invalid` không đăng nhập được; khách vãng lai chỉ xem được đơn vừa đặt trong phiên.
+  - **Ghi nhận nghiệm thu:** ngày 13/11/2026, commit `3cc29ee`; kết quả: 2 đơn bằng `0900 000 777` và `+84900000777` chỉ tạo 1 khách, SĐT `12` bị từ chối, xem đơn từ phiên khác trả 404 ([nghiệm thu CO][nghiem-thu-co]). Người kiểm chéo: chưa ghi tên.
 
 ### CO-02 Kiểm soát voucher
 
-- [ ] **CO-02 Phân biệt voucher dùng một lần với chương trình áp dụng chung và kiểm soát đủ điều kiện sử dụng.**
+- [x] **CO-02 Phân biệt voucher dùng một lần với chương trình áp dụng chung và kiểm soát đủ điều kiện sử dụng.**
   - **Mốc ghi âm:** 03:32–07:25, trọng tâm 06:02–07:25.
   - **Phụ trách dự kiến:** SV3 chính; SV4 kiểm tra tích hợp POS.
   - **Trạng thái / bằng chứng hiện có — Một phần:** SV3-11/12 có áp mã, ngày hiệu lực và lượt dùng; [KhuyenMaiRepository][promotion-repo] kiểm `SoLuong/DaDung` và tăng lượt trong transaction. Chưa đủ bằng chứng giới hạn theo từng khách và phân biệt đầy đủ các chính sách cô nêu.
   - **Tiêu chí nghiệm thu:** ghi rõ chính sách của từng loại mã về tổng lượt, lượt mỗi khách, thời hạn và điều kiện hóa đơn; kiểm tra mã một lần không dùng lại được sau khi mua thành công, mã áp dụng chung được lặp theo chính sách, mã hết hạn/tắt/hết lượt bị từ chối. Áp/bỏ mã cập nhật đúng tổng tiền trên Web/POS; hai giao dịch tranh lượt cuối không vượt giới hạn và giao dịch thất bại không mất lượt. Các ngưỡng tiền/tỷ lệ trong lời cô là ví dụ, không cố định thành điều kiện cho mọi mã.
-  - **Ghi nhận nghiệm thu:** Người kiểm: chưa ghi; ngày: chưa ghi; kết quả/minh chứng: chưa có.
+  - **Cập nhật 19/11 — Đạt theo mã nguồn:** bảng chính sách 3 loại (VOUCHER / HOADON / SANPHAM) đã ghi trong [nghiệm thu CO][nghiem-thu-co]; `KhuyenMaiRepository.KhachDaDungVoucher` giới hạn **1 lần mỗi khách mỗi mã** (tính theo đơn chưa hủy), kiểm trong transaction sau khi giữ khóa dòng voucher nên lỗi thì rollback, không mất lượt; giỏ hàng báo sớm cho khách đã đăng nhập. POS không chọn khách nên chỉ áp giới hạn tổng lượt/ngày/trạng thái — đây là chính sách đã chốt, không phải lỗi.
+  - **Ghi nhận nghiệm thu:** ngày 13/11/2026, commit `3cc29ee`; kết quả: voucher thử 5 lượt — khách A dùng lần 1 được, lần 2 bị từ chối và `DaDung` không đổi, khách B dùng được, A hủy đơn rồi dùng lại được. Người kiểm chéo: chưa ghi tên.
 
 ### CO-03 Main–sub đơn hàng
 
-- [ ] **CO-03 Chọn dòng đơn hàng để xem chi tiết ngay trong cùng màn hình.**
+- [x] **CO-03 Chọn dòng đơn hàng để xem chi tiết ngay trong cùng màn hình.**
   - **Mốc ghi âm:** 07:32–08:15; 09:29–09:35.
   - **Phụ trách dự kiến:** SV4 Desktop; SV3 Web.
   - **Trạng thái / bằng chứng hiện có — Một phần:** [FrmDonHang][orders-form] đã có lưới chính/phụ và sự kiện `CurrentCellChanged` nạp chi tiết; SV4-08 có bằng chứng đọc chi tiết. Chưa có nghiệm thu đầy đủ thao tác chọn/đổi dòng của cả Desktop và [Web][orders-view] theo mục bổ sung này.
   - **Tiêu chí nghiệm thu:** chọn một dòng bất kỳ thì hiện đúng chi tiết của đơn đó bên cạnh hoặc bên dưới; đổi dòng cập nhật mã đơn, thông tin và dòng hàng tương ứng; không giữ chi tiết đơn cũ khi danh sách rỗng hoặc đổi lựa chọn nhanh. Kiểm tra trên Desktop và trang đơn hàng Web của khách.
-  - **Ghi nhận nghiệm thu:** Người kiểm: chưa ghi; ngày: chưa ghi; kết quả/minh chứng: chưa có.
+  - **Cập nhật 19/11 — Đạt theo mã nguồn:** Desktop `FrmDonHang` lưới chính/phụ, dòng thông tin thêm tên/SĐT/email khách; Web `/DonHang` bấm dòng (hoặc Enter/Space) nạp chi tiết nhúng bên dưới, bản nhúng bỏ tiêu đề/khung lặp, hủy từ panel nhúng quay về danh sách (`Huy(id, veDanhSach)`).
+  - **Ghi nhận nghiệm thu:** ngày 13/11/2026, commit `3cc29ee`; kết quả: bài `DB-M01` bấm từng ô các dòng đầu và so với CSDL đạt; Web bấm nhanh nhiều dòng chỉ giữ dòng cuối, đơn người khác trả 404 ([nghiệm thu CO][nghiem-thu-co]). Người kiểm chéo: chưa ghi tên.
 
 ### CO-04 Quan hệ khách hàng–hóa đơn
 
-- [ ] **CO-04 Đối chiếu bảng, khóa ngoại, ERD và dữ liệu ghép để hiển thị hóa đơn.**
+- [x] **CO-04 Đối chiếu bảng, khóa ngoại, ERD và dữ liệu ghép để hiển thị hóa đơn.**
   - **Mốc ghi âm:** 08:27–09:35.
   - **Phụ trách dự kiến:** SV1 chính; SV3/SV4 phối hợp phần truy vấn và hiển thị.
   - **Trạng thái / bằng chứng hiện có — Một phần:** [schema][schema] đã có `HoaDon.MaKH` và khóa ngoại tới `KhachHang`; SV1-21 có ERD/lược đồ. Không kết luận hệ thống hiện tại đang lưu toàn bộ khách hàng trong bảng hóa đơn; cần đối chiếu thêm tài liệu và luồng ghi/đọc thực tế.
   - **Tiêu chí nghiệm thu:** schema, script tổng, ERD và lược đồ quan hệ thống nhất về liên kết khách hàng–hóa đơn; chỉ ra thông tin thuộc bảng nào và tên/SĐT được ghép qua truy vấn hoặc view để hiển thị. Giải thích riêng `DiaChiGiao` là địa chỉ của đơn, không tự xóa dữ liệu giao hàng chỉ vì cô phản biện việc sao chép toàn bộ hồ sơ khách. Kiểm tra lưu/đọc lại đơn Online và đơn POS khách vãng lai.
-  - **Ghi nhận nghiệm thu:** Người kiểm: chưa ghi; ngày: chưa ghi; kết quả/minh chứng: chưa có.
+  - **Cập nhật 19/11 — Đạt theo mã nguồn:** `HoaDon` chỉ giữ `MaKH` (FK `FK_HoaDon_KH`, cho phép NULL) và `DiaChiGiao` của riêng đơn; họ tên/SĐT/email ghép bằng `JOIN KhachHang` trong `HoaDonRepository.LayDanhSachHienThi`; `MaKH` NULL chỉ còn cho đơn POS tại quầy. [docs/ERD.md](../ERD.md) đã cập nhật ghi chú `MaKH`. **Lưu ý:** hình ERD PNG/Word vẫn là bản nền, cần xuất lại trước khi nộp.
+  - **Ghi nhận nghiệm thu:** ngày 13/11/2026, commit `3cc29ee` ([nghiệm thu CO][nghiem-thu-co]). Người kiểm chéo: chưa ghi tên.
 
 ### CO-05 Tồn kho sau nhập và bán
 
-- [ ] **CO-05 Kiểm tra tồn kho xuyên suốt nhập hàng, bán Web/POS và mở lại sản phẩm.**
+- [x] **CO-05 Kiểm tra tồn kho xuyên suốt nhập hàng, bán Web/POS và mở lại sản phẩm.**
   - **Mốc ghi âm:** 09:53–11:13; 12:34–12:42.
   - **Phụ trách dự kiến:** SV1 cơ chế dữ liệu; SV3/SV4 luồng bán và giao diện.
   - **Trạng thái / bằng chứng hiện có — Một phần:** SV1-06/07/08 và KT3 có kiểm tra tăng/giảm tồn, rollback và chặn quá tồn; chưa có ghi nhận demo xuyên suốt các thao tác giao diện theo mục này. Đoạn ghi âm có lời rời rạc nên không suy ra thêm lỗi tồn kho cụ thể.
   - **Tiêu chí nghiệm thu:** ghi tồn ban đầu, nhập thêm và đối chiếu tăng đúng số lượng; bán Web rồi POS và đối chiếu giảm đúng số lượng; tải lại hoặc mở lại sản phẩm thấy tồn mới. Thử bán quá tồn bị chặn; thao tác thất bại hoặc gửi lại cùng giao dịch không làm cập nhật tồn hai lần. Lưu mã sản phẩm, mã phiếu/đơn và số lượng trước/sau làm minh chứng.
-  - **Ghi nhận nghiệm thu:** Người kiểm: chưa ghi; ngày: chưa ghi; kết quả/minh chứng: chưa có.
+  - **Ghi nhận nghiệm thu:** ngày 13/11/2026; kịch bản trên CSDL thật trong một transaction rồi `ROLLBACK`, SP 1 tồn đầu 20 → nhập 10 = 30 → bán Web 3 = 27 → bán POS 2 = 25 → hủy đơn Web hoàn 3 = 28 → bán vượt tồn bị chặn → sau rollback về 20. Màn Sản phẩm có nút Tải lại, cache bị vô hiệu khi dữ liệu đổi (`DB-C04`, `DB-C05`). Nguồn: [nghiệm thu CO][nghiem-thu-co]. Đây là kiểm ở tầng CSDL; chưa có minh chứng thao tác tay qua giao diện. Người kiểm chéo: chưa ghi tên.
 
 ### CO-06 Thống kê theo yêu cầu demo
 
-- [ ] **CO-06 Mở thống kê thấy dữ liệu năm hiện tại, thu–chi, sản phẩm bán chạy và biểu đồ từng sản phẩm theo quý.**
+- [x] **CO-06 Mở thống kê thấy dữ liệu năm hiện tại, thu–chi, sản phẩm bán chạy và biểu đồ từng sản phẩm theo quý.**
   - **Mốc ghi âm:** 13:33–14:35.
   - **Phụ trách dự kiến:** SV4 chính; SV1 hỗ trợ truy vấn.
   - **Trạng thái / bằng chứng hiện có — Một phần:** [FrmThongKe][statistics-form] đã gọi nạp khi mở, mặc định từ đầu năm hiện tại đến ngày hiện tại và có chọn năm; SV4-15/16 có doanh thu và bảng bán chạy. Các thẻ đầu màn hình hiện là doanh thu, số đơn, số sản phẩm; thu–chi nằm ở tab riêng. Chưa có bằng chứng đủ cho luồng chọn từng sản phẩm xem biểu đồ quý.
   - **Tiêu chí nghiệm thu:** mở màn hình tự hiện số liệu năm hiện tại và thể hiện rõ tổng thu/chi, danh sách sản phẩm bán chạy giảm dần; chọn sản phẩm xem doanh số theo từng quý của năm đang chọn; đổi năm cập nhật đúng số liệu, bảng và biểu đồ. Đối chiếu với dữ liệu mẫu đã biết; năm/sản phẩm không có giao dịch hiển thị rõ không có dữ liệu, không giữ số liệu lựa chọn cũ.
-  - **Ghi nhận nghiệm thu:** Người kiểm: chưa ghi; ngày: chưa ghi; kết quả/minh chứng: chưa có.
+  - **Cập nhật 19/11 — Đạt theo mã nguồn:** [FrmThongKe][statistics-form] dòng tổng hiện Doanh thu, Thu, Chi nhập hàng, Chênh lệch (`TomTatThuChi`, khi chọn “Tất cả loại bán”); tab “Sản phẩm × quý {năm}” chọn một dòng thì biểu đồ đổi sang Q1–Q4 của đúng sản phẩm (`QuyCuaDong`), đổi năm/khoảng lọc thì dựng lại bảng và biểu đồ.
+  - **Ghi nhận nghiệm thu:** ngày 13/11/2026, commit `3cc29ee`; kết quả: bài `U11b` kiểm Q1–Q4 từng dòng khớp bảng và tổng 4 quý bằng cột Tổng ([nghiệm thu CO][nghiem-thu-co]). Người kiểm chéo: chưa ghi tên.
 
 ### CO-07 Tự kiểm tra và luyện demo
 
@@ -354,7 +363,33 @@ Script kiểm độc lập cũ cố định 6 sheet/trang. Bản chạy tạm ch
 
 Đã mở nội dung Markdown và trích văn bản Word của báo cáo tổng, kiến trúc, mô tả CSDL, đặc tả SV1, hướng dẫn cài đặt và HDSD SV1 để kiểm nội dung/TODO. Đã đếm **36 test case SV1, 61 test case SV4** từ các dòng ca kiểm thử thực tế. Chưa có bằng chứng bản in, xác nhận họp, kiểm chéo hoặc luyện demo thay cho các thành viên. Log trong Temp chỉ phục vụ truy vết trên máy hiện tại; kết luận quan trọng đã ghi trực tiếp cạnh từng ô.
 
+### KT7 Đối chiếu lại ngày 19/11/2026
+
+So sánh mã nguồn giữa commit `5270274` (mốc rà soát 13/11) và `c2a8753` (`develop` hiện tại, đã gộp PR #21–#28). `dotnet build BadmintonShop.sln` thành công: **0 lỗi, 1 cảnh báo CS8602 cũ** tại `FrmKhuyenMai.cs` dòng 278. Các mục đổi sang `[x]` dựa trên mã nguồn đã gộp và tài liệu [nghiệm thu CO][nghiem-thu-co].
+
+**Chạy lại bộ kiểm thử KT3** (`--install-checks --integration --server '.\SQLEXPRESS'`):
+
+1. Lượt đầu **69 đạt, 6 lỗi**. P06/P14/P15/P16/P19 báo `Invalid column name 'GhiChu'`, vì cột `HoaDon.GhiChu` của SV3-06 mới có ở script tổng và `11_SV3_GhiChuDon.sql`, chưa có trong `01_CreateDatabase.sql`. Ai cài bằng `01 → 02 → 03` mà không chạy `11` thì Web cũng lỗi khi đặt hàng.
+2. Đã thêm `GhiChu NVARCHAR(500) NULL` vào bảng `HoaDon` trong `01_CreateDatabase.sql` → còn **1 lỗi H01**: đơn thứ hai của cùng khách dùng lại mã `HTTP20` bị từ chối. Đây là quy tắc mới của CO-02 (mỗi khách dùng một mã một lần), không phải lỗi code; test cũ viết trước quy tắc này.
+3. Sửa H01 cho đơn thứ hai dùng mã khác `HTTP20B` (cùng 20%), giữ nguyên các kiểm tra giá thay đổi, tổng tiền và hoàn tồn → **87 đạt, 0 lỗi**.
+
+Chưa chạy lại harness HTTP riêng của KT5 (đăng ký, đánh giá, catalog).
+
+| Commit / PR | Nội dung | Mục được đóng |
+|---|---|---|
+| `3cc29ee` / PR #21 | Xử lý góp ý của cô CO-01 đến CO-06, trang khách hàng Desktop | CO-01 … CO-06 |
+| `28e9376`, `be2edd5` / PR #22, #25 | Ảnh sản phẩm thật, ngày sinh nhân viên | hỗ trợ SV2-19 |
+| `32c2d3a` / PR #23 | Chỉ khách đã mua được đánh giá, mật khẩu mạnh, chặn trùng SĐT | SV2-03, SV2-04, SV2-25 |
+| `a81f46e`, `b4ea6eb` / PR #23, #26 | Lọc thương hiệu, khoảng giá, sắp xếp mới nhất | SV2-14, SV2-15, SV2-17 |
+| `5217a6d` / PR #27 | Giá khuyến mãi ở trang chủ, danh sách, chi tiết | SV2-10, SV2-22 |
+| `23e3202` / PR #28 | Ghi chú đơn hàng | SV3-06 |
+
+Bốn tiêu chí chưa đạt ở KT5 (đánh giá khi chưa mua, mật khẩu `abc123`, SĐT trùng, thiếu lọc thương hiệu/giá) đều đã có mã xử lý; nên chạy lại harness Web để có log xác nhận.
+
+Các mục **vẫn để trống** vì chưa thấy thay đổi tương ứng: SV2-06 (quên mật khẩu chỉ ở Development), SV2-27 (ẩn lại bình luận đã duyệt), SV2-28/29/30/34 và SV3-20/21/22/24 (SRS, use case, sơ đồ tuần tự/hoạt động, HDSD chưa có file mới), SV3-17 (email thật), SV3-19 (sinh voucher qua UI), SV4-19 (Chart control/LiveCharts), cùng các mục kiểm thử chéo, họp, luyện demo, báo cáo PDF/bản in.
+
 [phan-cong]: ../../../CNPM_01_Phan_cong_cong_viec.docx
+[nghiem-thu-co]: nghiem-thu-gop-y-co-12-11.md
 [ghi-am-co]: <../../../16.10, 12 thg 11__1.m4a>
 [phu-de-co]: ../../../ban-chep-loi.txt
 [gitignore]: ../../.gitignore

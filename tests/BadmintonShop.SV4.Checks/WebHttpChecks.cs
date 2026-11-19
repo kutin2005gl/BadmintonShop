@@ -17,7 +17,8 @@ internal static partial class Program
     private static void WebHttpChecks()=>Test("H01 live Kestrel MVC checkout / anti-forgery / ownership / Desktop state / stale quote",()=>Task.Run(WebHttpAsync).GetAwaiter().GetResult());
     private static async Task WebHttpAsync()
     {
-        ResetOffers();int product=Product();Offer("SANPHAM",10,product);Offer("VOUCHER",20,code:"HTTP20");
+        // CO-02: moi khach chi dung 1 lan moi ma voucher -> don thu hai cua cung khach dung ma khac (HTTP20B, cung 20%).
+        ResetOffers();int product=Product();Offer("SANPHAM",10,product);Offer("VOUCHER",20,code:"HTTP20");Offer("VOUCHER",20,code:"HTTP20B");
         var assembly=typeof(DatHangController).Assembly;
         var builder=WebApplication.CreateBuilder(new WebApplicationOptions { ApplicationName=assembly.GetName().Name,ContentRootPath=Path.Combine(root,"BadmintonShop.Web"),EnvironmentName="Development" });
         builder.Logging.ClearProviders();builder.WebHost.UseUrls("http://127.0.0.1:0");
@@ -29,7 +30,7 @@ internal static partial class Program
         app.MapGet("/__test/login",async (HttpContext http)=>await http.DangNhapKhachHangAsync(new KhachHangRepository().LayTheoMa(customer)!));
         int other=Convert.ToInt32(DbHelper.ExecuteScalar("INSERT KhachHang(HoTen,Email,MatKhau) VALUES(N'Other HTTP customer','other-http@example.invalid','test');SELECT CAST(SCOPE_IDENTITY() AS int)"));
         app.MapGet("/__test/other",async (HttpContext http)=>await http.DangNhapKhachHangAsync(new KhachHangRepository().LayTheoMa(other)!));
-        app.MapGet("/__test/cart",(HttpContext http)=> { http.Session.LuuGio([new DongGioLuu(product,1)]);http.Session.LuuVoucher("HTTP20");return "ready"; });
+        app.MapGet("/__test/cart",(HttpContext http)=> { http.Session.LuuGio([new DongGioLuu(product,1)]);http.Session.LuuVoucher(http.Request.Query["v"].FirstOrDefault() ?? "HTTP20");return "ready"; });
         app.MapGet("/__test/token",(HttpContext http,IAntiforgery csrf)=>csrf.GetAndStoreTokens(http).RequestToken!);
         app.MapControllerRoute("default","{controller=Home}/{action=Index}/{id?}");
         await app.StartAsync();
@@ -59,7 +60,7 @@ internal static partial class Program
             await otherClient.PostAsync($"/DonHang/Huy/{id}",new FormUrlEncodedContent(new Dictionary<string,string> { ["__RequestVerificationToken"]=token }));
             Eq("Hoàn thành",repo.LayTheoMa(id)!.TrangThai);
             // A changed price between GET confirmation and POST never silently creates an order.
-            await http.GetAsync("/__test/cart");html=await GetHtml(http,"/DatHang");int count=Orders();Price(product,110);
+            await http.GetAsync("/__test/cart?v=HTTP20B");html=await GetHtml(http,"/DatHang");int count=Orders();Price(product,110);
             var stale=await Checkout(http,html);Eq(HttpStatusCode.OK,stale.StatusCode);Eq(count,Orders());
             html=await stale.Content.ReadAsStringAsync();True(WebUtility.HtmlDecode(html).Contains("xác nhận lại"));
             created=await Checkout(http,html);Eq(HttpStatusCode.Redirect,created.StatusCode);int cancellable=RedirectId(created);
