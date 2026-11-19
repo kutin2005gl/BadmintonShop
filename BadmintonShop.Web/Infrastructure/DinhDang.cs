@@ -10,6 +10,13 @@ public static class DinhDang
     // TV3: 8580000 -> "8.580.000 ₫"
     public static string Dong(this decimal so) => so.ToString("N0", Vi) + " ₫";
 
+    // TV1: che bot SDT khi hien cho khach tra cuu: "0900000777" -> "09xx xxx 777"
+    public static string CheSDT(string? sdt)
+    {
+        var so = new string((sdt ?? "").Where(char.IsDigit).ToArray());
+        return so.Length < 6 ? "***" : so[..2] + "xx xxx " + so[^3..];
+    }
+
     // TV3: mau badge Bootstrap theo trang thai don
     public static string MauTrangThai(string trangThai) => trangThai switch
     {

@@ -63,27 +63,36 @@ public class GioHangController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // TV3: nhap ma giam gia (kiem tra hop le khi tinh lai gio)
+    // TV3: nhap ma giam gia (kiem tra hop le khi tinh lai gio); goi tu trang Gio hang hoac trang Dat hang (returnUrl)
     [HttpPost, ValidateAntiForgeryToken]
-    public IActionResult ApDungVoucher(string? maVoucher)
+    public IActionResult ApDungVoucher(string? maVoucher, string? returnUrl = null)
     {
+        if (string.IsNullOrWhiteSpace(maVoucher))
+        {
+            TempData["Loi"] = "Vui lòng nhập mã giảm giá.";
+            return QuayLai(returnUrl);
+        }
         // CO-02: bao som neu khach dang nhap da dung ma nay (khach chua dang nhap duoc kiem luc dat hang)
         var maKH = User.Identity?.IsAuthenticated == true ? User.LayMaKH() : null;
-        if (maKH != null && new KhuyenMaiRepository().KhachDaDungVoucher(maKH.Value, maVoucher ?? ""))
+        if (maKH != null && new KhuyenMaiRepository().KhachDaDungVoucher(maKH.Value, maVoucher))
         {
             HttpContext.Session.LuuVoucher(null);
             TempData["Loi"] = KhuyenMaiRepository.ThongBaoDaDungVoucher;
-            return RedirectToAction(nameof(Index));
+            return QuayLai(returnUrl);
         }
         HttpContext.Session.LuuVoucher(maVoucher);
-        return RedirectToAction(nameof(Index));
+        return QuayLai(returnUrl);
     }
 
     // TV3: bo ma giam gia
     [HttpPost, ValidateAntiForgeryToken]
-    public IActionResult BoVoucher()
+    public IActionResult BoVoucher(string? returnUrl = null)
     {
         HttpContext.Session.LuuVoucher(null);
-        return RedirectToAction(nameof(Index));
+        return QuayLai(returnUrl);
     }
+
+    // TV3: quay ve trang goi (chi nhan URL noi bo), mac dinh ve gio hang
+    private IActionResult QuayLai(string? returnUrl)
+        => !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl) ? Redirect(returnUrl) : RedirectToAction(nameof(Index));
 }

@@ -13,8 +13,91 @@ namespace BadmintonShop.Web.Controllers;
 public class DonHangController : Controller
 {
     private readonly DonHangOnlineRepository _donHang = new();
+    private readonly KhachHangRepository _khachHang = new();
 
     private int MaKH => User.LayMaKH() ?? 0;
+
+    // Tra cuu don cho khach chua dang nhap (CO-01): chi xem DUNG don da tra cuu, khong lo lich su cua SDT
+    private const string TraCuuHDKey = "TraCuu.MaHD";
+    private const string TraCuuKHKey = "TraCuu.MaKH";
+    private const string SoLanSaiKey = "TraCuu.SoLanSai";
+    private const string KhoaDenKey = "TraCuu.KhoaDen";
+    private const int SoLanSaiToiDa = 5;
+    private static readonly TimeSpan ThoiGianKhoa = TimeSpan.FromMinutes(15);
+    private const string LoiChung = "Không tìm thấy đơn hàng với thông tin đã nhập.";
+
+    // TV1: trang tra cuu don bang ma don + SDT (khong can dang nhap)
+    [HttpGet, AllowAnonymous]
+    public IActionResult TraCuu() => View(new TraCuuDonViewModel());
+
+    // TV1: kiem ma don + SDT, khop thi luu quyen xem DUNG don do trong session; sai qua 5 lan khoa 15 phut
+    [HttpPost, AllowAnonymous, ValidateAntiForgeryToken]
+    public IActionResult TraCuu(string? maDon, string? sdt)
+    {
+        var vm = new TraCuuDonViewModel { MaDon = maDon ?? "", SDT = sdt ?? "" };
+        var s = HttpContext.Session;
+
+        var conKhoa = PhutConKhoa();
+        if (conKhoa > 0)
+        {
+            vm.Loi = $"Bạn đã nhập sai quá nhiều lần. Vui lòng thử lại sau {conKhoa} phút.";
+            return View(vm);
+        }
+        if (string.IsNullOrWhiteSpace(maDon) || string.IsNullOrWhiteSpace(sdt))
+        {
+            vm.Loi = "Vui lòng nhập mã đơn hàng và số điện thoại.";
+            return View(vm);
+        }
+
+        var so = KhachHangRepository.ChuanHoaSDT(sdt);
+        int? maKH = null;
+        if (int.TryParse(maDon.Trim().TrimStart('#'), out var maHD) && maHD > 0 && so != null)
+            maKH = _donHang.TraCuuMaKHTheoSDT(maHD, so);
+
+        if (maKH == null)
+        {
+            var sai = (s.GetInt32(SoLanSaiKey) ?? 0) + 1;
+            if (sai >= SoLanSaiToiDa)
+            {
+                s.Remove(SoLanSaiKey);
+                s.SetString(KhoaDenKey, DateTime.UtcNow.Add(ThoiGianKhoa).Ticks.ToString());
+                vm.Loi = $"Bạn đã nhập sai quá nhiều lần. Vui lòng thử lại sau {(int)ThoiGianKhoa.TotalMinutes} phút.";
+            }
+            else
+            {
+                s.SetInt32(SoLanSaiKey, sai);
+                vm.Loi = LoiChung;
+            }
+            return View(vm);
+        }
+
+        s.SetInt32(TraCuuHDKey, maHD);
+        s.SetInt32(TraCuuKHKey, maKH.Value);
+        return RedirectToAction(nameof(XemDon), new { id = maHD });
+    }
+
+    // TV1: xem 1 don da tra cuu dung trong phien nay (chi xem, khong huy)
+    [HttpGet, AllowAnonymous, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public IActionResult XemDon(int id)
+    {
+        var s = HttpContext.Session;
+        if (s.GetInt32(TraCuuHDKey) != id) return RedirectToAction(nameof(TraCuu));
+        var maKH = s.GetInt32(TraCuuKHKey) ?? 0;
+        var hd = _donHang.LayDonCuaKhach(id, maKH);
+        if (hd == null) return RedirectToAction(nameof(TraCuu));
+        ViewData["TraCuu"] = true;
+        ViewData["SDTChe"] = DinhDang.CheSDT(_khachHang.LayTheoMa(maKH)?.SDT);
+        return View("ChiTiet", new ChiTietDonViewModel { Don = hd, Dong = _donHang.LayChiTietHienThi(id, maKH) });
+    }
+
+    // TV1: so phut con bi khoa tra cuu trong phien nay (0 = khong khoa)
+    private int PhutConKhoa()
+    {
+        if (!long.TryParse(HttpContext.Session.GetString(KhoaDenKey), out var ticks)) return 0;
+        var con = new DateTime(ticks, DateTimeKind.Utc) - DateTime.UtcNow;
+        if (con <= TimeSpan.Zero) { HttpContext.Session.Remove(KhoaDenKey); return 0; }
+        return (int)Math.Ceiling(con.TotalMinutes);
+    }
 
     // TV3: danh sach don cua toi
     public IActionResult Index() => View(_donHang.LayLichSu(MaKH));

@@ -152,6 +152,15 @@ public class KhachHangRepository
         }
     }
 
+    // TV1: nang cap khach vang lai (email gia @khach.invalid) thanh tai khoan that: dat email + mat khau cho CHINH khach do
+    public bool NangCapKhachVangLai(int maKH, string email, string matKhauTho)
+        => DbHelper.ExecuteNonQuery(@"UPDATE KhachHang SET Email = @email, MatKhau = @mk
+                                      WHERE MaKH = @ma AND TrangThai = 1 AND Email LIKE N'%' + @duoi",
+                                    new SqlParameter("@email", ChuanHoaEmail(email)),
+                                    new SqlParameter("@mk", MatKhauHelper.BamMatKhau(matKhauTho)),
+                                    new SqlParameter("@ma", maKH),
+                                    new SqlParameter("@duoi", DuoiEmailVangLai)) > 0;
+
     // Danh sach khach hang cho man hinh quan ly (khong tra mat khau): loc theo ten/SDT/email,
     // kem so don va tong tien da mua (khong tinh don huy)
     public DataTable LayDanhSach(string? tuKhoa = null)

@@ -3,6 +3,7 @@
 @{
     var hd = Model.Don;
     var nhung = ViewData["Nhung"] is true;   // true = chi tiet nhung trong man hinh danh sach (main-sub), bo khung trang day du
+    var traCuu = ViewData["TraCuu"] is true; // true = khach chua dang nhap xem qua trang tra cuu: chi xem, khong huy
     ViewData["Title"] = "Đơn hàng #" + hd.MaHD;
     var cacBuoc = new[] { "Chờ xác nhận", "Đã xác nhận", "Đang giao", "Hoàn thành" };
     var viTri = Array.IndexOf(cacBuoc, hd.TrangThai);
@@ -17,7 +18,14 @@
 }
 else
 {
-    <a asp-action="Index" class="text-xs font-bold uppercase underline hover:text-primary">&larr; Đơn hàng của tôi</a>
+    @if (traCuu)
+    {
+        <a asp-action="TraCuu" class="text-xs font-bold uppercase underline hover:text-primary">&larr; Tra cứu đơn khác</a>
+    }
+    else
+    {
+        <a asp-action="Index" class="text-xs font-bold uppercase underline hover:text-primary">&larr; Đơn hàng của tôi</a>
+    }
     <h1 class="page-title mt-4">Đơn hàng #@hd.MaHD <span class="badge align-middle @DinhDang.MauTrangThai(hd.TrangThai)">@hd.TrangThai</span></h1>
 
     @if (TempData["ThongBao"] is string tb) { <div class="alert-ok">@tb</div> }
@@ -73,9 +81,14 @@ else
                 <div>Ngày đặt: @hd.NgayLap.ToString("dd/MM/yyyy HH:mm")</div>
                 <div>Thanh toán: @(hd.HinhThucTT == "COD" ? "Khi nhận hàng (COD)" : "Online")</div>
                 <div>Giao tới: @hd.DiaChiGiao</div>
+                @if (traCuu) { <div>Số điện thoại: @ViewData["SDTChe"]</div> }
                 @if (!string.IsNullOrWhiteSpace(hd.GhiChu)) { <div>Ghi chú: @hd.GhiChu</div> }
             </div>
-            @if (hd.TrangThai == "Chờ xác nhận")
+            @if (traCuu && hd.TrangThai == "Chờ xác nhận")
+            {
+                <p class="mt-6 text-xs text-gray-500">Muốn hủy hoặc thay đổi đơn, vui lòng liên hệ cửa hàng hoặc đăng nhập tài khoản.</p>
+            }
+            else if (hd.TrangThai == "Chờ xác nhận")
             {
                 <form asp-action="Huy" asp-route-id="@hd.MaHD" method="post" class="mt-6"
                       onsubmit="return confirm('Bạn chắc chắn muốn hủy đơn hàng này?');">

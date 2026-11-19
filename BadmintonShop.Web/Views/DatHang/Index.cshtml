@@ -5,10 +5,12 @@
 <h1 class="page-title">Xác nhận đơn hàng</h1>
 
 @if (Model.Loi != null) { <div class="alert-err">@Model.Loi</div> }
+@if (TempData["Loi"] is string loiTam) { <div class="alert-err">@loiTam</div> }
+@foreach (var cb in g.CanhBao) { <div class="alert-warn">@cb</div> }
 
 <div class="flex flex-col lg:flex-row gap-12">
     <div class="w-full lg:w-3/5">
-        <form asp-action="XacNhan" method="post" class="space-y-6">
+        <form asp-action="XacNhan" method="post" class="space-y-6" id="form-dat-hang">
             @if (Model.DaDangNhap)
             {
                 <div>
@@ -67,13 +69,61 @@
             </div>
             <div class="border-t border-gray-200 pt-4 space-y-3 text-sm font-medium">
                 <div class="flex justify-between"><span class="text-gray-600">Tạm tính</span><span>@g.TongTienHang.Dong()</span></div>
-                <div class="flex justify-between text-secondary"><span>Giảm giá</span><span>-@g.TienGiamHoaDon.Dong()</span></div>
+                <div class="flex justify-between text-secondary">
+                    <span>Giảm giá@(g.MaVoucher != null ? $" (mã {g.MaVoucher})" : "")</span><span>-@g.TienGiamHoaDon.Dong()</span>
+                </div>
             </div>
             <div class="flex justify-between items-end border-t border-gray-200 pt-6 mt-4">
                 <span class="font-bold uppercase tracking-wider text-sm">Tổng cộng</span>
                 <span class="text-2xl font-extrabold tracking-tight">@g.TongThanhToan.Dong()</span>
             </div>
         </div>
+
+        @* SV3: nhap ma giam gia ngay tai trang dat hang (form rieng, khong long trong form dat hang) *@
+        <div class="mt-6 border border-gray-200 p-6">
+            <h3 class="font-bold uppercase text-sm tracking-wider mb-4">Mã giảm giá</h3>
+            @if (g.LoiVoucher != null) { <div class="alert-err">@g.LoiVoucher</div> }
+            @if (g.MaVoucher != null)
+            {
+                <p class="text-sm mb-3">Đang áp dụng mã <strong>@g.MaVoucher</strong>.</p>
+                <form asp-controller="GioHang" asp-action="BoVoucher" method="post" class="giu-thong-tin">
+                    <input type="hidden" name="returnUrl" value="@Url.Action("Index", "DatHang")" />
+                    <button type="submit" class="text-xs font-bold uppercase underline hover:text-primary">Bỏ mã</button>
+                </form>
+            }
+            else
+            {
+                <form asp-controller="GioHang" asp-action="ApDungVoucher" method="post" class="flex gap-2 giu-thong-tin">
+                    <input type="hidden" name="returnUrl" value="@Url.Action("Index", "DatHang")" />
+                    <input type="text" name="maVoucher" class="input-box flex-1" placeholder="Nhập mã của bạn" maxlength="30" aria-label="Mã giảm giá" required />
+                    <button type="submit" class="bg-black text-white px-6 font-bold uppercase text-sm hover:bg-gray-800 transition-colors">Áp dụng</button>
+                </form>
+            }
+        </div>
     </div>
 </div>
 </div>
+
+@section Scripts {
+<script>
+    // Giu lai thong tin khach da go (ho ten, SDT, dia chi, ghi chu, hinh thuc TT) khi bam Ap dung / Bo ma giam gia
+    (function () {
+        var key = 'DatHang.NhapTam', form = document.getElementById('form-dat-hang');
+        if (!form) return;
+        var ten = ['hoTen', 'sdt', 'diaChi', 'ghiChu'];
+        document.querySelectorAll('form.giu-thong-tin').forEach(function (f) {
+            f.addEventListener('submit', function () {
+                var d = {};
+                ten.forEach(function (n) { var el = form.elements[n]; if (el) d[n] = el.value; });
+                var tt = form.querySelector('input[name="hinhThucTT"]:checked'); if (tt) d.hinhThucTT = tt.value;
+                try { sessionStorage.setItem(key, JSON.stringify(d)); } catch (e) { }
+            });
+        });
+        var luu = null;
+        try { luu = JSON.parse(sessionStorage.getItem(key) || 'null'); sessionStorage.removeItem(key); } catch (e) { }
+        if (!luu) return;
+        ten.forEach(function (n) { var el = form.elements[n]; if (el && luu[n]) el.value = luu[n]; });
+        if (luu.hinhThucTT) { var r = form.querySelector('input[name="hinhThucTT"][value="' + luu.hinhThucTT + '"]'); if (r) r.checked = true; }
+    })();
+</script>
+}

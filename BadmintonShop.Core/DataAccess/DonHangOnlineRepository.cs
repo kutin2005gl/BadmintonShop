@@ -65,6 +65,20 @@ public class DonHangOnlineRepository
         return dt.Rows.Count == 0 ? null : HoaDonRepository.Map(dt.Rows[0]);
     }
 
+    // TV1: tra cuu don ONLINE bang ma don + SDT (da chuan hoa 0xxx) cua khach so huu don; khop tra MaKH, khong khop tra null
+    public int? TraCuuMaKHTheoSDT(int maHD, string sdtChuanHoa)
+    {
+        // SDT trong CSDL co the luu dang +84..., 84..., co dau cach/cham/gach
+        var kq = DbHelper.ExecuteScalar(@"
+            SELECT h.MaKH FROM HoaDon h JOIN KhachHang k ON k.MaKH = h.MaKH
+            WHERE h.MaHD = @hd AND h.LoaiBan = N'Online'
+              AND REPLACE(REPLACE(REPLACE(REPLACE(k.SDT,' ',''),'-',''),'.',''),'+','') IN (@a, @b)",
+            new SqlParameter("@hd", maHD),
+            new SqlParameter("@a", sdtChuanHoa),
+            new SqlParameter("@b", "84" + sdtChuanHoa[1..]));
+        return kq is int ma ? ma : null;
+    }
+
     // TV3: chi tiet don kem ten san pham (gia, giam la gia LUC DAT, khong phai gia hien tai)
     public DataTable LayChiTietHienThi(int maHD, int? maKH = null)
         => DbHelper.ExecuteQuery(@"SELECT ct.MaSP, sp.TenSP, sp.HinhAnh, ct.SoLuong, ct.DonGia, ct.GiamGia, ct.ThanhTien
