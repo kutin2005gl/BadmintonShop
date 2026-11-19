@@ -1,0 +1,44 @@
+﻿@model BadmintonShop.Web.Models.XacThucOtpViewModel
+
+@{
+    ViewData["Title"] = "Xác thực số điện thoại";
+}
+
+<div class="auth-khung">
+    <div class="auth-card">
+        <h1 class="auth-title">Xác thực số điện thoại</h1>
+        <p class="auth-sub">Số điện thoại này đã từng đặt hàng. Nhập mã OTP gồm 6 chữ số để xác nhận bạn là chủ số và nhận lại lịch sử đơn. Mã có hiệu lực trong 5 phút.</p>
+
+        @if (TempData["OtpDemo"] != null)
+        {
+            <div class="alert-warn text-center !mb-8">
+                <div class="font-bold uppercase tracking-wider text-xs">OTP mô phỏng (chỉ dùng để demo)</div>
+                <div class="text-4xl font-extrabold tracking-[0.3em] my-3 tabular-nums">@TempData["OtpDemo"]</div>
+                <div class="text-xs">Mã này không được gửi qua email thật.</div>
+            </div>
+        }
+
+        <form asp-controller="TaiKhoan" asp-action="XacThucSdt" method="post">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="alert-err"></div>
+
+            <div class="field">
+                <label asp-for="MaOtp" class="field-label"></label>
+                <input asp-for="MaOtp" class="input-box text-center text-2xl font-bold tracking-[0.4em] tabular-nums"
+                       maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="000000" />
+                <span asp-validation-for="MaOtp" class="field-error"></span>
+            </div>
+
+            <button type="submit" class="btn-dark w-full">Xác nhận OTP</button>
+        </form>
+
+        <div class="border-t border-gray-200 mt-8 pt-6 text-center">
+            <a asp-controller="TaiKhoan" asp-action="DangKy" class="link-sub">Quay lại đăng ký để lấy mã OTP mới</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
