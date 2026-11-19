@@ -52,6 +52,13 @@
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-current transition-all duration-300 group-hover:w-full"></span>
                     </a>
                 }
+                else
+                {
+                    <a asp-controller="DonHang" asp-action="TraCuu" class="text-sm font-semibold uppercase tracking-wider hover:text-primary transition-colors py-8 relative group text-black">
+                        Tra cứu đơn hàng
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-current transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                }
             </nav>
 
             <div class="flex items-center space-x-4 sm:space-x-6">
@@ -111,6 +118,10 @@
             {
                 <a asp-controller="DonHang" asp-action="Index" class="py-4 border-b border-gray-100 text-lg font-bold uppercase text-black">Đơn hàng của tôi</a>
             }
+            else
+            {
+                <a asp-controller="DonHang" asp-action="TraCuu" class="py-4 border-b border-gray-100 text-lg font-bold uppercase text-black">Tra cứu đơn hàng</a>
+            }
             <div class="flex items-center justify-around py-8 text-black">
                 @if (daDangNhap)
                 {
@@ -155,7 +166,7 @@
                 <div>
                     <h4 class="text-sm font-bold uppercase mb-6">Hỗ trợ</h4>
                     <ul class="space-y-4">
-                        <li><a asp-controller="DonHang" asp-action="Index" class="text-gray-400 hover:text-white transition-colors text-sm">Theo dõi đơn hàng</a></li>
+                        <li><a asp-controller="DonHang" asp-action="@(daDangNhap ? "Index" : "TraCuu")" class="text-gray-400 hover:text-white transition-colors text-sm">Theo dõi đơn hàng</a></li>
                         <li><a asp-controller="GioHang" asp-action="Index" class="text-gray-400 hover:text-white transition-colors text-sm">Giỏ hàng</a></li>
                         <li><a href="#" class="text-gray-400 hover:text-white transition-colors text-sm">Chính sách vận chuyển</a></li>
                         <li><a href="#" class="text-gray-400 hover:text-white transition-colors text-sm">Chính sách đổi trả</a></li>

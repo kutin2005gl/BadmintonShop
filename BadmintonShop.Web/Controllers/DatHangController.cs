@@ -128,6 +128,68 @@ public class DatHangController : Controller
     {
         var hd = _donHang.LayDonCuaKhach(id, MaKHXemDon(id));
         if (hd == null) return NotFound();
+        if (!DaDangNhap) ViewData["NangCap"] = KhachVuaDatCoTheNangCap(id) ? "form" : "daCoTaiKhoan";
         return View(new ChiTietDonViewModel { Don = hd, Dong = _donHang.LayChiTietHienThi(id, MaKHXemDon(id)) });
+    }
+
+    // TV1: khach vang lai vua dat don 'maHD' trong phien nay va van con la khach email gia -> duoc tao tai khoan
+    private bool KhachVuaDatCoTheNangCap(int maHD)
+    {
+        var s = HttpContext.Session;
+        if (s.GetInt32(GuestHDKey) != maHD || s.GetInt32(GuestKHKey) is not int maKH) return false;
+        var kh = _khachHang.LayTheoMa(maKH);
+        return kh != null && kh.TrangThai && KhachHangRepository.LaEmailVangLai(kh.Email);
+    }
+
+    // TV1: nang cap khach vang lai vua dat don thanh tai khoan (email + mat khau), dang nhap luon roi chuyen toi /DonHang
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> TaoTaiKhoan(int id, string? email, string? matKhau, string? xacNhanMatKhau)
+    {
+        if (DaDangNhap) return RedirectToAction("Index", "DonHang");
+        if (!KhachVuaDatCoTheNangCap(id)) return RedirectToAction(nameof(ThanhCong), new { id });
+        var maKH = HttpContext.Session.GetInt32(GuestKHKey)!.Value;
+
+        email = (email ?? "").Trim();
+        string? loi = null;
+        if (email.Length == 0 || email.Length > 100 || !new System.ComponentModel.DataAnnotations.EmailAddressAttribute().IsValid(email)
+            || KhachHangRepository.LaEmailVangLai(email))
+            loi = "Email không hợp lệ.";
+        else if (!MatKhauHelper.LaMatKhauManh(matKhau ?? ""))
+            loi = "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường và chữ số.";
+        else if (matKhau != xacNhanMatKhau)
+            loi = "Mật khẩu xác nhận không khớp.";
+        else if (_khachHang.EmailDaTonTai(email))
+            loi = "Email này đã được đăng ký.";
+
+        if (loi == null)
+        {
+            try
+            {
+                if (!_khachHang.NangCapKhachVangLai(maKH, email, matKhau!))
+                    loi = "Không thể tạo tài khoản cho số điện thoại này. Vui lòng liên hệ cửa hàng.";
+            }
+            catch (SqlException ex) when (ex.Number is 2627 or 2601)   // email vua bi nguoi khac dang ky cung luc
+            {
+                loi = "Email này đã được đăng ký.";
+            }
+            catch (SqlException ex)
+            {
+                loi = LoiCsdl.ThongBao(ex);
+            }
+        }
+
+        if (loi != null)
+        {
+            TempData["LoiNangCap"] = loi;
+            TempData["EmailNangCap"] = email;
+            return RedirectToAction(nameof(ThanhCong), new { id });
+        }
+
+        var kh = _khachHang.LayTheoMa(maKH)!;
+        await HttpContext.DangNhapKhachHangAsync(kh);
+        HttpContext.Session.Remove(GuestHDKey);
+        HttpContext.Session.Remove(GuestKHKey);
+        TempData["ThongBao"] = "Đã tạo tài khoản. Từ nay bạn đăng nhập bằng email " + kh.Email + " để theo dõi đơn hàng.";
+        return RedirectToAction("Index", "DonHang");
     }
 }

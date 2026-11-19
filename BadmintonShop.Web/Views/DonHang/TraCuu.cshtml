@@ -1,0 +1,29 @@
+@model TraCuuDonViewModel
+@{ ViewData["Title"] = "Tra cứu đơn hàng"; }
+
+<div class="auth-khung">
+    <div class="auth-card">
+        <h1 class="auth-title">Tra cứu đơn hàng</h1>
+        <p class="auth-sub">Nhập mã đơn hàng và số điện thoại đã dùng khi đặt hàng để xem tình trạng đơn.</p>
+
+        <form asp-controller="DonHang" asp-action="TraCuu" method="post" autocomplete="off">
+            @if (Model.Loi != null) { <div class="alert-err">@Model.Loi</div> }
+
+            <div class="field">
+                <label for="maDon" class="field-label">Mã đơn hàng</label>
+                <input id="maDon" name="maDon" value="@Model.MaDon" class="input-box" inputmode="numeric" placeholder="Ví dụ: 1234" required maxlength="20" />
+            </div>
+            <div class="field">
+                <label for="sdt" class="field-label">Số điện thoại đặt hàng</label>
+                <input id="sdt" name="sdt" value="@Model.SDT" class="input-box" inputmode="tel" autocomplete="tel" placeholder="0901 234 567" required maxlength="20" />
+            </div>
+
+            <button type="submit" class="btn-dark w-full mt-2">Tra cứu</button>
+        </form>
+
+        <div class="border-t border-gray-200 mt-8 pt-6 text-sm text-gray-600 text-center">
+            Có tài khoản?
+            <a asp-controller="TaiKhoan" asp-action="DangNhap" asp-route-returnUrl="/DonHang" class="link-sub ml-1">Đăng nhập để xem tất cả đơn hàng</a>
+        </div>
+    </div>
+</div>

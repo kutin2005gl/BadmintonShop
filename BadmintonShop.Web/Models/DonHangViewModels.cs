@@ -20,3 +20,11 @@ public class ChiTietDonViewModel
     public HoaDon Don { get; set; } = new();
     public DataTable Dong { get; set; } = new();
 }
+
+/// <summary>Form tra cuu don cho khach chua dang nhap (ma don + SDT).</summary>
+public class TraCuuDonViewModel
+{
+    public string MaDon { get; set; } = "";
+    public string SDT { get; set; } = "";
+    public string? Loi { get; set; }
+}

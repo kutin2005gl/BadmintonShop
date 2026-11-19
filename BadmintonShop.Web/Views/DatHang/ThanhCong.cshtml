@@ -1,6 +1,6 @@
 @model ChiTietDonViewModel
 @using System.Data
-@{ ViewData["Title"] = "Đặt hàng thành công"; var hd = Model.Don; }
+@{ ViewData["Title"] = "Đặt hàng thành công"; var hd = Model.Don; var nangCap = ViewData["NangCap"] as string; }
 
 <div class="container mx-auto px-4 py-12">
 <div class="text-center mb-10">
@@ -32,4 +32,47 @@
     }
     <a asp-controller="Home" asp-action="Index" class="btn-outline">Tiếp tục mua sắm</a>
 </div>
+
+@if (nangCap != null)
+{
+    <div class="mx-auto max-w-xl mt-10 border border-gray-200 p-6 md:p-8">
+        <p class="text-sm">
+            Hãy <strong>lưu lại mã đơn #@hd.MaHD và số điện thoại</strong> đã đặt hàng để tra cứu tình trạng đơn tại
+            <a asp-controller="DonHang" asp-action="TraCuu" class="link-sub">trang tra cứu đơn hàng</a>.
+        </p>
+
+        @if (nangCap == "form")
+        {
+            <h2 class="text-lg font-extrabold uppercase tracking-tight mt-8 mb-2">Tạo tài khoản để theo dõi đơn</h2>
+            <p class="text-xs text-gray-500 mb-4">Đơn hàng đặt bằng số điện thoại này sẽ được gắn vào tài khoản mới.</p>
+            @if (TempData["LoiNangCap"] is string loiNC) { <div class="alert-err">@loiNC</div> }
+            <form asp-action="TaoTaiKhoan" asp-route-id="@hd.MaHD" method="post">
+                <div class="field">
+                    <label for="email" class="field-label">Email</label>
+                    <input id="email" name="email" type="email" value="@(TempData["EmailNangCap"] as string)" class="input-box" autocomplete="email" required maxlength="100" />
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 sm:gap-4">
+                    <div class="field">
+                        <label for="matKhau" class="field-label">Mật khẩu</label>
+                        <input id="matKhau" name="matKhau" type="password" class="input-box" autocomplete="new-password" required minlength="8" maxlength="100" />
+                    </div>
+                    <div class="field">
+                        <label for="xacNhanMatKhau" class="field-label">Nhập lại mật khẩu</label>
+                        <input id="xacNhanMatKhau" name="xacNhanMatKhau" type="password" class="input-box" autocomplete="new-password" required minlength="8" maxlength="100" />
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mb-4">Ít nhất 8 ký tự, gồm chữ hoa, chữ thường và chữ số.</p>
+                <button type="submit" class="btn-dark w-full">Tạo tài khoản</button>
+            </form>
+        }
+        else
+        {
+            <p class="text-sm mt-4">
+                Số điện thoại này đã có tài khoản, vui lòng
+                <a asp-controller="TaiKhoan" asp-action="DangNhap" asp-route-returnUrl="/DonHang" class="link-sub">đăng nhập</a>
+                để xem đơn.
+            </p>
+        }
+    </div>
+}
 </div>
