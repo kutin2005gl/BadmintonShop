@@ -35,6 +35,10 @@
                 <textarea id="diaChi" name="diaChi" class="input-box" rows="3" maxlength="255" required>@Model.DiaChi</textarea>
             </div>
             <div>
+                <label for="ghiChu" class="block text-sm font-bold uppercase tracking-wider mb-2">Ghi chú đơn hàng <span class="font-normal normal-case text-gray-500">(không bắt buộc)</span></label>
+                <textarea id="ghiChu" name="ghiChu" class="input-box" rows="2" maxlength="500" placeholder="Ví dụ: giao giờ hành chính, gọi trước khi giao">@Model.GhiChu</textarea>
+            </div>
+            <div>
                 <span class="block text-sm font-bold uppercase tracking-wider mb-3">Hình thức thanh toán</span>
                 <label class="flex items-center gap-3 border border-gray-300 p-4 mb-2 cursor-pointer has-[:checked]:border-black">
                     <input type="radio" name="hinhThucTT" id="tt-cod" value="COD" checked="@(Model.HinhThucTT == "COD")" class="accent-black" />

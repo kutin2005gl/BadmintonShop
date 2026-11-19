@@ -15,6 +15,7 @@ public class HoaDon
     public decimal TongTien { get; set; }  // trigger tu tinh
     public string TrangThai { get; set; } = "";
     public string? LyDoHuy { get; set; }
+    public string? GhiChu { get; set; }   // SV3: ghi chu cua khach khi dat don online (NULL = khong co)
     public Guid? MaYeuCauPOS { get; set; }
     public decimal? TienKhachDua { get; set; }
 }

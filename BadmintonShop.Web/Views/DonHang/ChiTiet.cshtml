@@ -73,6 +73,7 @@ else
                 <div>Ngày đặt: @hd.NgayLap.ToString("dd/MM/yyyy HH:mm")</div>
                 <div>Thanh toán: @(hd.HinhThucTT == "COD" ? "Khi nhận hàng (COD)" : "Online")</div>
                 <div>Giao tới: @hd.DiaChiGiao</div>
+                @if (!string.IsNullOrWhiteSpace(hd.GhiChu)) { <div>Ghi chú: @hd.GhiChu</div> }
             </div>
             @if (hd.TrangThai == "Chờ xác nhận")
             {

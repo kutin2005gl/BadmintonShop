@@ -54,7 +54,7 @@ public class HoaDonRepository
         return new HoaDon { MaHD=ma,MaKH=r.Field<int?>("MaKH"),MaNV=r.Field<int?>("MaNV"),
             NgayLap=r.Field<DateTime>("NgayLap"),LoaiBan=r.Field<string>("LoaiBan")!,HinhThucTT=r.Field<string>("HinhThucTT")!,
             DiaChiGiao=r.Field<string?>("DiaChiGiao"),MaCTKM=r.Field<int?>("MaCTKM"),TienGiamGia=r.Field<decimal>("TienGiamGia"),
-            TongTien=r.Field<decimal>("TongTien"),TrangThai=r.Field<string>("TrangThai")!,LyDoHuy=dt.Columns.Contains("LyDoHuy")?r.Field<string?>("LyDoHuy"):null,
+            TongTien=r.Field<decimal>("TongTien"),TrangThai=r.Field<string>("TrangThai")!,LyDoHuy=dt.Columns.Contains("LyDoHuy")?r.Field<string?>("LyDoHuy"):null,GhiChu=dt.Columns.Contains("GhiChu")?r.Field<string?>("GhiChu"):null,
             MaYeuCauPOS=dt.Columns.Contains("MaYeuCauPOS")?r.Field<Guid?>("MaYeuCauPOS"):null,TienKhachDua=dt.Columns.Contains("TienKhachDua")?r.Field<decimal?>("TienKhachDua"):null };
     }
 
