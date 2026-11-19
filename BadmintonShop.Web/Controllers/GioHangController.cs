@@ -14,28 +14,50 @@ public class GioHangController : Controller
     // TV3: xem gio hang
     public IActionResult Index() => View(_gioHang.TinhTuSession(HttpContext.Session));
 
+    [HttpGet, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public IActionResult NganGio()
+    {
+        var session = HttpContext.Session;
+        var gio = _gioHang.Tinh(session.LayGio().Select(d => (d.MaSP, d.SoLuong)), session.LayVoucher());
+        return PartialView("_NganGio", gio);
+    }
+
     // TV3: them vao gio - SV2 goi tu trang chi tiet san pham: POST /GioHang/Them (maSP, soLuong, returnUrl)
     [HttpPost, ValidateAntiForgeryToken]
     public IActionResult Them(int maSP, int soLuong = 1, string? returnUrl = null)
     {
-        if (maSP <= 0 || soLuong <= 0) return BadRequest();
+        var gio = HttpContext.Session.LayGio();
+        IActionResult TraKetQua(bool thanhCong, string thongBao)
+        {
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                var data = new { thanhCong, thongBao, tongSoLuong = gio.Sum(d => d.SoLuong) };
+                return thanhCong ? Json(data) : BadRequest(data);
+            }
+
+            TempData[thanhCong ? "GioHang.ThongBao" : "GioHang.Loi"] = thongBao;
+            return QuayLai(returnUrl);
+        }
+
+        if (!ModelState.IsValid || maSP <= 0 || soLuong <= 0)
+            return TraKetQua(false, "Sản phẩm hoặc số lượng không hợp lệ.");
 
         var sp = _sanPham.LayTheoMa(maSP);
         if (sp == null || sp.TrangThai != "Đang bán")
-        {
-            TempData["Loi"] = "Sản phẩm không tồn tại hoặc đã ngừng bán.";
-            return RedirectToAction(nameof(Index));
-        }
+            return TraKetQua(false, "Sản phẩm không tồn tại hoặc đã ngừng bán.");
 
-        var gio = HttpContext.Session.LayGio();
         var i = gio.FindIndex(x => x.MaSP == maSP);
-        if (i >= 0) gio[i] = gio[i] with { SoLuong = Math.Min(GioHangSession.SoLuongToiDa, gio[i].SoLuong + soLuong) };
-        else gio.Add(new DongGioLuu(maSP, Math.Min(GioHangSession.SoLuongToiDa, soLuong)));
+        var tongDong = (long)soLuong + (i >= 0 ? gio[i].SoLuong : 0);
+        if (sp.SoLuongTon <= 0) return TraKetQua(false, $"“{sp.TenSP}” đã hết hàng.");
+        if (tongDong > sp.SoLuongTon) return TraKetQua(false, $"“{sp.TenSP}” chỉ còn {sp.SoLuongTon} sản phẩm.");
+        if (tongDong > GioHangSession.SoLuongToiDa)
+            return TraKetQua(false, $"Mỗi sản phẩm được thêm tối đa {GioHangSession.SoLuongToiDa} món.");
+
+        if (i >= 0) gio[i] = gio[i] with { SoLuong = (int)tongDong };
+        else gio.Add(new DongGioLuu(maSP, soLuong));
         HttpContext.Session.LuuGio(gio);
 
-        TempData["ThongBao"] = $"Đã thêm “{sp.TenSP}” vào giỏ hàng.";
-        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)) return Redirect(returnUrl);
-        return RedirectToAction(nameof(Index));
+        return TraKetQua(true, $"Đã thêm “{sp.TenSP}” vào giỏ hàng.");
     }
 
     // TV3: doi so luong 1 dong (<= 0 thi xoa dong)

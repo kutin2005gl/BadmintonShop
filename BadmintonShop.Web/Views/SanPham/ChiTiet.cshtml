@@ -98,11 +98,11 @@
                 </dd>
             </dl>
 
-            <form asp-controller="GioHang" asp-action="Them" method="post" class="flex items-stretch gap-3 mb-10">
+            <form asp-controller="GioHang" asp-action="Them" method="post" data-cart-add class="flex items-stretch gap-3 mb-10">
                 <input type="hidden" name="maSP" value="@Model.MaSP" />
-                <input type="hidden" name="returnUrl" value="@(Context.Request.Path + "#gio")" />
+                <input type="hidden" name="returnUrl" value="@(Context.Request.PathBase + Context.Request.Path + Context.Request.QueryString)" />
                 <label for="soLuong" class="sr-only">Số lượng</label>
-                <input id="soLuong" type="number" name="soLuong" value="1" min="1" max="@Math.Max(1, Model.SoLuongTon)"
+                <input id="soLuong" type="number" name="soLuong" value="1" min="1" max="@Math.Clamp(Model.SoLuongTon, 1, GioHangSession.SoLuongToiDa)"
                        class="input-box !w-24 text-center tabular-nums" disabled="@(!conHang)" />
                 <button type="submit" class="btn-dark flex-1" disabled="@(!conHang)">
                     @(conHang ? "Thêm vào giỏ hàng" : "Sản phẩm đã hết hàng")

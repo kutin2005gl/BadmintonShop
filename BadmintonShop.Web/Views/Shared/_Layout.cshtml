@@ -8,25 +8,25 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/smashpro.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/cart.css" asp-append-version="true" />
 </head>
 
-<body>
 @{
     var daDangNhap = User.Identity?.IsAuthenticated == true;
     var tenController = (string?)ViewContext.RouteData.Values["controller"] ?? "";
     var coNganKeo = tenController != "GioHang" && tenController != "DatHang";
 
-    // Giao dien: doc gio hang + danh muc de ve header/ngan keo (chi doc, khong doi nghiep vu)
-    BadmintonShop.Core.Models.KetQuaGioHang? gio = null;
     List<BadmintonShop.Core.Models.DanhMuc> danhMucNav = new();
     try
     {
-        gio = new BadmintonShop.Core.Services.GioHangService().TinhTuSession(Context.Session);
-        danhMucNav = new BadmintonShop.Core.DataAccess.DanhMucRepository().LayTatCa();
+        danhMucNav = (ViewData["DanhMuc"] as List<BadmintonShop.Core.Models.DanhMuc>)
+            ?? (ViewData.Model as TrangChuViewModel)?.DanhMuc
+            ?? new BadmintonShop.Core.DataAccess.DanhMucRepository().LayTatCa();
     }
     catch { }
-    var soLuongGio = gio?.TongSoLuong ?? 0;
+    var soLuongGio = Context.Features.Get<Microsoft.AspNetCore.Http.Features.ISessionFeature>()?.Session.DemSoLuong() ?? 0;
 }
+<body data-cart-page="@(coNganKeo ? "false" : "true")">
 <div class="flex flex-col min-h-screen">
     <div class="bg-black text-white text-center text-xs py-2 font-medium tracking-wide">
         Miễn phí vận chuyển cho đơn từ 500.000đ
@@ -93,12 +93,9 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     </a>
                 }
-                <a asp-controller="GioHang" asp-action="Index" id="btn-gio" class="text-black hover:text-primary transition-colors relative" title="Giỏ hàng">
+                <a asp-controller="GioHang" asp-action="Index" data-cart-link id="btn-gio" class="text-black hover:text-primary transition-colors relative" title="Giỏ hàng" aria-label="Giỏ hàng (@soLuongGio)">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                    @if (soLuongGio > 0)
-                    {
-                        <span class="absolute -top-2 -right-2 bg-primary text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">@soLuongGio</span>
-                    }
+                    <span id="gio-so-luong" class="cart-count absolute -top-2 -right-2 bg-primary text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center" hidden="@(soLuongGio == 0)">@soLuongGio</span>
                 </a>
             </div>
         </div>
@@ -132,12 +129,14 @@
                 {
                     <a href="/TaiKhoan/DangNhap" class="flex flex-col items-center text-xs font-semibold">Tài khoản</a>
                 }
-                <a asp-controller="GioHang" asp-action="Index" class="flex flex-col items-center text-xs font-semibold">Giỏ hàng</a>
+                <a asp-controller="GioHang" asp-action="Index" data-cart-link class="flex flex-col items-center text-xs font-semibold">Giỏ hàng</a>
             </div>
         </nav>
     </div>
 
     <main class="flex-grow">
+        @if (TempData["GioHang.ThongBao"] is string gioThongBao) { <div class="container mx-auto px-4"><div class="alert-ok" role="status">@gioThongBao</div></div> }
+        @if (TempData["GioHang.Loi"] is string gioLoi) { <div class="container mx-auto px-4"><div class="alert-err" role="alert">@gioLoi</div></div> }
         @RenderBody()
     </main>
 
@@ -167,7 +166,7 @@
                     <h4 class="text-sm font-bold uppercase mb-6">Hỗ trợ</h4>
                     <ul class="space-y-4">
                         <li><a asp-controller="DonHang" asp-action="@(daDangNhap ? "Index" : "TraCuu")" class="text-gray-400 hover:text-white transition-colors text-sm">Theo dõi đơn hàng</a></li>
-                        <li><a asp-controller="GioHang" asp-action="Index" class="text-gray-400 hover:text-white transition-colors text-sm">Giỏ hàng</a></li>
+                        <li><a asp-controller="GioHang" asp-action="Index" data-cart-link class="text-gray-400 hover:text-white transition-colors text-sm">Giỏ hàng</a></li>
                         <li><a href="#" class="text-gray-400 hover:text-white transition-colors text-sm">Chính sách vận chuyển</a></li>
                         <li><a href="#" class="text-gray-400 hover:text-white transition-colors text-sm">Chính sách đổi trả</a></li>
                         <li><a href="#" class="text-gray-400 hover:text-white transition-colors text-sm">Liên hệ</a></li>
@@ -198,63 +197,15 @@
 @if (coNganKeo)
 {
     <div id="gio-overlay" class="hidden fixed inset-0 bg-black/50 z-50"></div>
-    <aside id="gio-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col translate-x-full transition-transform duration-300">
+    <aside id="gio-drawer" inert aria-labelledby="gio-tieu-de" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col translate-x-full transition-transform duration-300">
         <div class="flex items-center justify-between p-6 border-b border-gray-100">
-            <h2 class="text-lg font-extrabold uppercase tracking-tight">Giỏ hàng (@soLuongGio)</h2>
+            <h2 id="gio-tieu-de" class="text-lg font-extrabold uppercase tracking-tight">Giỏ hàng</h2>
             <button type="button" id="gio-dong" class="text-2xl leading-none hover:text-primary" aria-label="Đóng">&times;</button>
         </div>
-        <div class="flex-1 overflow-y-auto p-6">
-            @if (gio == null || gio.Dong.Count == 0)
-            {
-                <p class="text-gray-500 text-sm text-center py-16">Giỏ hàng của bạn đang trống.</p>
-            }
-            else
-            {
-                <div class="space-y-6">
-                @foreach (var d in gio.Dong)
-                {
-                    <div class="flex gap-4">
-                        <div class="w-20 h-20 bg-gray-50 shrink-0 flex items-center justify-center text-2xl font-extrabold text-gray-200">@d.TenSP.Substring(0, 1)</div>
-                        <div class="flex-1 min-w-0">
-                            <div class="font-bold text-sm line-clamp-2 mb-1">@d.TenSP</div>
-                            <div class="text-sm text-gray-600 mb-2">@d.DonGiaSauGiam.Dong()</div>
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center border border-black">
-                                    <form asp-controller="GioHang" asp-action="CapNhat" method="post">
-                                        <input type="hidden" name="maSP" value="@d.MaSP" /><input type="hidden" name="soLuong" value="@(d.SoLuong - 1)" />
-                                        <button type="submit" class="w-8 h-8 hover:bg-gray-100 font-bold" aria-label="Giảm">&minus;</button>
-                                    </form>
-                                    <span class="w-8 text-center text-sm font-bold">@d.SoLuong</span>
-                                    <form asp-controller="GioHang" asp-action="CapNhat" method="post">
-                                        <input type="hidden" name="maSP" value="@d.MaSP" /><input type="hidden" name="soLuong" value="@(d.SoLuong + 1)" />
-                                        <button type="submit" class="w-8 h-8 hover:bg-gray-100 font-bold" aria-label="Tăng">+</button>
-                                    </form>
-                                </div>
-                                <form asp-controller="GioHang" asp-action="Xoa" method="post">
-                                    <input type="hidden" name="maSP" value="@d.MaSP" />
-                                    <button type="submit" class="text-xs font-bold uppercase text-gray-400 hover:text-red-500">Xóa</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                }
-                </div>
-            }
+        <div id="gio-noi-dung" data-url="@Url.Action("NganGio", "GioHang")" class="flex flex-col flex-1 cart-drawer-content"></div>
+        <div class="p-6 border-t border-gray-100">
+            <button type="button" id="gio-tiep-tuc" class="btn-outline w-full">Tiếp tục chọn hàng</button>
         </div>
-        @if (gio != null && gio.Dong.Count > 0)
-        {
-            <div class="p-6 border-t border-gray-100">
-                <div class="flex justify-between items-end mb-4">
-                    <span class="font-bold uppercase tracking-wider text-sm">Tổng cộng</span>
-                    <span class="text-2xl font-extrabold tracking-tight">@gio.TongThanhToan.Dong()</span>
-                </div>
-                <a asp-controller="GioHang" asp-action="Index" class="btn-dark w-full mb-2">Xem giỏ hàng</a>
-                @if (gio.CoTheDatHang)
-                {
-                    <a asp-controller="DatHang" asp-action="Index" class="btn-outline w-full">Thanh toán</a>
-                }
-            </div>
-        }
     </aside>
 }
 
@@ -283,18 +234,11 @@
             $('thanh-tim').classList.toggle('hidden');
             var o = document.querySelector('#thanh-tim input'); if (o) o.focus();
         });
-        var drawer = $('gio-drawer'), overlay = $('gio-overlay');
-        if (drawer) {
-            var mo = function (e) { if (e) e.preventDefault(); drawer.classList.remove('translate-x-full'); overlay.classList.remove('hidden'); };
-            var dong = function () { drawer.classList.add('translate-x-full'); overlay.classList.add('hidden'); };
-            $('btn-gio').addEventListener('click', mo);
-            $('gio-dong').addEventListener('click', dong);
-            overlay.addEventListener('click', dong);
-            if (location.hash === '#gio') mo();
-        }
     })();
 </script>
+<div id="gio-toast" class="cart-toast" role="status" aria-live="polite"></div>
 <script src="~/js/site.js" asp-append-version="true"></script>
+<script src="~/js/cart.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -1,0 +1,54 @@
+@model KetQuaGioHang
+@using BadmintonShop.Core.Models
+<div class="flex-1 overflow-y-auto p-6">
+    @if (Model.Dong.Count == 0)
+    {
+        <p class="text-gray-500 text-sm text-center py-16">Giỏ hàng của bạn đang trống.</p>
+    }
+    else
+    {
+        <div class="space-y-6">
+        @foreach (var d in Model.Dong)
+        {
+            <div class="flex gap-4">
+                <div class="w-20 h-20 bg-gray-50 shrink-0 flex items-center justify-center text-2xl font-extrabold text-gray-200">@d.TenSP.Substring(0, 1)</div>
+                <div class="flex-1 min-w-0">
+                    <div class="font-bold text-sm line-clamp-2 mb-1">@d.TenSP</div>
+                    <div class="text-sm text-gray-600 mb-2">@d.DonGiaSauGiam.Dong()</div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center border border-black">
+                            <form asp-controller="GioHang" asp-action="CapNhat" method="post">
+                                <input type="hidden" name="maSP" value="@d.MaSP" /><input type="hidden" name="soLuong" value="@(d.SoLuong - 1)" />
+                                <button type="submit" class="w-8 h-8 hover:bg-gray-100 font-bold" aria-label="Giảm">&minus;</button>
+                            </form>
+                            <span class="w-8 text-center text-sm font-bold">@d.SoLuong</span>
+                            <form asp-controller="GioHang" asp-action="CapNhat" method="post">
+                                <input type="hidden" name="maSP" value="@d.MaSP" /><input type="hidden" name="soLuong" value="@(d.SoLuong + 1)" />
+                                <button type="submit" class="w-8 h-8 hover:bg-gray-100 font-bold" aria-label="Tăng">+</button>
+                            </form>
+                        </div>
+                        <form asp-controller="GioHang" asp-action="Xoa" method="post">
+                            <input type="hidden" name="maSP" value="@d.MaSP" />
+                            <button type="submit" class="text-xs font-bold uppercase text-gray-400 hover:text-red-500">Xóa</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+        </div>
+    }
+</div>
+@if (Model.Dong.Count > 0)
+{
+    <div class="p-6 border-t border-gray-100">
+        <div class="flex justify-between items-end mb-4">
+            <span class="font-bold uppercase tracking-wider text-sm">Tổng cộng</span>
+            <span class="text-2xl font-extrabold tracking-tight">@Model.TongThanhToan.Dong()</span>
+        </div>
+        <a asp-controller="GioHang" asp-action="Index" data-cart-link class="btn-dark w-full mb-2">Xem giỏ hàng</a>
+        @if (Model.CoTheDatHang)
+        {
+            <a asp-controller="DatHang" asp-action="Index" class="btn-outline w-full">Thanh toán</a>
+        }
+    </div>
+}

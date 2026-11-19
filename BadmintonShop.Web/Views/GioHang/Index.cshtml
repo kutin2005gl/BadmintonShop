@@ -13,11 +13,14 @@
 {
     <div class="flex flex-col items-center justify-center text-center py-16">
         <p class="text-gray-500 mb-8 max-w-md">Giỏ hàng đang trống. Hãy quay lại cửa hàng để chọn những sản phẩm ưng ý nhất nhé.</p>
-        <a asp-controller="Home" asp-action="Index" class="btn-dark">Tiếp tục mua sắm</a>
+        <a asp-controller="SanPham" asp-action="Index" data-cart-return class="btn-dark">Tiếp tục chọn hàng</a>
     </div>
 }
 else
 {
+    <div class="mb-6">
+        <a asp-controller="SanPham" asp-action="Index" data-cart-return class="btn-outline">Tiếp tục chọn hàng</a>
+    </div>
     <div class="flex flex-col lg:flex-row gap-12">
         <div class="w-full lg:w-2/3">
             <div class="hidden md:grid grid-cols-12 gap-4 pb-4 border-b border-black mb-6 text-sm font-bold uppercase tracking-wider text-gray-500">
@@ -86,7 +89,7 @@ else
                 </div>
                 <div class="flex justify-between items-end border-t border-gray-200 pt-6 mb-8">
                     <span class="font-bold uppercase tracking-wider text-sm">Tổng thanh toán</span>
-                    <span class="text-2xl font-extrabold tracking-tight">@Model.TongThanhToan.Dong()</span>
+                    <span class="text-2xl font-extrabold tracking-tight whitespace-nowrap">@Model.TongThanhToan.Dong()</span>
                 </div>
                 @if (Model.CoTheDatHang)
                 {
