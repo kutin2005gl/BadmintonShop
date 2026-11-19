@@ -11,6 +11,7 @@
     let toastTimer;
     let drawerRequest;
     let pendingAdd = Promise.resolve();
+    let drawerUpdatePending = false;
 
     // TV1: doc diem quay lai tu phien trinh duyet
     function readPoint(key) {
@@ -82,15 +83,14 @@
         document.getElementById('gio-tiep-tuc').addEventListener('click', closeDrawer);
         overlay.addEventListener('click', closeDrawer);
         document.addEventListener('keydown',
-        // TV1: dong ngan gio khi bam Escape
-        event => {
-            if (event.key === 'Escape' && !drawer.inert) closeDrawer();
-        });
+            // TV1: dong ngan gio khi bam Escape
+            event => {
+                if (event.key === 'Escape' && !drawer.inert) closeDrawer();
+            });
     }
 
-    document.addEventListener('click',
     // TV1: xu ly lien ket mo gio va tiep tuc chon hang
-    event => {
+    function clickCart(event) {
         const link = event.target.closest('[data-cart-link], [data-cart-return]');
         if (!link || event.defaultPrevented || event.button !== 0 ||
             event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
@@ -117,40 +117,47 @@
             document.getElementById('gio-dong').focus({ preventScroll: true });
             refreshDrawer();
         }
-    });
+    }
 
-    document.addEventListener('submit',
-    // TV1: gui form them hang bang AJAX
-    event => {
+    // TV1: gui form them hang va cap nhat ngan gio bang AJAX
+    function submitCart(event) {
         const form = event.target;
-        if (!form.matches('[data-cart-add]') || !window.fetch || event.defaultPrevented) return;
+        const inDrawer = Boolean(form.closest('#gio-drawer'));
+        if ((!inDrawer && !form.matches('[data-cart-add]')) || !window.fetch || event.defaultPrevented) return;
         event.preventDefault();
         const button = form.querySelector('button[type="submit"]');
-        if (button.disabled) return;
+        if (button.disabled || (inDrawer && drawerUpdatePending)) return;
         const body = new URLSearchParams(new FormData(form));
+        if (inDrawer) {
+            body.set('returnUrl', location.pathname + location.search);
+            drawerUpdatePending = true;
+        }
         button.disabled = true;
-        // Queue requests on this page so each submission sees the saved session.
         pendingAdd = pendingAdd.then(
-        // TV1: gui lan luot cac yeu cau ghi gio
-        async () => {
-            try {
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                    body
-                });
-                const result = await response.json();
-                if (typeof result.thanhCong !== 'boolean' || !Number.isInteger(result.tongSoLuong)) throw new Error();
-                setCount(result.tongSoLuong);
-                showToast(result.thongBao, result.thanhCong);
-                if (result.thanhCong && drawer && !drawer.inert) refreshDrawer();
-            } catch {
-                showToast('Chưa xác nhận được kết quả. Hãy kiểm tra giỏ hàng rồi thử lại.', false);
-            } finally {
-                button.disabled = false;
-            }
-        });
-    });
+            // TV1: gui lan luot cac yeu cau ghi gio
+            async () => {
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body
+                    });
+                    const result = await response.json();
+                    if (typeof result.thanhCong !== 'boolean' || !Number.isInteger(result.tongSoLuong)) throw new Error();
+                    setCount(result.tongSoLuong);
+                    showToast(result.thongBao, result.thanhCong);
+                } catch {
+                    showToast('Chưa xác nhận được kết quả. Hãy kiểm tra giỏ hàng rồi thử lại.', false);
+                } finally {
+                    if (drawer && !drawer.inert) await refreshDrawer();
+                    if (inDrawer) drawerUpdatePending = false;
+                    button.disabled = false;
+                }
+            });
+    }
+
+    document.addEventListener('click', clickCart);
+    document.addEventListener('submit', submitCart);
 
     const restore = readPoint(restoreKey);
     if (restore?.url === location.href) {
