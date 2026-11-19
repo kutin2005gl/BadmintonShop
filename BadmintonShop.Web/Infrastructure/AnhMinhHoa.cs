@@ -17,6 +17,13 @@ public static class AnhMinhHoa
             ? "/media/" + hinhAnh
             : TheoDanhMuc(tenDanhMuc);
 
+    // Danh muc (cau, phu kien...) khong co anh minh hoa rieng: trang chu dung anh san pham that cua danh muc do
+    public static bool CoAnhMinhHoaRieng(string? tenDanhMuc)
+    {
+        var t = (tenDanhMuc ?? "").ToLowerInvariant();
+        return t.Contains("vợt") || t.Contains("giày") || t.Contains("áo") || t.Contains("quần") || t.Contains("túi") || t.Contains("balo");
+    }
+
     // Giao dien: chon anh minh hoa theo ten danh muc (vot / giay / ao quan / tui / phu kien)
     public static string TheoDanhMuc(string? tenDanhMuc)
     {

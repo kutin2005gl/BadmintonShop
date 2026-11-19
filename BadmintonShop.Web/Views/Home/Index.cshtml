@@ -32,8 +32,10 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 @foreach (var dm in Model.DanhMuc)
                 {
+                    var anhSp = AnhMinhHoa.CoAnhMinhHoaRieng(dm.TenDanhMuc) ? null
+                        : Model.SanPham.FirstOrDefault(s => s.MaDM == dm.MaDM && !string.IsNullOrWhiteSpace(s.HinhAnh))?.HinhAnh;
                     <a href="/SanPham?maDM=@dm.MaDM" class="group relative aspect-square overflow-hidden bg-gray-100 block">
-                        <img src="@AnhMinhHoa.TheoDanhMuc(dm.TenDanhMuc)" alt="@dm.TenDanhMuc" data-chu="@dm.TenDanhMuc.Substring(0, 1)" data-nen="bg-gray-600" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 mix-blend-multiply" />
+                        <img src="@(anhSp != null ? AnhMinhHoa.CuaSanPham(anhSp, dm.TenDanhMuc) : AnhMinhHoa.TheoDanhMuc(dm.TenDanhMuc))" alt="@dm.TenDanhMuc" data-chu="@dm.TenDanhMuc.Substring(0, 1)" data-nen="bg-gray-600" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 mix-blend-multiply" />
                         <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-end p-4 md:p-6">
                             <h3 class="text-white font-bold uppercase text-lg md:text-xl tracking-wide">@dm.TenDanhMuc</h3>
                         </div>
