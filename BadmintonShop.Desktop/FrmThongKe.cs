@@ -44,6 +44,7 @@ public class FrmThongKe : Form
         revenue.Text=$"{kq.TongDoanhThu:N0} đ";
         count.Text=kq.Bang["Trạng thái đơn"].AsEnumerable().Sum(r=>r.Field<int>("Số đơn")).ToString("N0");
         sold.Text=kq.Bang["Bán chạy"].AsEnumerable().Sum(r=>r.Field<long>("Số lượng")).ToString("N0");
+        var tabDangXem=tabs.SelectedTab?.Text;
         ketQua=kq;while(tabs.TabPages.Count>0) { var old=tabs.TabPages[0];tabs.TabPages.RemoveAt(0);old.Dispose(); }
         foreach(var (ten,dt) in kq.Bang)
         {
@@ -64,6 +65,10 @@ public class FrmThongKe : Form
             grid.DataSource=dt;split.Panel1.Controls.Add(grid);split.Panel2.Controls.Add(chart);
             page.Controls.Add(split);tabs.TabPages.Add(page);
         }
+        // CO-06: mở màn hình mặc định xem tab "Sản phẩm × quý"; nạp lại thì giữ tab đang xem nếu còn tồn tại.
+        tabs.SelectedTab=tabs.TabPages.Cast<TabPage>().FirstOrDefault(p=>p.Text==tabDangXem)
+            ?? tabs.TabPages.Cast<TabPage>().FirstOrDefault(p=>p.Text.StartsWith("Sản phẩm × quý ",StringComparison.Ordinal))
+            ?? (tabs.TabPages.Count>0?tabs.TabPages[0]:null);
         tong.Text=$"{kq.TuNgay:dd/MM/yyyy}–{kq.DenNgay:dd/MM/yyyy} | {kq.LoaiBan} | Doanh thu: {kq.TongDoanhThu:N0} đ"+TomTatThuChi(kq);
         },kq=>kq.Bang["Theo ngày"].Rows.Count==0 && !kq.Bang
             .Where(b=>b.Key.StartsWith("Thu–chi ",StringComparison.Ordinal))
