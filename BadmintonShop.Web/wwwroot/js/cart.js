@@ -13,6 +13,8 @@
     let drawerRequest;
     let pendingAdd = Promise.resolve();
     let drawerUpdatePending = false;
+    let countSeq = 0;
+    let shownSeq = 0;
 
     // TV1: doc diem quay lai tu phien trinh duyet
     function readPoint(key) {
@@ -45,6 +47,8 @@
         clearTimeout(toastTimer);
         toast.textContent = message;
         toast.classList.toggle('cart-toast-error', !success);
+        // Thanh cong: an khoi man hinh (anh bay + badge da du), van doc cho trinh doc man hinh.
+        toast.classList.toggle('cart-toast-silent', success);
         toastTimer = setTimeout(
             // TV1: an thong bao sau thoi gian hien thi
             () => { toast.textContent = ''; }, 4500);
@@ -55,6 +59,13 @@
         badge.textContent = count;
         badge.hidden = count === 0;
         cartButton.setAttribute('aria-label', `Giỏ hàng (${count})`);
+    }
+
+    // TV1: chi hien so luong moi nhat (ket qua cu den sau khong ghi de)
+    function applyCount(count, seq) {
+        if (seq < shownSeq) return;
+        shownSeq = seq;
+        setCount(count);
     }
 
     // TV1: tai lai noi dung ngan gio
@@ -131,6 +142,7 @@
         event.preventDefault();
         const button = form.querySelector('button[type="submit"]');
         if (button.disabled || (inDrawer && drawerUpdatePending)) return;
+        const productImage = inDrawer ? null : form.closest('[data-cart-scope]')?.querySelector('[data-cart-image]');
         const body = new URLSearchParams(new FormData(form));
         if (inDrawer) {
             body.set('returnUrl', location.pathname + location.search);
@@ -148,7 +160,14 @@
                     });
                     const result = await response.json();
                     if (typeof result.thanhCong !== 'boolean' || !Number.isInteger(result.tongSoLuong)) throw new Error();
-                    setCount(result.tongSoLuong);
+                    const seq = ++countSeq;
+                    if (result.thanhCong && productImage && window.bayVaoGio) {
+                        window.bayVaoGio.bay(productImage, cartButton).then(
+                            // TV1: cap nhat so luong khi anh bay cham gio
+                            () => applyCount(result.tongSoLuong, seq));
+                    } else {
+                        applyCount(result.tongSoLuong, seq);
+                    }
                     showToast(result.thongBao, result.thanhCong);
                 } catch {
                     showToast('Chưa xác nhận được kết quả. Hãy kiểm tra giỏ hàng rồi thử lại.', false);
