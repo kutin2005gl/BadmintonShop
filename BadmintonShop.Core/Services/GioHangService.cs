@@ -68,16 +68,17 @@ public class GioHangService
 
         kq.TongTienHang = kq.Dong.Sum(d => d.ThanhTien);
 
-        var giam = _km.TinhGiamHoaDon(kq.TongTienHang, bayGio, maVoucher);
+        var giam = _km.TinhGiamHoaDonChiTiet(kq.TongTienHang, bayGio, maVoucher);
         kq.MaCTKM = giam.MaCTKM;
         kq.TienGiamHoaDon = giam.TienGiam;
-        kq.MaVoucher = giam.MaVoucherDung;
+        kq.MaVoucher = giam.MaVoucher;
+        kq.PhanTramGiamHoaDon = giam.PhanTram;
+        kq.NguongGiamHoaDon = giam.NguongTien;
+        kq.VoucherHopLeNhungThua = !giam.VoucherThang && !string.IsNullOrWhiteSpace(maVoucher) && giam.ConUuDaiThua;
 
         if (!string.IsNullOrWhiteSpace(maVoucher))
         {
             kq.LoiVoucher = _km.LoiVoucher(maVoucher, bayGio);
-            if (kq.LoiVoucher == null && kq.MaVoucher == null)
-                kq.CanhBao.Add("Đang áp dụng ưu đãi theo giá trị đơn hàng vì giảm nhiều hơn mã giảm giá.");
         }
         return kq;
     }

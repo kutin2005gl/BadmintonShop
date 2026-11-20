@@ -1,0 +1,32 @@
+@model KetQuaGioHang
+@using BadmintonShop.Core.Models
+@* 1.3: o nhap voucher dung chung. ViewData["returnUrl"] co gia tri khi dat tren trang Dat hang. *@
+@{ var returnUrl = ViewData["returnUrl"] as string; }
+<h3 class="font-bold uppercase text-sm tracking-wider mb-4">Mã giảm giá</h3>
+@if (Model.LoiVoucher != null)
+{
+    <div class="alert-err">@Model.LoiVoucher</div>
+}
+else if (Model.MaVoucher != null)
+{
+    <p class="text-sm mb-3">Đang áp dụng mã <strong>@Model.MaVoucher</strong>.</p>
+}
+else if (Model.VoucherHopLeNhungThua)
+{
+    <div class="alert-warn">Mã <strong>@Model.VoucherYeuCau</strong> hợp lệ nhưng chưa được dùng: đơn đang áp dụng giảm theo ngưỡng vì có lợi hơn. Mã không bị trừ lượt.</div>
+}
+@if (Model.VoucherYeuCau != null)
+{
+    <form asp-controller="GioHang" asp-action="BoVoucher" method="post" class="giu-thong-tin">
+        @if (returnUrl != null) { <input type="hidden" name="returnUrl" value="@returnUrl" /> }
+        <button type="submit" class="text-xs font-bold uppercase underline hover:text-primary">Bỏ mã</button>
+    </form>
+}
+else
+{
+    <form asp-controller="GioHang" asp-action="ApDungVoucher" method="post" class="flex gap-2 giu-thong-tin">
+        @if (returnUrl != null) { <input type="hidden" name="returnUrl" value="@returnUrl" /> }
+        <input type="text" name="maVoucher" class="input-box flex-1" placeholder="Nhập mã của bạn" maxlength="30" aria-label="Mã giảm giá" required />
+        <button type="submit" class="bg-black text-white px-6 font-bold uppercase text-sm hover:bg-gray-800 transition-colors">Áp dụng</button>
+    </form>
+}

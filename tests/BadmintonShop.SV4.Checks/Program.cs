@@ -62,7 +62,7 @@ internal static partial class Program
         {
             int index=Array.IndexOf(args,"--server");
             if(index<0 || index+1>=args.Length)throw new ArgumentException("Integration yêu cầu --server <SQL Server>; luôn tạo CSDL test mới.");
-            try { TaoCsdlTest(args[index+1]);Integration();PromotionIntegration();WebHttpChecks();Render();UiReadOnly(true);FinalIntegrationChecks();FinalReconciliation(); }
+            try { TaoCsdlTest(args[index+1]);Integration();PromotionIntegration();MultiPromotionChecks();WebHttpChecks();Render();UiReadOnly(true);FinalIntegrationChecks();FinalReconciliation(); }
             catch(Exception ex) { failed++;Ghi("FAIL SETUP: "+ex); }
         }
         Ghi($"RESULT: {passed} passed, {failed} failed. Output: {output}");
@@ -163,7 +163,7 @@ internal static partial class Program
         using(var c=new SqlConnection(b.ConnectionString)) { c.Open();using var cmd=new SqlCommand($"CREATE DATABASE [{name}]",c) { CommandTimeout=120 };cmd.ExecuteNonQuery(); }
         b.InitialCatalog=name;DbHelper.ConnectionString=b.ConnectionString;Ghi("Isolated test database: "+name);
         var schema=File.ReadAllText(Path.Combine(root,"database/01_CreateDatabase.sql"));schema=schema[schema.IndexOf("-- ====== DANH MUC",StringComparison.Ordinal)..];Batches(schema);
-        foreach(var file in new[]{"02_Triggers.sql","04_SV4_Migration.sql","04_SV4_Migration.sql","06_SV4_POS_Request.sql","06_SV4_POS_Request.sql"})Batches(File.ReadAllText(Path.Combine(root,"database",file)).Replace("USE BadmintonShop;",$"USE [{name}];",StringComparison.Ordinal));
+        foreach(var file in new[]{"02_Triggers.sql","04_SV4_Migration.sql","04_SV4_Migration.sql","06_SV4_POS_Request.sql","06_SV4_POS_Request.sql","12_SV3_KhuyenMaiNhieuLoai.sql","12_SV3_KhuyenMaiNhieuLoai.sql"})Batches(File.ReadAllText(Path.Combine(root,"database",file)).Replace("USE BadmintonShop;",$"USE [{name}];",StringComparison.Ordinal));
         nv=ScalarInt("INSERT NhanVien(HoTen,ChucVu) VALUES(N'SV4 TEST',N'Nhân viên bán hàng');SELECT CAST(SCOPE_IDENTITY() AS int)");
         DbHelper.ExecuteNonQuery("INSERT TaiKhoan(TenDangNhap,MatKhau,VaiTro,MaNV) VALUES('sv4test',@hash,'ADMIN',@nv)",new SqlParameter("@hash",MatKhauHelper.BamMatKhau("TestOnly@123")),new SqlParameter("@nv",nv));
         ncc=ScalarInt("INSERT NhaCungCap(TenNCC) VALUES(N'SV4 TEST');SELECT CAST(SCOPE_IDENTITY() AS int)");

@@ -7,19 +7,42 @@ using Microsoft.Data.SqlClient;
 namespace BadmintonShop.Core.DataAccess;
 
 /// <summary>
-/// Quan ly chuong trinh khuyen mai cho Desktop (SV3): danh sach, them / sua (kem chi tiet theo loai), bat/tat, xoa.
+/// Quan ly chuong trinh khuyen mai cho Desktop (SV3): danh sach, them / sua (kem chi tiet), bat/tat, xoa.
+/// Mot chuong trinh co the co CA BA nhom uu dai (san pham, hoa don, voucher); luu chung trong 1 giao dich.
 /// Tach rieng khoi KhuyenMaiRepository (phan TINH khuyen mai cho Web va POS) de khong xung dot.
 /// Chi tiet theo loai: SANPHAM (MaSP, PhanTramGG), HOADON (TongTienToiThieu, PhanTramGG), VOUCHER (MaVoucher, PhanTramGG, SoLuong, DaDung).
 /// </summary>
 public class KhuyenMaiQuanLyRepository
 {
     public static readonly string[] CacLoai = { "SANPHAM", "HOADON", "VOUCHER" };
+    public const string LoaiHonHop = "HONHOP";   // CTKM.LoaiKM khi chuong trinh co tu 2 nhom tro len
+
+    /// <summary>Chi tiet ba nhom uu dai cua mot chuong trinh (moi nhom co the rong).</summary>
+    public sealed class ChiTietKhuyenMai
+    {
+        public DataTable SanPham { get; init; } = TaoBangChiTiet("SANPHAM");
+        public DataTable HoaDon { get; init; } = TaoBangChiTiet("HOADON");
+        public DataTable Voucher { get; init; } = TaoBangChiTiet("VOUCHER");
+
+        public DataTable Bang(string loai) => loai switch
+        {
+            "SANPHAM" => SanPham, "HOADON" => HoaDon, "VOUCHER" => Voucher,
+            _ => throw new ArgumentException("Loại khuyến mãi không hợp lệ."),
+        };
+    }
+
+    public static string TenNhom(string loai) => loai switch
+    {
+        "SANPHAM" => "Sản phẩm", "HOADON" => "Hóa đơn", _ => "Voucher",
+    };
     private static readonly Regex MaVoucherHopLe = new("^[A-Z0-9_-]{3,30}$", RegexOptions.Compiled);
 
     // TV3: danh sach chuong trinh kem trang thai hien tai (dang ap dung / sap dien ra / ngung)
     public DataTable LayDanhSach() => DbHelper.ExecuteQuery(@"
         SELECT k.MaCTKM, k.TenCTKM,
-               CASE k.LoaiKM WHEN 'SANPHAM' THEN N'Theo sản phẩm' WHEN 'HOADON' THEN N'Theo hóa đơn' ELSE N'Voucher' END AS Loai,
+               STUFF(CASE WHEN EXISTS (SELECT 1 FROM KM_TheoSP WHERE MaCTKM = k.MaCTKM) THEN N' + Sản phẩm' ELSE N'' END
+                   + CASE WHEN EXISTS (SELECT 1 FROM KM_TheoHD WHERE MaCTKM = k.MaCTKM) THEN N' + Hóa đơn' ELSE N'' END
+                   + CASE WHEN EXISTS (SELECT 1 FROM KM_TheoVoucher WHERE MaCTKM = k.MaCTKM) THEN N' + Voucher' ELSE N'' END, 1, 3, N'') AS Loai,
                CONVERT(char(10), k.NgayBatDau, 103) AS TuNgay,
                CONVERT(char(10), k.NgayKetThuc, 103) AS DenNgay,
                (SELECT COUNT(*) FROM KM_TheoSP WHERE MaCTKM = k.MaCTKM)
@@ -87,23 +110,46 @@ public class KhuyenMaiQuanLyRepository
         return DbHelper.ExecuteQuery(sql, new SqlParameter("@ma", ma));
     }
 
+    // tat ca chi tiet cua 1 chuong trinh (ca ba nhom)
+    public ChiTietKhuyenMai LayChiTietTatCa(int ma) => new()
+    {
+        SanPham = LayChiTiet(ma, "SANPHAM"),
+        HoaDon = LayChiTiet(ma, "HOADON"),
+        Voucher = LayChiTiet(ma, "VOUCHER"),
+    };
+
+    // loai luu trong CTKM.LoaiKM: 1 nhom -> ten nhom do, tu 2 nhom -> HONHOP
+    public static string TinhLoai(ChiTietKhuyenMai ct)
+    {
+        var co = CacLoai.Where(l => Dong(ct.Bang(l)).Count > 0).ToList();
+        return co.Count == 1 ? co[0] : LoaiHonHop;
+    }
+
     // kiem tra du lieu (goi truoc khi luu, nem ArgumentException co thong bao tieng Viet)
-    public static void KiemTra(CTKM k, DataTable ct)
+    public static void KiemTra(CTKM k, ChiTietKhuyenMai ct)
     {
         k.TenCTKM = QuyTacBanHang.BatBuoc(k.TenCTKM, 150, "Tên chương trình");
-        if (!CacLoai.Contains(k.LoaiKM)) throw new ArgumentException("Loại khuyến mãi không hợp lệ.");
         if (k.NgayKetThuc.Date < k.NgayBatDau.Date) throw new ArgumentException("Ngày kết thúc phải từ ngày bắt đầu trở đi.");
 
-        var rows = Dong(ct);
-        if (rows.Count == 0) throw new ArgumentException("Hãy thêm ít nhất một dòng chi tiết cho chương trình.");
+        if (CacLoai.All(l => Dong(ct.Bang(l)).Count == 0))
+            throw new ArgumentException("Hãy cấu hình ít nhất một nhóm ưu đãi (Sản phẩm, Hóa đơn hoặc Voucher) cho chương trình.");
 
+        foreach (var loai in CacLoai)
+        {
+            try { KiemTraNhom(loai, Dong(ct.Bang(loai))); }
+            catch (ArgumentException ex) { throw new ArgumentException($"Tab {TenNhom(loai)}: {ex.Message}"); }
+        }
+    }
+
+    private static void KiemTraNhom(string loai, List<DataRow> rows)
+    {
         var daCo = new HashSet<string>();
         foreach (var r in rows)
         {
             var pt = So(r, "PhanTramGG", "Phần trăm giảm");
             if (pt <= 0 || pt > 100) throw new ArgumentException("Phần trăm giảm phải lớn hơn 0 và không quá 100.");
 
-            switch (k.LoaiKM)
+            switch (loai)
             {
                 case "SANPHAM":
                     var maSP = (int)So(r, "MaSP", "Sản phẩm");
@@ -127,11 +173,15 @@ public class KhuyenMaiQuanLyRepository
         }
     }
 
-    // TV3: luu chuong trinh (ma = 0 la them moi) cung chi tiet trong 1 transaction, tra ve MaCTKM
-    public int Luu(CTKM k, DataTable ct)
+    // TV3: luu chuong trinh (ma = 0 la them moi) cung ca ba nhom chi tiet trong 1 transaction, tra ve MaCTKM.
+    // Loi o bat ky nhom nao -> huy toan bo.
+    public int Luu(CTKM k, ChiTietKhuyenMai ct)
     {
         KiemTra(k, ct);
-        var rows = Dong(ct);
+        k.LoaiKM = TinhLoai(ct);
+        var sp = Dong(ct.SanPham);
+        var hd = Dong(ct.HoaDon);
+        var vc = Dong(ct.Voucher);
 
         return DbHelper.ExecuteTransaction((c, t) =>
         {
@@ -146,36 +196,23 @@ public class KhuyenMaiQuanLyRepository
             }
             else
             {
-                using var loai = Lenh(c, t, "SELECT LoaiKM FROM CTKM WHERE MaCTKM = @ma", ("@ma", ma));
-                var loaiCu = loai.ExecuteScalar() as string
-                             ?? throw new InvalidOperationException("Chương trình không còn tồn tại. Hãy tải lại.");
-                if (loaiCu != k.LoaiKM) throw new InvalidOperationException("Không thể đổi loại của chương trình đã tạo.");
-                using var sua = Lenh(c, t, @"UPDATE CTKM SET TenCTKM = @ten, NgayBatDau = @bd, NgayKetThuc = @kt, TrangThai = @tt
+                using var sua = Lenh(c, t, @"UPDATE CTKM SET TenCTKM = @ten, NgayBatDau = @bd, NgayKetThuc = @kt, LoaiKM = @loai, TrangThai = @tt
                                              WHERE MaCTKM = @ma",
-                    ("@ten", k.TenCTKM), ("@bd", k.NgayBatDau.Date), ("@kt", k.NgayKetThuc.Date), ("@tt", k.TrangThai), ("@ma", ma));
-                sua.ExecuteNonQuery();
+                    ("@ten", k.TenCTKM), ("@bd", k.NgayBatDau.Date), ("@kt", k.NgayKetThuc.Date), ("@loai", k.LoaiKM), ("@tt", k.TrangThai), ("@ma", ma));
+                if (sua.ExecuteNonQuery() == 0) throw new InvalidOperationException("Chương trình không còn tồn tại. Hãy tải lại.");
             }
 
-            switch (k.LoaiKM)
-            {
-                case "SANPHAM":
-                    Lenh(c, t, "DELETE FROM KM_TheoSP WHERE MaCTKM = @ma", ("@ma", ma)).ExecuteNonQuery();
-                    foreach (var r in rows)
-                        Lenh(c, t, "INSERT INTO KM_TheoSP (MaCTKM, MaSP, PhanTramGG) VALUES (@ma, @sp, @pt)",
-                            ("@ma", ma), ("@sp", Convert.ToInt32(r["MaSP"])), ("@pt", Convert.ToDecimal(r["PhanTramGG"]))).ExecuteNonQuery();
-                    break;
+            Lenh(c, t, "DELETE FROM KM_TheoSP WHERE MaCTKM = @ma", ("@ma", ma)).ExecuteNonQuery();
+            foreach (var r in sp)
+                Lenh(c, t, "INSERT INTO KM_TheoSP (MaCTKM, MaSP, PhanTramGG) VALUES (@ma, @sp, @pt)",
+                    ("@ma", ma), ("@sp", Convert.ToInt32(r["MaSP"])), ("@pt", Convert.ToDecimal(r["PhanTramGG"]))).ExecuteNonQuery();
 
-                case "HOADON":
-                    Lenh(c, t, "DELETE FROM KM_TheoHD WHERE MaCTKM = @ma", ("@ma", ma)).ExecuteNonQuery();
-                    foreach (var r in rows)
-                        Lenh(c, t, "INSERT INTO KM_TheoHD (MaCTKM, TongTienToiThieu, PhanTramGG) VALUES (@ma, @tong, @pt)",
-                            ("@ma", ma), ("@tong", Convert.ToDecimal(r["TongTienToiThieu"])), ("@pt", Convert.ToDecimal(r["PhanTramGG"]))).ExecuteNonQuery();
-                    break;
+            Lenh(c, t, "DELETE FROM KM_TheoHD WHERE MaCTKM = @ma", ("@ma", ma)).ExecuteNonQuery();
+            foreach (var r in hd)
+                Lenh(c, t, "INSERT INTO KM_TheoHD (MaCTKM, TongTienToiThieu, PhanTramGG) VALUES (@ma, @tong, @pt)",
+                    ("@ma", ma), ("@tong", Convert.ToDecimal(r["TongTienToiThieu"])), ("@pt", Convert.ToDecimal(r["PhanTramGG"]))).ExecuteNonQuery();
 
-                case "VOUCHER":
-                    LuuVoucher(c, t, ma, rows);
-                    break;
-            }
+            LuuVoucher(c, t, ma, vc);
             return ma;
         });
     }

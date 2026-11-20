@@ -111,7 +111,7 @@ CREATE TABLE CTKM (
     NgayBatDau  DATE NOT NULL,
     NgayKetThuc DATE NOT NULL,
     LoaiKM      VARCHAR(20) NOT NULL
-                CONSTRAINT CK_CTKM_Loai CHECK (LoaiKM IN ('SANPHAM','HOADON','VOUCHER')),
+                CONSTRAINT CK_CTKM_Loai CHECK (LoaiKM IN ('SANPHAM','HOADON','VOUCHER','HONHOP')),
     TrangThai   BIT NOT NULL DEFAULT 1,
     CONSTRAINT CK_CTKM_Ngay CHECK (NgayKetThuc >= NgayBatDau)
 );
@@ -174,6 +174,14 @@ CREATE TABLE ChiTietHoaDon (
     CONSTRAINT PK_CTHD PRIMARY KEY (MaHD, MaSP),
     CONSTRAINT FK_CTHD_HD FOREIGN KEY (MaHD) REFERENCES HoaDon(MaHD) ON DELETE CASCADE,
     CONSTRAINT FK_CTHD_SP FOREIGN KEY (MaSP) REFERENCES SanPham(MaSP)
+);
+
+CREATE TABLE HoaDon_Voucher (       -- hoa don nao da dung ma voucher nao (chi ghi ma thang; xem 12_SV3_KhuyenMaiNhieuLoai.sql)
+    MaHD      INT NOT NULL,
+    MaVoucher VARCHAR(30) NOT NULL,
+    CONSTRAINT PK_HoaDon_Voucher PRIMARY KEY (MaHD),
+    CONSTRAINT FK_HDVC_HD FOREIGN KEY (MaHD) REFERENCES HoaDon(MaHD) ON DELETE CASCADE,
+    CONSTRAINT FK_HDVC_VC FOREIGN KEY (MaVoucher) REFERENCES KM_TheoVoucher(MaVoucher)
 );
 
 -- ====== PHAN HOI / DANH GIA ======
@@ -861,4 +869,34 @@ USE BadmintonShop;
 GO
 IF COL_LENGTH('dbo.HoaDon','GhiChu') IS NULL
     ALTER TABLE dbo.HoaDon ADD GhiChu NVARCHAR(500) NULL;
+GO
+/* SV3: mot chuong trinh khuyen mai co the co ca 3 nhom uu dai (san pham, hoa don, voucher)
+   va ghi nhan dung ma voucher da dung cho tung hoa don.
+   - CTKM.LoaiKM: them gia tri 'HONHOP' (chuong trinh co tu 2 nhom tro len). Cot van giu de tuong thich.
+   - Bang HoaDon_Voucher: hoa don nao da dung ma voucher nao (chi ghi ma THANG).
+   Chay sau 01/02/03 (va 04) tren CSDL hien co; chay lai duoc, khong xoa du lieu. */
+USE BadmintonShop;
+GO
+SET XACT_ABORT ON;
+BEGIN TRANSACTION;
+
+IF EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CK_CTKM_Loai' AND parent_object_id = OBJECT_ID('dbo.CTKM')
+           AND definition NOT LIKE '%HONHOP%')
+    ALTER TABLE dbo.CTKM DROP CONSTRAINT CK_CTKM_Loai;
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CK_CTKM_Loai' AND parent_object_id = OBJECT_ID('dbo.CTKM'))
+    ALTER TABLE dbo.CTKM ADD CONSTRAINT CK_CTKM_Loai CHECK (LoaiKM IN ('SANPHAM','HOADON','VOUCHER','HONHOP'));
+
+IF OBJECT_ID(N'dbo.HoaDon_Voucher', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.HoaDon_Voucher (
+        MaHD      INT NOT NULL,
+        MaVoucher VARCHAR(30) NOT NULL,
+        CONSTRAINT PK_HoaDon_Voucher PRIMARY KEY (MaHD),
+        CONSTRAINT FK_HDVC_HD FOREIGN KEY (MaHD) REFERENCES dbo.HoaDon(MaHD) ON DELETE CASCADE,
+        CONSTRAINT FK_HDVC_VC FOREIGN KEY (MaVoucher) REFERENCES dbo.KM_TheoVoucher(MaVoucher)
+    );
+    CREATE INDEX IX_HDVC_Voucher ON dbo.HoaDon_Voucher(MaVoucher);
+END
+
+COMMIT;
 GO

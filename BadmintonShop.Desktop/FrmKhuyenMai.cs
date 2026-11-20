@@ -5,42 +5,34 @@ using System.Text.RegularExpressions;
 using BadmintonShop.Core.DataAccess;
 using BadmintonShop.Core.Models;
 using BadmintonShop.Core.Services;
+using ChiTietKM = BadmintonShop.Core.DataAccess.KhuyenMaiQuanLyRepository.ChiTietKhuyenMai;
 
 namespace BadmintonShop.Desktop;
 
 /// <summary>
-/// Quan ly chuong trinh khuyen mai (SV3): theo san pham / theo hoa don (nhieu bac) / voucher (co sinh ma hang loat).
-/// Bang tren: danh sach; phan giua: thong tin chung; bang duoi: chi tiet theo loai (sua truc tiep, Delete de xoa dong).
+/// Quan ly chuong trinh khuyen mai (SV3): mot chuong trinh co the co CA BA nhom uu dai —
+/// tab San pham, tab Hoa don (nhieu bac), tab Voucher (co sinh ma hang loat) — dung chung ten, thoi han, trang thai.
+/// Bang tren: danh sach; phan giua: thong tin chung; 3 tab duoi: chi tiet (sua truc tiep, Delete de xoa dong).
 /// </summary>
 public class FrmKhuyenMai : Form, IUnsavedWork
 {
     private const ChucNang Quyen = ChucNang.SanPhamDanhMucKhuyenMai;
 
-    private sealed record LoaiItem(string Ma, string Ten)
-    {
-        public override string ToString() => Ten;
-    }
-
-    private static readonly LoaiItem[] CacLoai =
-    [
-        new("SANPHAM", "Giảm theo sản phẩm"),
-        new("HOADON", "Giảm theo hóa đơn"),
-        new("VOUCHER", "Voucher"),
-    ];
-
     private readonly KhuyenMaiQuanLyRepository _repo = new();
 
-    private DataGridView luoi = null!, chiTiet = null!;
+    private static readonly string[] CacNhom = KhuyenMaiQuanLyRepository.CacLoai;
+
+    private DataGridView luoi = null!;
+    private readonly Dictionary<string, DataGridView> luoiCT = new();
+    private TabControl tabs = null!;
     private TextBox ten = null!;
-    private ComboBox loai = null!;
     private DateTimePicker tuNgay = null!, denNgay = null!;
     private CheckBox bat = null!;
     private Label nhanMa = null!, nhanChiTiet = null!;
     private Button btnSinh = null!;
 
     private int ma;                                   // 0 = dang them moi
-    private string loaiHienTai = "SANPHAM";
-    private DataTable bang = KhuyenMaiQuanLyRepository.TaoBangChiTiet("SANPHAM");
+    private ChiTietKM ct = new();
     private DataTable sanPham = new();
     private string original = "";
     private bool dangNap;                             // true khi code dang tu dat gia tri cho form
@@ -61,22 +53,28 @@ public class FrmKhuyenMai : Form, IUnsavedWork
         luoi.Dock = DockStyle.Top;
         luoi.Height = 220;
 
-        chiTiet = Sv4Ui.Luoi();
-        chiTiet.AutoGenerateColumns = false;
-        chiTiet.ReadOnly = false;
-        chiTiet.AllowUserToAddRows = true;
-        chiTiet.AllowUserToDeleteRows = true;
-        chiTiet.DataError += (_, e) =>
+        tabs = new TabControl { Dock = DockStyle.Fill };
+        foreach (var nhom in CacNhom)
         {
-            e.ThrowException = false;
-            MessageBox.Show(this, "Giá trị không hợp lệ. Hãy nhập số, hoặc chọn sản phẩm từ danh sách.",
-                "Dữ liệu chưa hợp lệ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        };
+            var g = Sv4Ui.Luoi();
+            g.Dock = DockStyle.Fill;
+            g.AutoGenerateColumns = false;
+            g.ReadOnly = false;
+            g.AllowUserToAddRows = true;
+            g.AllowUserToDeleteRows = true;
+            g.DataError += (_, e) =>
+            {
+                e.ThrowException = false;
+                MessageBox.Show(this, "Giá trị không hợp lệ. Hãy nhập số, hoặc chọn sản phẩm từ danh sách.",
+                    "Dữ liệu chưa hợp lệ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            };
+            luoiCT[nhom] = g;
+            var trang = new TabPage(KhuyenMaiQuanLyRepository.TenNhom(nhom)) { Name = nhom };
+            trang.Controls.Add(g);
+            tabs.TabPages.Add(trang);
+        }
 
         ten = new TextBox { Width = 280, MaxLength = 150 };
-        loai = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 190, Margin = new Padding(4) };
-        loai.Items.AddRange(CacLoai);
-        loai.SelectedIndex = 0;
         tuNgay = new DateTimePicker { Format = DateTimePickerFormat.Short, Width = 110 };
         denNgay = new DateTimePicker { Format = DateTimePickerFormat.Short, Width = 110 };
         bat = new CheckBox { Text = "Đang áp dụng", AutoSize = true, Checked = true, Margin = new Padding(8, 8, 8, 3) };
@@ -85,7 +83,7 @@ public class FrmKhuyenMai : Form, IUnsavedWork
         var edit = Sv4Ui.ThanhCongCu(120);
         edit.Controls.AddRange(new Control[]
         {
-            nhanMa, Sv4Ui.Nhan("Tên"), ten, Sv4Ui.Nhan("Loại"), loai,
+            nhanMa, Sv4Ui.Nhan("Tên"), ten,
             Sv4Ui.Nhan("Từ ngày"), tuNgay, Sv4Ui.Nhan("Đến ngày"), denNgay, bat,
             Sv4Ui.Nut("Mới", () => { if (!HasUnsavedWork || Sv4Ui.XacNhan(this, "Bỏ thay đổi để tạo chương trình mới?")) Moi(); }),
             Sv4Ui.Nut("Lưu", () => Chay(Luu)),
@@ -100,16 +98,13 @@ public class FrmKhuyenMai : Form, IUnsavedWork
         thanhChiTiet.Controls.AddRange(new Control[] { nhanChiTiet, btnSinh });
 
         // thu tu Add: Fill truoc, Top sau cung nam tren cung
-        Controls.Add(chiTiet);
+        Controls.Add(tabs);
         Controls.Add(thanhChiTiet);
         Controls.Add(edit);
         Controls.Add(luoi);
         ShopTheme.Apply(this);
 
-        loai.SelectedIndexChanged += (_, _) =>
-        {
-            if (!dangNap && ma == 0 && loai.SelectedItem is LoaiItem li) ThietLapChiTiet(li.Ma);
-        };
+        tabs.SelectedIndexChanged += (_, _) => CapNhatNhanTab();
         FormClosing += (_, e) =>
         {
             if (HasUnsavedWork && !Sv4Ui.XacNhan(this, "Bỏ thay đổi chương trình chưa lưu?")) e.Cancel = true;
@@ -163,23 +158,21 @@ public class FrmKhuyenMai : Form, IUnsavedWork
         Tieu("SoMuc", "Số mục chi tiết");
     }
 
-    // TV3: chon 1 dong trong danh sach -> hien thong tin + chi tiet de sua
+    // TV3: chon 1 dong trong danh sach -> hien thong tin + chi tiet (ca ba nhom) de sua
     private void NapChiTiet(int id)
     {
         var k = _repo.LayCTKM(id) ?? throw new InvalidOperationException("Chương trình không còn tồn tại. Hãy tải lại.");
-        var du = _repo.LayChiTiet(id, k.LoaiKM);
+        var du = _repo.LayChiTietTatCa(id);
         dangNap = true;
         try
         {
             ma = k.MaCTKM;
             nhanMa.Text = $"Mã: {ma}";
             ten.Text = k.TenCTKM;
-            loai.SelectedItem = CacLoai.First(x => x.Ma == k.LoaiKM);
-            loai.Enabled = false;                       // khong doi loai chuong trinh da tao
             tuNgay.Value = k.NgayBatDau.Date;
             denNgay.Value = k.NgayKetThuc.Date;
             bat.Checked = k.TrangThai;
-            ThietLapChiTiet(k.LoaiKM, du);
+            ThietLapChiTiet(du);
         }
         finally { dangNap = false; }
         original = Chup();
@@ -193,12 +186,11 @@ public class FrmKhuyenMai : Form, IUnsavedWork
             ma = 0;
             nhanMa.Text = "Chương trình mới";
             ten.Clear();
-            loai.Enabled = true;
-            loai.SelectedIndex = 0;
             tuNgay.Value = DateTime.Today;
             denNgay.Value = DateTime.Today.AddDays(30);
             bat.Checked = true;
-            ThietLapChiTiet("SANPHAM");
+            ThietLapChiTiet(new ChiTietKM());
+            tabs.SelectedIndex = 0;
             luoi.ClearSelection();
         }
         finally { dangNap = false; }
@@ -206,46 +198,72 @@ public class FrmKhuyenMai : Form, IUnsavedWork
         ten.Focus();
     }
 
-    // TV3: dung cot cho bang chi tiet theo loai
-    private void ThietLapChiTiet(string maLoai, DataTable? du = null)
+    private static readonly Dictionary<string, string> MoTaNhom = new()
     {
-        loaiHienTai = maLoai;
-        bang = du ?? KhuyenMaiQuanLyRepository.TaoBangChiTiet(maLoai);
-        chiTiet.DataSource = null;
-        chiTiet.Columns.Clear();
+        ["SANPHAM"] = "Giảm theo sản phẩm: luôn áp dụng khi sản phẩm đang giảm. Thêm ở dòng trống cuối bảng, xóa dòng bằng phím Delete.",
+        ["HOADON"] = "Giảm theo ngưỡng tiền: mỗi dòng là một bậc, tổng tiền hàng (sau giảm sản phẩm) đạt mốc thì được giảm %. Áp dụng bậc cao nhất đạt được; không cộng dồn với voucher.",
+        ["VOUCHER"] = "Voucher: mỗi dòng là một mã dùng chung có giới hạn lượt. Mã đã có người dùng thì không xóa được và số lượt không được nhỏ hơn số đã dùng.",
+    };
 
-        switch (maLoai)
+    private void CapNhatNhanTab()
+    {
+        var nhom = CacNhom[Math.Max(0, tabs.SelectedIndex)];
+        nhanChiTiet.Text = MoTaNhom[nhom];
+        btnSinh.Visible = nhom == "VOUCHER";
+    }
+
+    private void CapNhatTieuDeTab()
+    {
+        foreach (var nhom in CacNhom)
         {
-            case "SANPHAM":
-                chiTiet.Columns.Add(new DataGridViewComboBoxColumn
-                {
-                    Name = "SanPham",
-                    DataPropertyName = "MaSP",
-                    HeaderText = "Sản phẩm",
-                    FillWeight = 300,
-                    DataSource = sanPham,
-                    DisplayMember = "TenSP",
-                    ValueMember = "MaSP",
-                    FlatStyle = FlatStyle.Flat,
-                });
-                chiTiet.Columns.Add(Cot("GiamGia", "PhanTramGG", "Giảm (%)", typeof(decimal), "0.##"));
-                nhanChiTiet.Text = "Sản phẩm áp dụng và % giảm. Thêm ở dòng trống cuối bảng, xóa dòng bằng phím Delete.";
-                break;
-            case "HOADON":
-                chiTiet.Columns.Add(Cot("TongTienToiThieu", "TongTienToiThieu", "Từ tổng tiền hàng (đ)", typeof(decimal), "#,##0"));
-                chiTiet.Columns.Add(Cot("GiamGia", "PhanTramGG", "Giảm (%)", typeof(decimal), "0.##"));
-                nhanChiTiet.Text = "Mỗi dòng là một bậc: tổng tiền hàng đạt mốc thì được giảm %. Hệ thống áp dụng bậc cao nhất đạt được.";
-                break;
-            default:
-                chiTiet.Columns.Add(Cot("MaVoucher", "MaVoucher", "Mã voucher", typeof(string)));
-                chiTiet.Columns.Add(Cot("GiamGia", "PhanTramGG", "Giảm (%)", typeof(decimal), "0.##"));
-                chiTiet.Columns.Add(Cot("SoLuot", "SoLuong", "Số lượt dùng", typeof(int)));
-                chiTiet.Columns.Add(Cot("DaDung", "DaDung", "Đã dùng", typeof(int), null, chiDoc: true));
-                nhanChiTiet.Text = "Mỗi dòng là một mã. Mã đã có người dùng thì không xóa được và số lượt không được nhỏ hơn số đã dùng.";
-                break;
+            var n = ct.Bang(nhom).Rows.Cast<DataRow>().Count(r => r.RowState != DataRowState.Deleted);
+            tabs.TabPages[nhom]!.Text = KhuyenMaiQuanLyRepository.TenNhom(nhom) + (n > 0 ? $" ({n})" : "");
         }
-        btnSinh.Visible = maLoai == "VOUCHER";
-        chiTiet.DataSource = bang;
+    }
+
+    // TV3: dung cot + nguon du lieu cho ca ba tab
+    private void ThietLapChiTiet(ChiTietKM du)
+    {
+        ct = du;
+        foreach (var nhom in CacNhom)
+        {
+            var g = luoiCT[nhom];
+            g.DataSource = null;
+            g.Columns.Clear();
+            switch (nhom)
+            {
+                case "SANPHAM":
+                    g.Columns.Add(new DataGridViewComboBoxColumn
+                    {
+                        Name = "SanPham",
+                        DataPropertyName = "MaSP",
+                        HeaderText = "Sản phẩm",
+                        FillWeight = 300,
+                        DataSource = sanPham,
+                        DisplayMember = "TenSP",
+                        ValueMember = "MaSP",
+                        FlatStyle = FlatStyle.Flat,
+                    });
+                    g.Columns.Add(Cot("GiamGia", "PhanTramGG", "Giảm (%)", typeof(decimal), "0.##"));
+                    break;
+                case "HOADON":
+                    g.Columns.Add(Cot("TongTienToiThieu", "TongTienToiThieu", "Từ tổng tiền hàng (đ)", typeof(decimal), "#,##0"));
+                    g.Columns.Add(Cot("GiamGia", "PhanTramGG", "Giảm (%)", typeof(decimal), "0.##"));
+                    break;
+                default:
+                    g.Columns.Add(Cot("MaVoucher", "MaVoucher", "Mã voucher", typeof(string)));
+                    g.Columns.Add(Cot("GiamGia", "PhanTramGG", "Giảm (%)", typeof(decimal), "0.##"));
+                    g.Columns.Add(Cot("SoLuot", "SoLuong", "Số lượt dùng", typeof(int)));
+                    g.Columns.Add(Cot("DaDung", "DaDung", "Đã dùng", typeof(int), null, chiDoc: true));
+                    break;
+            }
+            var bang = du.Bang(nhom);
+            g.DataSource = bang;
+            bang.RowChanged += (_, _) => CapNhatTieuDeTab();
+            bang.RowDeleted += (_, _) => CapNhatTieuDeTab();
+        }
+        CapNhatTieuDeTab();
+        CapNhatNhanTab();
     }
 
     private static DataGridViewTextBoxColumn Cot(string tenCot, string thuocTinh, string tieuDe, Type kieu,
@@ -266,16 +284,19 @@ public class FrmKhuyenMai : Form, IUnsavedWork
     // TV3: anh chup trang thai form de biet co thay doi chua luu hay khong
     private string Chup()
     {
-        var dong = bang.Rows.Cast<DataRow>()
+        var dong = CacNhom.Select(nhom => nhom + ":" + string.Join(";", ct.Bang(nhom).Rows.Cast<DataRow>()
             .Where(r => r.RowState != DataRowState.Deleted)
-            .Select(r => string.Join(",", r.ItemArray.Select(v => Convert.ToString(v, CultureInfo.InvariantCulture))));
-        return $"{ten.Text}|{loaiHienTai}|{tuNgay.Value:yyyyMMdd}|{denNgay.Value:yyyyMMdd}|{bat.Checked}|{string.Join(";", dong)}";
+            .Select(r => string.Join(",", r.ItemArray.Select(v => Convert.ToString(v, CultureInfo.InvariantCulture))))));
+        return $"{ten.Text}|{tuNgay.Value:yyyyMMdd}|{denNgay.Value:yyyyMMdd}|{bat.Checked}|{string.Join("|", dong)}";
     }
 
     private void KetThucSua()
     {
-        chiTiet.EndEdit();
-        BindingContext[bang].EndCurrentEdit();
+        foreach (var nhom in CacNhom)
+        {
+            luoiCT[nhom].EndEdit();
+            if (luoiCT[nhom].DataSource != null) BindingContext![ct.Bang(nhom)].EndCurrentEdit();
+        }
     }
 
     private void Luu()
@@ -287,12 +308,18 @@ public class FrmKhuyenMai : Form, IUnsavedWork
             TenCTKM = ten.Text,
             NgayBatDau = tuNgay.Value.Date,
             NgayKetThuc = denNgay.Value.Date,
-            LoaiKM = ((LoaiItem)loai.SelectedItem!).Ma,
             TrangThai = bat.Checked,
         };
-        KhuyenMaiQuanLyRepository.KiemTra(k, bang);            // bao loi ngay tren giao dien
-        if (!Sv4Ui.XacNhan(this, "Lưu chương trình khuyến mãi này?")) return;
-        var du = bang;
+        try { KhuyenMaiQuanLyRepository.KiemTra(k, ct); }            // bao loi ngay tren giao dien
+        catch (ArgumentException ex)
+        {
+            // loi o tab nao thi chuyen sang tab do ("Tab Voucher: ...")
+            foreach (var nhom in CacNhom)
+                if (ex.Message.StartsWith($"Tab {KhuyenMaiQuanLyRepository.TenNhom(nhom)}:")) tabs.SelectedTab = tabs.TabPages[nhom];
+            throw;
+        }
+        if (!Sv4Ui.XacNhan(this, "Lưu chương trình khuyến mãi này (cả ba nhóm ưu đãi)?")) return;
+        var du = ct;
         Ghi(() => _repo.Luu(k, du));
     }
 
@@ -324,7 +351,8 @@ public class FrmKhuyenMai : Form, IUnsavedWork
     // TV3: sinh N ma ngau nhien (tien to + 6 ky tu, bo ky tu de nham) vao bang chi tiet; chi luu khi bam "Lưu"
     private void SinhVoucher()
     {
-        if (loaiHienTai != "VOUCHER") return;
+        tabs.SelectedTab = tabs.TabPages["VOUCHER"];
+        var bang = ct.Voucher;
 
         using var f = new Form
         {

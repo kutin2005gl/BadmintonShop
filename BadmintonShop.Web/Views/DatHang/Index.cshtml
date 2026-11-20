@@ -68,10 +68,7 @@
                 }
             </div>
             <div class="border-t border-gray-200 pt-4 space-y-3 text-sm font-medium">
-                <div class="flex justify-between"><span class="text-gray-600">Tạm tính</span><span>@g.TongTienHang.Dong()</span></div>
-                <div class="flex justify-between text-secondary">
-                    <span>Giảm giá@(g.MaVoucher != null ? $" (mã {g.MaVoucher})" : "")</span><span>-@g.TienGiamHoaDon.Dong()</span>
-                </div>
+                <partial name="_TomTatGiamGia" model="g" />
             </div>
             <div class="flex justify-between items-end border-t border-gray-200 pt-6 mt-4">
                 <span class="font-bold uppercase tracking-wider text-sm">Tổng cộng</span>
@@ -81,24 +78,7 @@
 
         @* SV3: nhap ma giam gia ngay tai trang dat hang (form rieng, khong long trong form dat hang) *@
         <div class="mt-6 border border-gray-200 p-6">
-            <h3 class="font-bold uppercase text-sm tracking-wider mb-4">Mã giảm giá</h3>
-            @if (g.LoiVoucher != null) { <div class="alert-err">@g.LoiVoucher</div> }
-            @if (g.MaVoucher != null)
-            {
-                <p class="text-sm mb-3">Đang áp dụng mã <strong>@g.MaVoucher</strong>.</p>
-                <form asp-controller="GioHang" asp-action="BoVoucher" method="post" class="giu-thong-tin">
-                    <input type="hidden" name="returnUrl" value="@Url.Action("Index", "DatHang")" />
-                    <button type="submit" class="text-xs font-bold uppercase underline hover:text-primary">Bỏ mã</button>
-                </form>
-            }
-            else
-            {
-                <form asp-controller="GioHang" asp-action="ApDungVoucher" method="post" class="flex gap-2 giu-thong-tin">
-                    <input type="hidden" name="returnUrl" value="@Url.Action("Index", "DatHang")" />
-                    <input type="text" name="maVoucher" class="input-box flex-1" placeholder="Nhập mã của bạn" maxlength="30" aria-label="Mã giảm giá" required />
-                    <button type="submit" class="bg-black text-white px-6 font-bold uppercase text-sm hover:bg-gray-800 transition-colors">Áp dụng</button>
-                </form>
-            }
+            <partial name="_VoucherBox" model="g" view-data="@(new ViewDataDictionary(ViewData) { { "returnUrl", Url.Action("Index", "DatHang") } })" />
         </div>
     </div>
 </div>

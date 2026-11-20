@@ -1,15 +1,24 @@
-@model BadmintonShop.Core.Models.HoaDon
+@model BadmintonShop.Web.Models.ThanhToanOnlineViewModel
 @{ ViewData["Title"] = "Thanh toán online"; }
 
 <div class="container mx-auto px-4 py-12">
 <div class="mx-auto max-w-md bg-gray-50 p-8 text-center">
     <h1 class="text-xl font-extrabold uppercase tracking-tight mb-2">Cổng thanh toán (giả lập)</h1>
     <p class="text-gray-500 text-sm mb-6">Đây là màn hình mô phỏng, không có giao dịch thật.</p>
-    <p class="text-sm mb-1">Đơn hàng <strong>#@Model.MaHD</strong></p>
-    <p class="text-3xl font-extrabold tracking-tight mb-8">@Model.TongTien.Dong()</p>
-    <form asp-action="ThanhToanOnline" asp-route-id="@Model.MaHD" method="post" class="flex flex-col gap-3">
+    <p class="text-sm mb-4">Đơn hàng <strong>#@Model.Don.MaHD</strong></p>
+    <div class="text-sm font-medium space-y-2 mb-4 text-left" id="tom-tat-giam-gia">
+        <div class="flex justify-between"><span class="text-gray-600">Tiền hàng</span><span>@Model.TienHangTruocGiam.Dong()</span></div>
+        <div class="flex justify-between text-secondary"><span>Giảm sản phẩm</span><span>-@Model.GiamSanPham.Dong()</span></div>
+        <div class="flex justify-between text-secondary">
+            <span>Giảm hóa đơn@(Model.MaVoucher != null ? $" — mã {Model.MaVoucher}" : (Model.GiamHoaDon > 0 ? " — giảm theo ngưỡng" : ""))</span>
+            <span>-@Model.GiamHoaDon.Dong()</span>
+        </div>
+        <div class="flex justify-between font-bold border-t border-gray-200 pt-2"><span>Tổng giảm giá</span><span>-@Model.TongGiam.Dong()</span></div>
+    </div>
+    <p class="text-3xl font-extrabold tracking-tight mb-8">@Model.Don.TongTien.Dong()</p>
+    <form asp-action="ThanhToanOnline" asp-route-id="@Model.Don.MaHD" method="post" class="flex flex-col gap-3">
         <button type="submit" class="btn-accent w-full">Xác nhận đã thanh toán</button>
-        <a asp-action="ThanhCong" asp-route-id="@Model.MaHD" class="text-sm font-bold uppercase underline hover:text-primary">Thanh toán sau</a>
+        <a asp-action="ThanhCong" asp-route-id="@Model.Don.MaHD" class="text-sm font-bold uppercase underline hover:text-primary">Thanh toán sau</a>
     </form>
 </div>
 </div>

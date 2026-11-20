@@ -110,7 +110,18 @@ public class DatHangController : Controller
         if (hd == null) return NotFound();
         if (hd.HinhThucTT != "Online" || hd.TrangThai != "Chờ xác nhận")
             return RedirectToAction(nameof(ThanhCong), new { id });
-        return View(hd);
+        var maKH = MaKHXemDon(id);
+        var dong = _donHang.LayChiTietHienThi(id, maKH);
+        var truoc = dong.Rows.Cast<System.Data.DataRow>().Sum(r => Convert.ToInt32(r["SoLuong"]) * Convert.ToDecimal(r["DonGia"]));
+        var sauGiamSP = dong.Rows.Cast<System.Data.DataRow>().Sum(r => Convert.ToDecimal(r["ThanhTien"]));
+        return View(new ThanhToanOnlineViewModel
+        {
+            Don = hd,
+            TienHangTruocGiam = truoc,
+            GiamSanPham = truoc - sauGiamSP,
+            GiamHoaDon = hd.TienGiamGia,
+            MaVoucher = new KhuyenMaiRepository().LayVoucherCuaHoaDon(id),
+        });
     }
 
     [HttpPost, ValidateAntiForgeryToken]

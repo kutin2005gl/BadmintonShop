@@ -44,6 +44,7 @@ public class DonHangOnlineRepository
             hd.Parameters.AddWithValue("@gc", DbHelper.GiaTriHoacNull(ghiChu));
             var maHD = (int)hd.ExecuteScalar()!;
 
+            GiaoDichBanHang.GhiVoucher(c, t, maHD, fresh);
             GiaoDichBanHang.GhiChiTiet(c, t, maHD, fresh);
             return maHD;
         }, IsolationLevel.Serializable);

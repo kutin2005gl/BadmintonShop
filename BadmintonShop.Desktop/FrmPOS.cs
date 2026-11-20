@@ -131,7 +131,7 @@ public class FrmPOS : Form, IUnsavedWork
             gio.ResetBindings();
         }
         finally { binding=false; }
-        voucherInfo.Text=result.LoiVoucher??(result.MaVoucher!=null?$"Đã áp dụng {result.MaVoucher}":result.VoucherYeuCau!=null?"Ưu đãi hóa đơn tốt hơn voucher; mã không bị trừ lượt.":"Tự động áp dụng ưu đãi hiện có.");
+        voucherInfo.Text=result.LoiVoucher??(result.MaVoucher!=null?$"Đã áp dụng {result.MaVoucher}":result.VoucherYeuCau!=null?"Mã hợp lệ nhưng đang áp dụng giảm theo ngưỡng vì có lợi hơn; mã không bị trừ lượt.":"Tự động áp dụng ưu đãi hiện có.");
         if(result.CanhBao.Count>0)voucherInfo.Text+="\n"+string.Join(" ",result.CanhBao);
         voucherInfo.ForeColor=result.LoiVoucher==null?ShopTheme.Green:Color.Firebrick;HienTong();
     }
@@ -141,7 +141,7 @@ public class FrmPOS : Form, IUnsavedWork
         if(InvokeRequired) { ShopTheme.OnUi(this,HienTong);return; }
         decimal total=baoGia?.TongThanhToan??0;
         chiPhi.Text=baoGia==null?(gio.Count==0?"Giỏ hàng trống":"Chưa có báo giá hợp lệ"):
-            $"Tiền hàng trước giảm: {baoGia.TienHangTruocGiam:N0} đ\nGiảm sản phẩm: {baoGia.TienGiamSanPham:N0} đ\nGiảm hóa đơn / voucher: {baoGia.TienGiamHoaDon:N0} đ";
+            $"Tiền hàng trước giảm: {baoGia.TienHangTruocGiam:N0} đ\nGiảm sản phẩm: {baoGia.TienGiamSanPham:N0} đ\nGiảm hóa đơn{(baoGia.TenGiamHoaDon!=null?" — "+baoGia.TenGiamHoaDon:"")}: {baoGia.TienGiamHoaDon:N0} đ\nTổng giảm giá: {baoGia.TongGiamGia:N0} đ";
         tong.Text=$"Tổng thanh toán: {total:N0} đ\n"+(tien.Value>=total?$"Tiền thừa: {tien.Value-total:N0} đ":$"Còn thiếu: {total-tien.Value:N0} đ");
         bool sameCode=MaVoucher()==voucherYeuCau;
         luu.Enabled=hoTroPOS && !dangLuu && baoGia is { CoTheDatHang:true,LoiVoucher:null } && baoGia.Dong.Count==gio.Count && sameCode && tien.Value>=total;
