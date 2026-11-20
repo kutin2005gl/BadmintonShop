@@ -2,7 +2,7 @@
 @{
     var sp = Model.SanPham; var pt = KhuyenMaiHienThi.LayPhanTram(sp.MaSP);
 }
-<div class="sp-card group relative flex flex-col bg-white" data-dm="@sp.MaDM" data-ten="@((sp.TenSP + " " + sp.ThuongHieu).ToLowerInvariant())">
+<div class="sp-card group relative flex flex-col bg-white" data-cart-scope data-dm="@sp.MaDM" data-ten="@((sp.TenSP + " " + sp.ThuongHieu).ToLowerInvariant())">
     <div class="absolute top-2 left-2 z-10 flex flex-col gap-2">
         @if (sp.SoLuongTon <= 0) { <span class="bg-gray-500 text-white text-[10px] font-bold px-2 py-1 tracking-wider uppercase">Hết hàng</span> }
         else if (sp.SoLuongTon <= 5) { <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-1 tracking-wider uppercase">Sắp hết</span> }
@@ -13,7 +13,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
     </button>
 
-    <a asp-controller="SanPham" asp-action="ChiTiet" asp-route-id="@sp.MaSP" tabindex="-1" aria-hidden="true"
+    <a asp-controller="SanPham" asp-action="ChiTiet" asp-route-id="@sp.MaSP" tabindex="-1" aria-hidden="true" data-cart-image
        class="relative bg-gray-50 aspect-square overflow-hidden mb-4 flex items-center justify-center">
         <img src="@AnhMinhHoa.CuaSanPham(sp.HinhAnh, Model.TenDanhMuc)" alt="@sp.TenSP" loading="lazy" data-chu="@sp.TenSP.Substring(0, 1)"
              class="w-full h-full object-cover mix-blend-multiply transition-transform duration-500 group-hover:scale-110" />
