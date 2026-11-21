@@ -15,6 +15,17 @@ public class DatHangViewModel
     public string? Loi { get; set; }
 }
 
+/// <summary>Man hinh thanh toan online gia lap: so lieu giam gia lay tu hoa don va chi tiet DA LUU (khong tinh lai).</summary>
+public class ThanhToanOnlineViewModel
+{
+    public HoaDon Don { get; set; } = new();
+    public decimal TienHangTruocGiam { get; set; }
+    public decimal GiamSanPham { get; set; }
+    public decimal GiamHoaDon { get; set; }
+    public string? MaVoucher { get; set; }       // ma voucher thang (HoaDon_Voucher); null = giam theo nguong hoac khong giam hoa don
+    public decimal TongGiam => GiamSanPham + GiamHoaDon;
+}
+
 public class ChiTietDonViewModel
 {
     public HoaDon Don { get; set; } = new();

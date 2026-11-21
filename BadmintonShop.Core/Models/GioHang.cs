@@ -25,6 +25,15 @@ public class KetQuaGioHang
     public decimal TienGiamHoaDon { get; set; }  // giam theo bac hoa don hoac voucher
     public int? MaCTKM { get; set; }
     public string? MaVoucher { get; set; }       // chi co khi voucher thuc su duoc ap dung
+    public decimal PhanTramGiamHoaDon { get; set; } // % cua uu dai cap hoa don duoc chon
+    public decimal NguongGiamHoaDon { get; set; }   // moc tien cua bac giam theo nguong (khi khong dung voucher)
+    public bool VoucherHopLeNhungThua { get; set; } // voucher hop le nhung giam theo nguong co loi hon
+    public bool CoGiamHoaDon => TienGiamHoaDon > 0 || MaVoucher != null;
+    public decimal TongGiamGia => TienGiamSanPham + TienGiamHoaDon;
+    // nhan hien thi cua uu dai cap hoa don duoc chon: "Voucher ABC (10%)" / "Giảm theo ngưỡng đơn từ X (5%)"
+    public string? TenGiamHoaDon => MaVoucher != null
+        ? $"mã {MaVoucher} (−{PhanTramGiamHoaDon:0.##}%)"
+        : (TienGiamHoaDon > 0 ? $"giảm theo ngưỡng đơn từ {NguongGiamHoaDon:N0} đ (−{PhanTramGiamHoaDon:0.##}%)" : null);
     public string? LoiVoucher { get; set; }      // co khi khach nhap voucher nhung khong hop le
     public List<string> CanhBao { get; } = new();
     public decimal TongThanhToan => Math.Max(0, TongTienHang - TienGiamHoaDon);

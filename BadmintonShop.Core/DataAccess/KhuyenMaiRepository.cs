@@ -32,7 +32,7 @@ public class KhuyenMaiRepository
     {
         const string sql = @"SELECT MAX(sp.PhanTramGG)
                              FROM KM_TheoSP sp JOIN CTKM k ON k.MaCTKM = sp.MaCTKM
-                             WHERE sp.MaSP = @sp AND k.LoaiKM = 'SANPHAM' AND k.TrangThai = 1
+                             WHERE sp.MaSP = @sp AND k.TrangThai = 1
                                AND @ngay BETWEEN k.NgayBatDau AND k.NgayKetThuc";
         var kq = Scalar(sql,
             new SqlParameter("@sp", maSP),
@@ -45,7 +45,7 @@ public class KhuyenMaiRepository
     {
         const string sql = @"SELECT sp.MaSP, MAX(sp.PhanTramGG) AS PhanTram
                              FROM KM_TheoSP sp JOIN CTKM k ON k.MaCTKM = sp.MaCTKM
-                             WHERE k.LoaiKM = 'SANPHAM' AND k.TrangThai = 1
+                             WHERE k.TrangThai = 1
                                AND @ngay BETWEEN k.NgayBatDau AND k.NgayKetThuc
                              GROUP BY sp.MaSP";
         var dt = Query(sql, new SqlParameter("@ngay", SqlDbType.Date) { Value = ngay.Date });
@@ -59,7 +59,7 @@ public class KhuyenMaiRepository
     {
         const string sql = @"SELECT TOP 1 h.MaCTKM, h.TongTienToiThieu, h.PhanTramGG
                              FROM KM_TheoHD h JOIN CTKM k ON k.MaCTKM = h.MaCTKM
-                             WHERE k.LoaiKM = 'HOADON' AND k.TrangThai = 1
+                             WHERE k.TrangThai = 1
                                AND @ngay BETWEEN k.NgayBatDau AND k.NgayKetThuc
                                AND h.TongTienToiThieu <= @tong
                              ORDER BY h.TongTienToiThieu DESC, h.PhanTramGG DESC, h.MaCTKM";
@@ -82,7 +82,7 @@ public class KhuyenMaiRepository
         if(string.IsNullOrWhiteSpace(maVoucher) || maVoucher.Trim().Length>30)return null;
         string sql = $@"SELECT v.MaCTKM, v.MaVoucher, v.PhanTramGG, v.SoLuong, v.DaDung
                              FROM KM_TheoVoucher v {(transaction!=null?"WITH (UPDLOCK,HOLDLOCK)":"")} JOIN CTKM k ON k.MaCTKM = v.MaCTKM
-                             WHERE v.MaVoucher = @ma AND k.LoaiKM = 'VOUCHER' AND k.TrangThai = 1
+                             WHERE v.MaVoucher = @ma AND k.TrangThai = 1
                                AND @ngay BETWEEN k.NgayBatDau AND k.NgayKetThuc
                                AND v.DaDung < v.SoLuong";
         var dt = Query(sql,
@@ -110,19 +110,20 @@ public class KhuyenMaiRepository
             new SqlParameter("@ma", SqlDbType.VarChar, 30) { Value = maVoucher.Trim().ToUpperInvariant() });
         if (rows.Rows.Count == 0) return "Mã voucher không tồn tại.";
         var r = rows.Rows[0];
-        if (!r.Field<bool>("TrangThai") || r.Field<string>("LoaiKM") != "VOUCHER") return "Voucher đã ngừng áp dụng.";
+        if (!r.Field<bool>("TrangThai")) return "Voucher đã ngừng áp dụng.";
         if (ngay.Date < r.Field<DateTime>("NgayBatDau").Date) return $"Voucher chưa đến hạn; bắt đầu {r.Field<DateTime>("NgayBatDau"):dd/MM/yyyy}.";
         if (ngay.Date > r.Field<DateTime>("NgayKetThuc").Date) return $"Voucher đã hết hạn ngày {r.Field<DateTime>("NgayKetThuc"):dd/MM/yyyy}.";
         return r.Field<int>("DaDung") >= r.Field<int>("SoLuong") ? "Voucher đã hết lượt sử dụng." : null;
     }
 
-    // CO-02: mot khach chi duoc dung 1 lan moi ma voucher. Tinh theo don chua huy da gan voucher nay (HoaDon.MaCTKM),
-    // nen huy don thi duoc dung lai. Chi ap dung voi khach co ma (POS khong chon khach -> bo qua).
+    // CO-02: mot khach chi duoc dung 1 lan moi ma voucher. Tinh theo don chua huy da ghi dung ma nay (HoaDon_Voucher),
+    // nen huy don thi duoc dung lai, con don chi dung giam theo nguong thi KHONG tinh la da dung voucher.
+    // Chi ap dung voi khach co ma (POS khong chon khach -> bo qua).
     public bool KhachDaDungVoucher(int maKH, string maVoucher)
     {
         if (maKH <= 0 || string.IsNullOrWhiteSpace(maVoucher)) return false;
-        var n = Scalar(@"SELECT COUNT(*) FROM HoaDon h JOIN KM_TheoVoucher v ON v.MaCTKM = h.MaCTKM
-                         WHERE v.MaVoucher = @ma AND h.MaKH = @kh AND h.TrangThai <> N'Đã hủy'",
+        var n = Scalar(@"SELECT COUNT(*) FROM HoaDon h JOIN HoaDon_Voucher hv ON hv.MaHD = h.MaHD
+                         WHERE hv.MaVoucher = @ma AND h.MaKH = @kh AND h.TrangThai <> N'Đã hủy'",
             new SqlParameter("@ma", SqlDbType.VarChar, 30) { Value = maVoucher.Trim().ToUpperInvariant() },
             new SqlParameter("@kh", maKH));
         return n is int i && i > 0;
@@ -130,12 +131,25 @@ public class KhuyenMaiRepository
 
     public const string ThongBaoDaDungVoucher = "Bạn đã dùng mã này rồi, mỗi khách chỉ được dùng một mã voucher một lần.";
 
+    // Ghi ma voucher THANG cua hoa don (trong cung giao dich luu hoa don). Moi hoa don toi da 1 ma.
+    public static void GhiVoucherHoaDon(SqlConnection conn, SqlTransaction tran, int maHD, string maVoucher)
+    {
+        using var cmd = new SqlCommand("INSERT INTO HoaDon_Voucher (MaHD, MaVoucher) VALUES (@hd, @ma)", conn, tran);
+        cmd.Parameters.AddWithValue("@hd", maHD);
+        cmd.Parameters.AddWithValue("@ma", maVoucher.Trim().ToUpperInvariant());
+        cmd.ExecuteNonQuery();
+    }
+
+    // Ma voucher da ghi cho 1 hoa don (null neu don khong dung voucher)
+    public string? LayVoucherCuaHoaDon(int maHD)
+        => Scalar("SELECT MaVoucher FROM HoaDon_Voucher WHERE MaHD = @hd", new SqlParameter("@hd", maHD)) as string;
+
     // TV3/SV4: increment only within checkout transaction; false means no longer eligible.
     public bool DungVoucher(SqlConnection conn, SqlTransaction tran, string maVoucher, DateTime? ngay=null, int? maCTKM=null)
     {
         using var cmd = new SqlCommand(
             @"UPDATE v SET DaDung = v.DaDung + 1 FROM KM_TheoVoucher v JOIN CTKM k ON k.MaCTKM=v.MaCTKM
-              WHERE v.MaVoucher=@ma AND v.DaDung<v.SoLuong AND k.TrangThai=1 AND k.LoaiKM='VOUCHER'
+              WHERE v.MaVoucher=@ma AND v.DaDung<v.SoLuong AND k.TrangThai=1
                 AND @ngay BETWEEN k.NgayBatDau AND k.NgayKetThuc AND (@km IS NULL OR v.MaCTKM=@km)", conn, tran);
         cmd.Parameters.AddWithValue("@ma", maVoucher.Trim().ToUpperInvariant());
         cmd.Parameters.AddWithValue("@ngay",(ngay??DateTime.Now).Date);cmd.Parameters.AddWithValue("@km",DbHelper.GiaTriHoacNull(maCTKM));

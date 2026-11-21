@@ -1,0 +1,9 @@
+@model KetQuaGioHang
+@using BadmintonShop.Core.Models
+@* 1.3: ba dong giam gia dung chung cho gio hang va trang dat hang: Giam san pham, Giam hoa don (kem ten uu dai), Tong giam *@
+<div class="flex justify-between"><span class="text-gray-600">Tiền hàng (@Model.TongSoLuong sản phẩm)</span><span>@Model.TienHangTruocGiam.Dong()</span></div>
+<div class="flex justify-between text-secondary"><span>Giảm sản phẩm</span><span>-@Model.TienGiamSanPham.Dong()</span></div>
+<div class="flex justify-between text-secondary gap-4">
+    <span>Giảm hóa đơn@(Model.TenGiamHoaDon != null ? " — " + Model.TenGiamHoaDon : "")</span><span class="whitespace-nowrap">-@Model.TienGiamHoaDon.Dong()</span>
+</div>
+<div class="flex justify-between font-bold border-t border-gray-200 pt-3"><span>Tổng giảm giá</span><span>-@Model.TongGiamGia.Dong()</span></div>

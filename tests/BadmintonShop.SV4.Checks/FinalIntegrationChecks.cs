@@ -79,7 +79,7 @@ internal static partial class Program
             string sql=File.ReadAllText(Path.Combine(root,"database/BadmintonShop.sql"));
             sql=sql[sql.IndexOf("-- ====== DANH MUC",StringComparison.Ordinal)..].Replace("USE BadmintonShop;","USE ["+name+"];",StringComparison.Ordinal);
             Batches(sql);True(new HoaDonRepository().HoTroPOS());
-            foreach(var script in new[]{"04_SV4_Migration.sql","06_SV4_POS_Request.sql","04_SV4_Migration.sql","06_SV4_POS_Request.sql","05_SV4_Demo.sql","05_SV4_Demo.sql"})
+            foreach(var script in new[]{"04_SV4_Migration.sql","06_SV4_POS_Request.sql","12_SV3_KhuyenMaiNhieuLoai.sql","04_SV4_Migration.sql","06_SV4_POS_Request.sql","12_SV3_KhuyenMaiNhieuLoai.sql","05_SV4_Demo.sql","05_SV4_Demo.sql"})
                 Batches(File.ReadAllText(Path.Combine(root,"database",script)).Replace("USE BadmintonShop;","USE ["+name+"];",StringComparison.Ordinal));
             True(new HoaDonRepository().HoTroPOS());
             Eq(3,ScalarInt("SELECT COUNT(*) FROM CTKM WHERE TenCTKM LIKE N'[[]SV4-DEMO]%'"));

@@ -145,6 +145,7 @@ public class HoaDonRepository
             hd.Parameters.AddWithValue("@nv",maNV);hd.Parameters.AddWithValue("@id",yeuCau);hd.Parameters.AddWithValue("@cash",tienKhachDua);
             hd.Parameters.AddWithValue("@km",DbHelper.GiaTriHoacNull(fresh.MaCTKM));hd.Parameters.AddWithValue("@discount",fresh.TienGiamHoaDon);hd.Parameters.AddWithValue("@hash",fingerprint);
             int ma=(int)hd.ExecuteScalar()!;
+            GiaoDichBanHang.GhiVoucher(c,t,ma,fresh);
             GiaoDichBanHang.GhiChiTiet(c,t,ma,fresh);
             return ma;
         },IsolationLevel.Serializable);

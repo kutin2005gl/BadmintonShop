@@ -111,7 +111,7 @@ CREATE TABLE CTKM (
     NgayBatDau  DATE NOT NULL,
     NgayKetThuc DATE NOT NULL,
     LoaiKM      VARCHAR(20) NOT NULL
-                CONSTRAINT CK_CTKM_Loai CHECK (LoaiKM IN ('SANPHAM','HOADON','VOUCHER')),
+                CONSTRAINT CK_CTKM_Loai CHECK (LoaiKM IN ('SANPHAM','HOADON','VOUCHER','HONHOP')),
     TrangThai   BIT NOT NULL DEFAULT 1,
     CONSTRAINT CK_CTKM_Ngay CHECK (NgayKetThuc >= NgayBatDau)
 );
@@ -175,6 +175,14 @@ CREATE TABLE ChiTietHoaDon (
     CONSTRAINT PK_CTHD PRIMARY KEY (MaHD, MaSP),
     CONSTRAINT FK_CTHD_HD FOREIGN KEY (MaHD) REFERENCES HoaDon(MaHD) ON DELETE CASCADE,
     CONSTRAINT FK_CTHD_SP FOREIGN KEY (MaSP) REFERENCES SanPham(MaSP)
+);
+
+CREATE TABLE HoaDon_Voucher (       -- hoa don nao da dung ma voucher nao (chi ghi ma thang; xem 12_SV3_KhuyenMaiNhieuLoai.sql)
+    MaHD      INT NOT NULL,
+    MaVoucher VARCHAR(30) NOT NULL,
+    CONSTRAINT PK_HoaDon_Voucher PRIMARY KEY (MaHD),
+    CONSTRAINT FK_HDVC_HD FOREIGN KEY (MaHD) REFERENCES HoaDon(MaHD) ON DELETE CASCADE,
+    CONSTRAINT FK_HDVC_VC FOREIGN KEY (MaVoucher) REFERENCES KM_TheoVoucher(MaVoucher)
 );
 
 -- ====== PHAN HOI / DANH GIA ======

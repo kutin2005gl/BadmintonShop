@@ -31,6 +31,11 @@ internal static class GiaoDichBanHang
         if(maKH>0 && repo.KhachDaDungVoucher(maKH.Value,gio.MaVoucher))
             throw new InvalidOperationException(KhuyenMaiRepository.ThongBaoDaDungVoucher);
     }
+    // Ghi ma voucher thang vao HoaDon_Voucher (cung giao dich luu hoa don); don khong dung voucher thi khong ghi gi.
+    internal static void GhiVoucher(SqlConnection c,SqlTransaction t,int maHD,KetQuaGioHang gio)
+    {
+        if(gio.MaVoucher!=null)KhuyenMaiRepository.GhiVoucherHoaDon(c,t,maHD,gio.MaVoucher);
+    }
     internal static void GhiChiTiet(SqlConnection c,SqlTransaction t,int ma,KetQuaGioHang gio)
     {
         foreach(var d in gio.Dong.OrderBy(d=>d.MaSP))
