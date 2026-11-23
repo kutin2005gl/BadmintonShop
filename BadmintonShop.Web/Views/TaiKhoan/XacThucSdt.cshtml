@@ -2,6 +2,9 @@
 
 @{
     ViewData["Title"] = "Xác thực số điện thoại";
+    var otpDemo = ViewData["OtpDemo"] as string;
+    var giayCho = ViewData["GiayCho"] is int g ? g : 0;
+    var coLoi = !ViewData.ModelState.IsValid;
 }
 
 <div class="auth-khung">
@@ -9,36 +12,87 @@
         <h1 class="auth-title">Xác thực số điện thoại</h1>
         <p class="auth-sub">Số điện thoại này đã từng đặt hàng. Nhập mã OTP gồm 6 chữ số để xác nhận bạn là chủ số và nhận lại lịch sử đơn. Mã có hiệu lực trong 5 phút.</p>
 
-        @if (TempData["OtpDemo"] != null)
+        @if (!string.IsNullOrEmpty(otpDemo))
         {
-            <div class="alert-warn text-center !mb-8">
+            <div class="alert-warn text-center !mb-6">
                 <div class="font-bold uppercase tracking-wider text-xs">OTP mô phỏng (chỉ dùng để demo)</div>
-                <div class="text-4xl font-extrabold tracking-[0.3em] my-3 tabular-nums">@TempData["OtpDemo"]</div>
-                <div class="text-xs">Mã này không được gửi qua email thật.</div>
+                <div class="text-4xl font-extrabold tracking-[0.3em] my-3 tabular-nums">@otpDemo</div>
+                <div class="text-xs">Mã này không được gửi qua SMS thật.</div>
+            </div>
+        }
+
+        @if (TempData["OtpThongBao"] is string tb)
+        {
+            <div class="otp-note otp-ok" role="status">@tb</div>
+        }
+        @if (TempData["OtpLoi"] is string loiCho)
+        {
+            <div class="otp-note otp-bad" role="alert">@loiCho</div>
+        }
+        @if (coLoi)
+        {
+            <div class="otp-note otp-bad" role="alert">
+                <strong>Mã OTP chưa đúng.</strong>
+                <span>Đối chiếu với mã mô phỏng ở trên rồi nhập lại, hoặc gửi lại mã mới.</span>
             </div>
         }
 
         <form asp-controller="TaiKhoan" asp-action="XacThucSdt" method="post">
             @Html.AntiForgeryToken()
 
-            <div asp-validation-summary="ModelOnly" class="alert-err"></div>
-
             <div class="field">
                 <label asp-for="MaOtp" class="field-label"></label>
-                <input asp-for="MaOtp" class="input-box text-center text-2xl font-bold tracking-[0.4em] tabular-nums"
-                       maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="000000" />
+                <input asp-for="MaOtp" class="input-box otp-input @(coLoi ? "otp-input-bad" : "")"
+                       maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="000000" autofocus />
                 <span asp-validation-for="MaOtp" class="field-error"></span>
             </div>
 
             <button type="submit" class="btn-dark w-full">Xác nhận OTP</button>
         </form>
 
-        <div class="border-t border-gray-200 mt-8 pt-6 text-center">
-            <a asp-controller="TaiKhoan" asp-action="DangKy" class="link-sub">Quay lại đăng ký để lấy mã OTP mới</a>
+        <form asp-controller="TaiKhoan" asp-action="GuiLaiOtpSdt" method="post" class="otp-resend">
+            @Html.AntiForgeryToken()
+            <span class="otp-resend-text">Chưa thấy mã?</span>
+            <button type="submit" id="btnGuiLai" class="otp-resend-btn" data-giay="@giayCho" @(giayCho > 0 ? "disabled" : "")>
+                Gửi lại mã
+            </button>
+        </form>
+
+        <div class="border-t border-gray-200 mt-6 pt-6 text-center">
+            <a asp-controller="TaiKhoan" asp-action="DangKy" class="link-sub">Quay lại đăng ký</a>
         </div>
     </div>
 </div>
 
+<style>
+    .otp-input { text-align: center; font-size: 1.5rem; font-weight: 700; letter-spacing: .4em; font-variant-numeric: tabular-nums; }
+    .otp-input-bad { border-color: #dc2626 !important; background: #fef2f2; animation: otp-rung .35s; }
+    .otp-note { padding: .75rem 1rem; margin-bottom: 1.25rem; font-size: .875rem; border-left: 4px solid; display: flex; flex-direction: column; gap: .15rem; }
+    .otp-ok { background: #f0fdf4; color: #166534; border-color: #16a34a; }
+    .otp-bad { background: #fef2f2; color: #991b1b; border-color: #dc2626; }
+    .otp-resend { display: flex; align-items: center; justify-content: center; gap: .5rem; margin-top: 1.25rem; font-size: .875rem; }
+    .otp-resend-text { color: #6b7280; }
+    .otp-resend-btn { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; background: none; border: 0; cursor: pointer; }
+    .otp-resend-btn:disabled { color: #9ca3af; text-decoration: none; cursor: not-allowed; }
+    @@keyframes otp-rung { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+</style>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            var btn = document.getElementById('btnGuiLai');
+            if (!btn) return;
+            var con = parseInt(btn.getAttribute('data-giay'), 10) || 0;
+            var nhan = 'Gửi lại mã';
+            function ve() {
+                if (con > 0) { btn.disabled = true; btn.textContent = nhan + ' (' + con + 's)'; }
+                else { btn.disabled = false; btn.textContent = nhan; }
+            }
+            ve();
+            if (con > 0) {
+                var t = setInterval(function () { con--; ve(); if (con <= 0) clearInterval(t); }, 1000);
+            }
+        })();
+    </script>
 }

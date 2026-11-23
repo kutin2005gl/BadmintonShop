@@ -1,0 +1,93 @@
+/* Compact Product Filter Bar - trang /SanPham */
+.lsp { margin-bottom: 1.25rem; }
+.lsp *, .lsp *::before, .lsp *::after { box-sizing: border-box; }
+.lsp-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: .5rem; font-size: .8125rem; }
+.lsp-head b { font-weight: 700; color: #111827; }
+.lsp-head span { color: #6b7280; }
+
+.lsp-search { position: relative; }
+.lsp-search > svg { position: absolute; left: .875rem; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #9ca3af; pointer-events: none; }
+.lsp-search input { width: 100%; height: 44px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; padding: 0 2.5rem; font-size: .875rem; color: #111827; transition: border-color .15s, box-shadow .15s; }
+.lsp-search input::placeholder { color: #9ca3af; }
+.lsp-search input:hover { border-color: #9ca3af; }
+.lsp-search input:focus { outline: none; border-color: #111827; box-shadow: 0 0 0 3px rgba(17,24,39,.12); }
+.lsp-search input::-webkit-search-cancel-button { display: none; }
+.lsp-clear { position: absolute; right: .5rem; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border: 0; border-radius: 999px; background: transparent; color: #6b7280; cursor: pointer; display: none; align-items: center; justify-content: center; }
+.lsp-clear:hover { background: #f3f4f6; color: #111827; }
+.lsp-clear.show { display: inline-flex; }
+.lsp-clear svg { width: 14px; height: 14px; }
+
+.lsp-bar { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-top: .75rem; flex-wrap: wrap; }
+.lsp-group { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.lsp-dd { position: relative; }
+
+.lsp-pill { display: inline-flex; align-items: center; gap: .375rem; height: 36px; padding: 0 .875rem; border: 1px solid #d1d5db; border-radius: 999px; background: #fff; color: #374151; font-size: .8125rem; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background-color .15s, border-color .15s, color .15s; }
+.lsp-pill:hover { border-color: #6b7280; background: #f9fafb; }
+.lsp-pill:focus-visible { outline: 2px solid #111827; outline-offset: 2px; }
+.lsp-pill svg { width: 14px; height: 14px; flex: none; }
+.lsp-pill .chev { transition: transform .15s; color: #6b7280; }
+.lsp-pill[aria-expanded="true"] { border-color: #111827; }
+.lsp-pill[aria-expanded="true"] .chev { transform: rotate(180deg); }
+.lsp-pill.on { background: #111827; border-color: #111827; color: #fff; }
+.lsp-pill.on .chev { color: #d1d5db; }
+.lsp-pill .cnt { display: inline-flex; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #fff; color: #111827; font-size: .6875rem; font-weight: 700; align-items: center; justify-content: center; }
+
+.lsp-menu { position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; min-width: 220px; max-height: 320px; overflow-y: auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 10px 24px rgba(0,0,0,.10); padding: .375rem; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity .16s, transform .16s, visibility .16s; }
+.lsp-menu.right { left: auto; right: 0; }
+.lsp-dd.open > .lsp-menu { opacity: 1; visibility: visible; transform: none; }
+.lsp-opt { display: flex; align-items: center; justify-content: space-between; gap: .75rem; width: 100%; padding: .5rem .625rem; border: 0; border-radius: 6px; background: transparent; text-align: left; font-size: .8125rem; color: #374151; cursor: pointer; }
+.lsp-opt:hover, .lsp-opt:focus-visible { background: #f3f4f6; outline: none; }
+.lsp-opt[aria-checked="true"] { font-weight: 700; color: #111827; }
+.lsp-opt[aria-checked="true"]::after { content: "\2713"; font-size: .75rem; }
+
+.lsp-pop { padding: .875rem; width: 300px; }
+.lsp-pop.wide { width: 340px; }
+.lsp-fld { margin-bottom: .75rem; }
+.lsp-fld label { display: block; margin-bottom: .25rem; font-size: .75rem; font-weight: 600; color: #4b5563; }
+.lsp-fld input, .lsp-fld select { width: 100%; height: 38px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; padding: 0 .75rem; font-size: .875rem; color: #111827; }
+.lsp-fld input:focus, .lsp-fld select:focus { outline: none; border-color: #111827; box-shadow: 0 0 0 3px rgba(17,24,39,.12); }
+.lsp-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.lsp-err { min-height: 1rem; margin: -.25rem 0 .5rem; font-size: .75rem; color: #b91c1c; }
+.lsp-act { display: flex; justify-content: flex-end; gap: .5rem; }
+.lsp-btn { height: 36px; padding: 0 1rem; border-radius: 8px; border: 1px solid #d1d5db; background: #fff; color: #374151; font-size: .8125rem; font-weight: 600; cursor: pointer; transition: background-color .15s; }
+.lsp-btn:hover { background: #f3f4f6; }
+.lsp-btn.dark { background: #111827; border-color: #111827; color: #fff; }
+.lsp-btn.dark:hover { background: #1f2937; }
+
+.lsp-chips { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: .75rem; }
+.lsp-chip { display: inline-flex; align-items: center; gap: .375rem; height: 30px; padding: 0 .5rem 0 .75rem; border: 1px solid #111827; border-radius: 999px; background: #f9fafb; color: #111827; font-size: .75rem; font-weight: 500; text-decoration: none; transition: background-color .15s; }
+.lsp-chip:hover { background: #e5e7eb; }
+.lsp-chip svg { width: 12px; height: 12px; }
+.lsp-chips .lsp-all { font-size: .75rem; color: #6b7280; text-decoration: underline; margin-left: .25rem; }
+.lsp-chips .lsp-all:hover { color: #111827; }
+
+.lsp-mobile-only { display: none; }
+.lsp-overlay { display: none; }
+
+@media (max-width: 767px) {
+    .lsp-desk-only { display: none !important; }
+    .lsp-mobile-only { display: inline-flex; }
+    .lsp-bar { flex-wrap: nowrap; }
+    .lsp-bar .lsp-pill { flex: 1; justify-content: center; height: 40px; }
+    .lsp-group, .lsp-bar > .lsp-dd { flex: 1; }
+    .lsp-bar > .lsp-dd .lsp-pill, .lsp-group .lsp-dd { width: 100%; }
+    .lsp-group .lsp-dd { flex: 1; }
+    .lsp-menu.right { left: auto; right: 0; }
+
+    /* Panel bộ lọc -> bottom sheet */
+    #lspPanel { position: fixed; z-index: 60; left: 0; right: 0; bottom: 0; top: auto; width: auto; max-height: 85vh; border-radius: 16px 16px 0 0; border: 0; padding: 1rem; transform: translateY(100%); box-shadow: 0 -10px 30px rgba(0,0,0,.18); overflow-y: auto; transition: transform .2s ease, visibility .2s; }
+    .lsp-dd.open > #lspPanel { transform: none; }
+    .lsp-overlay { display: block; position: fixed; inset: 0; z-index: 55; background: rgba(0,0,0,.4); opacity: 0; visibility: hidden; transition: opacity .2s, visibility .2s; }
+    .lsp-overlay.show { opacity: 1; visibility: visible; }
+    .lsp-fld input, .lsp-fld select, .lsp-search input { font-size: 1rem; height: 44px; }
+    .lsp-btn { height: 44px; }
+}
+@media (min-width: 768px) {
+    .lsp-sheet-head { display: none; }
+}
+.lsp-sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; font-weight: 700; font-size: .9375rem; }
+.lsp-sheet-head button { border: 0; background: transparent; cursor: pointer; padding: .25rem; color: #6b7280; }
+
+@media (prefers-reduced-motion: reduce) {
+    .lsp-menu, #lspPanel, .lsp-overlay, .lsp-pill .chev { transition: none; }
+}

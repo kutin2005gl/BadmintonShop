@@ -107,7 +107,9 @@ internal static partial class Program
                 form.Show();WaitUi(form);
                 bool invoice=form is FrmDonHang;
                 var grids=Controls(form).OfType<DataGridView>().ToArray();
-                var main=grids.Single(g=>g.Columns.Contains(invoice?"MaHD":"MaPN"));var sub=grids.Single(g=>g!=main);
+                var main=grids.Single(g=>g.Columns.Contains(invoice?"MaHD":"MaPN"));var sub=invoice?null:grids.Single(g=>g!=main);
+                // FrmDonHang hiển thị chi tiết dạng thẻ sản phẩm (Tag = DataRow chi tiết) thay vì lưới phụ.
+                System.Data.DataRow[] Cards()=>Controls(form).OfType<Panel>().Where(p=>p.Name=="TheSanPham").Select(p=>(System.Data.DataRow)p.Tag!).ToArray();
                 if(invoice)
                 {
                     var dates=Controls(form).OfType<DateTimePicker>().ToArray();
@@ -121,12 +123,12 @@ internal static partial class Program
                     main.CurrentCell=row.Cells[column.Index];WaitUi(form);
                     int id=Convert.ToInt32(row.Cells[invoice?"MaHD":"MaPN"].Value);
                     var expected=invoice?new HoaDonRepository().LayChiTietHienThi(id):new PhieuNhapRepository().LayChiTietHienThi(id);
-                    var actual=(System.Data.DataTable)sub.DataSource!;
-                    Eq(expected.Rows.Count,actual.Rows.Count);
+                    var actual=invoice?Cards():((System.Data.DataTable)sub!.DataSource!).Rows.Cast<System.Data.DataRow>().ToArray();
+                    Eq(expected.Rows.Count,actual.Length);
                     for(int i=0;i<expected.Rows.Count;i++)
-                    { Eq(expected.Rows[i]["MaSP"],actual.Rows[i]["MaSP"]);Eq(expected.Rows[i]["ThanhTien"],actual.Rows[i]["ThanhTien"]); }
+                    { Eq(expected.Rows[i]["MaSP"],actual[i]["MaSP"]);Eq(expected.Rows[i]["ThanhTien"],actual[i]["ThanhTien"]); }
                 }
-                main.DataSource=((System.Data.DataTable)main.DataSource!).Clone();WaitUi(form);True(sub.DataSource==null);
+                main.DataSource=((System.Data.DataTable)main.DataSource!).Clone();WaitUi(form);True(invoice?Cards().Length==0:sub!.DataSource==null);
                 form.Close();
             }
         });

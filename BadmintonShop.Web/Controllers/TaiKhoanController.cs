@@ -147,7 +147,7 @@ public class TaiKhoanController : Controller
                 s.SetString(DkEmailKey, model.Email.Trim().ToLowerInvariant());
                 s.SetString(DkMatKhauKey, MatKhauHelper.BamMatKhau(model.MatKhau));
                 s.Remove(DkDaXacThucKey);
-                TempData["OtpDemo"] = _otpService.TaoOtp(DkOtpKhoa(vangLai.MaKH));
+                PhatOtpDangKy(vangLai.MaKH);
                 return RedirectToAction(nameof(XacThucSdt));
             }
             ModelState.AddModelError(
@@ -160,7 +160,8 @@ public class TaiKhoanController : Controller
         {
             HoTen = model.HoTen,
             Email = model.Email,
-            SDT = model.SDT,
+            // TV1: luu SDT dang chuan 0xxxxxxxxx de khop voi khach vang lai / tra cuu don
+            SDT = KhachHangRepository.ChuanHoaSDT(model.SDT) ?? model.SDT,
             DiaChi = model.DiaChi
         };
 
@@ -206,7 +207,34 @@ public class TaiKhoanController : Controller
     private const string DkMatKhauKey = "DangKy.MatKhauBam";
     private const string DkDaXacThucKey = "DangKy.DaXacThuc";
 
+    private const string DkOtpDemoKey = "DangKy.OtpDemo";
+    private const string DkGuiLucKey = "DangKy.GuiLuc";
+    private const int GiayChoGuiLai = 60;
+
     private static string DkOtpKhoa(int maKH) => "dangky:" + maKH;
+
+    // TV1: sinh OTP moi cho khach vang lai, luu ma demo + thoi diem gui trong session (de hien lai khi nhap sai va tinh 60s gui lai)
+    private void PhatOtpDangKy(int maKH)
+    {
+        var s = HttpContext.Session;
+        s.SetString(DkOtpDemoKey, _otpService.TaoOtp(DkOtpKhoa(maKH)));
+        s.SetString(DkGuiLucKey, DateTime.UtcNow.Ticks.ToString());
+    }
+
+    // TV1: so giay con phai cho truoc khi duoc gui lai OTP (0 = duoc gui)
+    private int GiayConChoGuiLai()
+    {
+        if (!long.TryParse(HttpContext.Session.GetString(DkGuiLucKey), out var ticks)) return 0;
+        var da = DateTime.UtcNow - new DateTime(ticks, DateTimeKind.Utc);
+        return Math.Max(0, (int)Math.Ceiling(GiayChoGuiLai - da.TotalSeconds));
+    }
+
+    // TV1: nap du lieu hien thi cho man hinh OTP (ma demo + dem nguoc gui lai)
+    private void NapDuLieuOtp()
+    {
+        ViewData["OtpDemo"] = HttpContext.Session.GetString(DkOtpDemoKey);
+        ViewData["GiayCho"] = GiayConChoGuiLai();
+    }
 
     // GET: /TaiKhoan/XacThucSdt
     // TV1: man hinh nhap OTP xac nhan quyen so huu SDT cua khach vang lai dang muon dang ky
@@ -216,7 +244,29 @@ public class TaiKhoanController : Controller
     {
         if (!_environment.IsDevelopment() || HttpContext.Session.GetInt32(DkMaKHKey) == null)
             return RedirectToAction(nameof(DangKy));
+        NapDuLieuOtp();
         return View(new XacThucOtpViewModel());
+    }
+
+    // POST: /TaiKhoan/GuiLaiOtpSdt
+    // TV1: gui lai OTP, chi cho phep sau khi het 60 giay ke tu lan gui truoc (kiem o server)
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public IActionResult GuiLaiOtpSdt()
+    {
+        if (!_environment.IsDevelopment() || HttpContext.Session.GetInt32(DkMaKHKey) is not int maKH)
+            return RedirectToAction(nameof(DangKy));
+
+        var cho = GiayConChoGuiLai();
+        if (cho > 0)
+            TempData["OtpLoi"] = $"Vui lòng đợi {cho} giây nữa để gửi lại mã.";
+        else
+        {
+            PhatOtpDangKy(maKH);
+            TempData["OtpThongBao"] = "Đã gửi mã OTP mới. Mã cũ không còn hiệu lực.";
+        }
+        return RedirectToAction(nameof(XacThucSdt));
     }
 
     // POST: /TaiKhoan/XacThucSdt
@@ -231,12 +281,15 @@ public class TaiKhoanController : Controller
             || s.GetString(DkEmailKey) is not string email || s.GetString(DkMatKhauKey) is not string matKhauBam)
             return RedirectToAction(nameof(DangKy));
 
+        NapDuLieuOtp();
         if (!ModelState.IsValid)
             return View(model);
 
         if (!_otpService.XacThucOtp(DkOtpKhoa(maKH), model.MaOtp))
         {
-            ModelState.AddModelError(nameof(model.MaOtp), "OTP không chính xác, đã hết hạn hoặc vượt quá số lần thử.");
+            ModelState.Remove(nameof(model.MaOtp));
+            model.MaOtp = "";
+            ModelState.AddModelError(nameof(model.MaOtp), "Mã OTP không chính xác, đã hết hạn hoặc vượt quá số lần thử. Hãy kiểm tra lại hoặc gửi lại mã mới.");
             return View(model);
         }
 
@@ -253,7 +306,7 @@ public class TaiKhoanController : Controller
             loi = "Email này đã được đăng ký.";
         }
 
-        foreach (var k in new[] { DkMaKHKey, DkEmailKey, DkMatKhauKey, DkDaXacThucKey }) s.Remove(k);
+        foreach (var k in new[] { DkMaKHKey, DkEmailKey, DkMatKhauKey, DkDaXacThucKey, DkOtpDemoKey, DkGuiLucKey }) s.Remove(k);
 
         if (loi != null)
         {
@@ -263,8 +316,8 @@ public class TaiKhoanController : Controller
 
         var khachHang = _khachHangRepository.LayTheoMa(maKH)!;
         await HttpContext.DangNhapKhachHangAsync(khachHang, false);
-        TempData["ThongBao"] = "Đã tạo tài khoản. Các đơn bạn đã đặt bằng số điện thoại này nay nằm trong lịch sử đơn hàng.";
-        return RedirectToAction("Index", "DonHang");
+        TempData["ThongBao"] = "Đã tạo tài khoản. Các đơn bạn đã đặt bằng số điện thoại này nay nằm trong lịch sử đơn hàng của tài khoản.";
+        return RedirectToAction("Index", "Home");
     }
 
     // GET: /TaiKhoan/HoSo

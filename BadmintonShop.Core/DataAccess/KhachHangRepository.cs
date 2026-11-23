@@ -31,9 +31,17 @@ public class KhachHangRepository
     public bool SdtDaTonTai(string? sdt)
     {
         if (string.IsNullOrWhiteSpace(sdt)) return false;
-        return (int)DbHelper.ExecuteScalar(
-            "SELECT COUNT(*) FROM KhachHang WHERE SDT = @sdt",
-            new SqlParameter("@sdt", sdt.Trim()))! > 0;
+        // So sanh theo dang chuan hoa: +84333..., 84333..., 0333... la CUNG MOT so (khach vang lai luu dang 0xxx)
+        var so = ChuanHoaSDT(sdt);
+        if (so == null)
+            return (int)DbHelper.ExecuteScalar(
+                "SELECT COUNT(*) FROM KhachHang WHERE SDT = @sdt",
+                new SqlParameter("@sdt", sdt.Trim()))! > 0;
+        return (int)DbHelper.ExecuteScalar(@"
+            SELECT COUNT(*) FROM KhachHang
+            WHERE REPLACE(REPLACE(REPLACE(REPLACE(SDT,' ',''),'-',''),'.',''),'+','') IN (@a, @b)",
+            new SqlParameter("@a", so),
+            new SqlParameter("@b", "84" + so[1..]))! > 0;
     }
 
     // TV1: dang ky khach hang moi (bam mat khau), tra ve MaKH. Goi EmailDaTonTai truoc de bao loi dep
