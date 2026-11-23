@@ -1,5 +1,6 @@
 ﻿using BadmintonShop.Web.Models;
 using BadmintonShop.Web.Infrastructure;
+using BadmintonShop.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using BadmintonShop.Core.DataAccess;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,10 @@ public class SanPhamController : Controller
     // Repository lấy danh mục từ SQL Server
     private readonly DanhMucRepository _danhMucRepository = new();
     private readonly DanhGiaRepository _danhGiaRepository = new();
+    // Giá khách thực sự thấy trên thẻ sản phẩm (đã trừ khuyến mãi nếu có)
+    private static decimal GiaHienThi(BadmintonShop.Core.Models.SanPham sp)
+        => KhuyenMaiHienThi.GiaSauGiam(sp.DonGiaBan, KhuyenMaiHienThi.LayPhanTram(sp.MaSP));
+
     // GET: /SanPham
     [HttpGet]
     public IActionResult Index(
@@ -22,8 +27,7 @@ public class SanPhamController : Controller
         int? maDM,
         string? sapXep,
         string? thuongHieu,
-        decimal? giaTu,
-        decimal? giaDen,
+        string? mucGia,
         int trang = 1, bool lamMoi = false)
     {
         const int soSanPhamMoiTrang = 8;
@@ -33,17 +37,19 @@ public class SanPhamController : Controller
         var danhMuc = snapshot.Categories;
 
         // 2. Lấy sản phẩm theo từ khóa và danh mục
-        // Nếu nhập ngược khoảng giá thì tự đổi chỗ
-        if (giaTu.HasValue && giaDen.HasValue && giaTu > giaDen)
-            (giaTu, giaDen) = (giaDen, giaTu);
+        // Khoảng giá sinh từ giá thực tế của sản phẩm đang bán (xem MucGia.Tao)
+        var dsMucGia = MucGia.Tao(snapshot.Products
+            .Where(sp => sp.TrangThai == "Đang bán").Select(GiaHienThi));
+        var muc = MucGia.DocKhoa(mucGia);
+        mucGia = muc?.Khoa;
 
         var keyword = tuKhoa?.Trim();
         var danhSach = snapshot.Products.Where(sp =>
             (string.IsNullOrEmpty(keyword) || $"{sp.TenSP} {sp.ThuongHieu}".Contains(keyword, StringComparison.CurrentCultureIgnoreCase)) &&
             (!maDM.HasValue || sp.MaDM == maDM) &&
             (string.IsNullOrEmpty(thuongHieu) || string.Equals(sp.ThuongHieu, thuongHieu, StringComparison.CurrentCultureIgnoreCase)) &&
-            (!giaTu.HasValue || sp.DonGiaBan >= giaTu) &&
-            (!giaDen.HasValue || sp.DonGiaBan <= giaDen)).ToList();
+            // Lọc theo giá khách thực sự thấy (đã trừ khuyến mãi), khoảng [Tu, Den)
+            (muc == null || muc.ChuaGia(GiaHienThi(sp)))).ToList();
 
         // 3. Chỉ hiển thị sản phẩm đang bán
         danhSach = danhSach
@@ -105,8 +111,8 @@ public class SanPhamController : Controller
         ViewBag.MaDM = maDM;
         ViewBag.SapXep = sapXep;
         ViewBag.ThuongHieu = thuongHieu;
-        ViewBag.GiaTu = giaTu;
-        ViewBag.GiaDen = giaDen;
+        ViewBag.MucGia = mucGia;
+        ViewBag.DanhSachMucGia = dsMucGia;
 
         // Danh sách thương hiệu cho ô lọc (chỉ sản phẩm đang bán)
         ViewBag.DanhSachThuongHieu = snapshot.Products

@@ -5,6 +5,7 @@ using BadmintonShop.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using BadmintonShop.Web.Services;
 
 namespace BadmintonShop.Web.Controllers;
 
@@ -14,6 +15,36 @@ public class DonHangController : Controller
 {
     private readonly DonHangOnlineRepository _donHang = new();
     private readonly KhachHangRepository _khachHang = new();
+    private readonly OtpService _otpService;
+
+    public DonHangController(OtpService otpService) => _otpService = otpService;
+
+    private const string OtpDemoKey = "TraCuu.OtpDemo";
+    private const string GuiLucKey = "TraCuu.GuiLuc";
+    private const int GiayChoGuiLai = 60;
+    private static string OtpKhoa(string sdt) => "tracuu:" + sdt;
+
+    // TV1: sinh OTP moi cho SDT tra cuu, luu ma demo + thoi diem gui trong session
+    private void PhatOtp(string so)
+    {
+        var s = HttpContext.Session;
+        s.SetString(OtpDemoKey, _otpService.TaoOtp(OtpKhoa(so)));
+        s.SetString(GuiLucKey, DateTime.UtcNow.Ticks.ToString());
+    }
+
+    // TV1: so giay con phai cho truoc khi duoc gui lai OTP (0 = duoc gui)
+    private int GiayConChoGuiLai()
+    {
+        if (!long.TryParse(HttpContext.Session.GetString(GuiLucKey), out var ticks)) return 0;
+        var da = DateTime.UtcNow - new DateTime(ticks, DateTimeKind.Utc);
+        return Math.Max(0, (int)Math.Ceiling(GiayChoGuiLai - da.TotalSeconds));
+    }
+
+    private void NapDuLieuOtp()
+    {
+        ViewData["OtpDemo"] = HttpContext.Session.GetString(OtpDemoKey);
+        ViewData["GiayCho"] = GiayConChoGuiLai();
+    }
 
     private int MaKH => User.LayMaKH() ?? 0;
 
@@ -62,6 +93,7 @@ public class DonHangController : Controller
                 return View(vm);
             }
             s.SetString(SdtChoOtpKey, so);
+            PhatOtp(so);
             return RedirectToAction(nameof(NhapOtp));
         }
 
@@ -97,10 +129,12 @@ public class DonHangController : Controller
     {
         var so = HttpContext.Session.GetString(SdtChoOtpKey);
         if (so == null) return RedirectToAction(nameof(TraCuu));
+        if (HttpContext.Session.GetString(OtpDemoKey) == null) PhatOtp(so);
+        NapDuLieuOtp();
         return View(new TraCuuDonViewModel { SDT = DinhDang.CheSDT(so) });
     }
 
-    // TV1: xac nhan OTP; DEMO chap nhan moi ma 6 chu so, dung thi cho xem danh sach don cua SDT trong phien nay
+    // TV1: xac nhan OTP that (5 phut, toi da 5 lan sai) -> dung thi cho xem danh sach don cua SDT trong phien nay
     [HttpPost, AllowAnonymous, ValidateAntiForgeryToken]
     public IActionResult NhapOtp(string? otp)
     {
@@ -109,13 +143,35 @@ public class DonHangController : Controller
         if (so == null) return RedirectToAction(nameof(TraCuu));
 
         otp = otp?.Trim() ?? "";
-        // TODO (sau demo): sinh OTP ngau nhien luc gui, luu session kem han 5 phut, so sanh o day + gioi han so lan sai
+        NapDuLieuOtp();
         if (otp.Length != 6 || !otp.All(char.IsDigit))
             return View(new TraCuuDonViewModel { SDT = DinhDang.CheSDT(so), Loi = "Mã OTP gồm 6 chữ số." });
 
+        if (!_otpService.XacThucOtp(OtpKhoa(so), otp))
+            return View(new TraCuuDonViewModel { SDT = DinhDang.CheSDT(so), Loi = "Mã OTP không chính xác, đã hết hạn hoặc vượt quá số lần thử. Hãy kiểm tra lại hoặc gửi lại mã mới." });
+
         s.Remove(SdtChoOtpKey);
+        s.Remove(OtpDemoKey);
+        s.Remove(GuiLucKey);
         s.SetString(SdtDaXacThucKey, so);
         return RedirectToAction(nameof(DanhSachTraCuu));
+    }
+
+    // TV1: gui lai OTP, chi sau 60 giay ke tu lan gui truoc (kiem o server)
+    [HttpPost, AllowAnonymous, ValidateAntiForgeryToken]
+    public IActionResult GuiLaiOtp()
+    {
+        var so = HttpContext.Session.GetString(SdtChoOtpKey);
+        if (so == null) return RedirectToAction(nameof(TraCuu));
+
+        var cho = GiayConChoGuiLai();
+        if (cho > 0) TempData["OtpLoi"] = $"Vui lòng đợi {cho} giây nữa để gửi lại mã.";
+        else
+        {
+            PhatOtp(so);
+            TempData["OtpThongBao"] = "Đã gửi mã OTP mới. Mã cũ không còn hiệu lực.";
+        }
+        return RedirectToAction(nameof(NhapOtp));
     }
 
     // TV1: danh sach don cua SDT da xac thuc OTP trong phien nay

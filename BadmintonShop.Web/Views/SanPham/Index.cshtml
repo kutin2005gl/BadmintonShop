@@ -7,8 +7,8 @@
     int? maDM = ViewBag.MaDM;
     string? sapXep = ViewBag.SapXep;
     string? thuongHieu = ViewBag.ThuongHieu;
-    decimal? giaTu = ViewBag.GiaTu;
-    decimal? giaDen = ViewBag.GiaDen;
+    string? mucGia = ViewBag.MucGia;
+    var dsMucGia = (ViewBag.DanhSachMucGia as IEnumerable<BadmintonShop.Web.Services.MucGia>)?.ToList() ?? new List<BadmintonShop.Web.Services.MucGia>();
     var dsThuongHieu = (ViewBag.DanhSachThuongHieu as IEnumerable<string>)?.ToList() ?? new List<string>();
 
     int trangHienTai = ViewBag.TrangHienTai ?? 1;
@@ -18,84 +18,185 @@
     var danhMuc = (ViewBag.DanhMuc as IEnumerable<BadmintonShop.Core.Models.DanhMuc>)?.ToList()
                   ?? new List<BadmintonShop.Core.Models.DanhMuc>();
 
+    // TV1: lấy tên danh mục theo mã để hiển thị trên thẻ sản phẩm
     string? TenDM(int ma) => danhMuc.FirstOrDefault(d => d.MaDM == ma)?.TenDanhMuc;
-    bool dangLoc = !string.IsNullOrWhiteSpace(tuKhoa) || maDM != null || !string.IsNullOrEmpty(sapXep)
-                   || !string.IsNullOrEmpty(thuongHieu) || giaTu != null || giaDen != null;
+
+    string? giaChip = dsMucGia.FirstOrDefault(m => m.Khoa == mucGia)?.Nhan ?? BadmintonShop.Web.Services.MucGia.DocKhoa(mucGia)?.Nhan;
+    string? tenDMDangChon = maDM.HasValue ? TenDM(maDM.Value) : null;
+    bool coGia = giaChip != null;
+    bool coTuKhoa = !string.IsNullOrWhiteSpace(tuKhoa);
+    bool coThuongHieu = !string.IsNullOrWhiteSpace(thuongHieu);
+    bool coDanhMuc = maDM.HasValue;
+    int soLocPanel = (coDanhMuc ? 1 : 0) + (coThuongHieu ? 1 : 0) + (coGia ? 1 : 0);
+    bool coChip = coTuKhoa || soLocPanel > 0;
+    string tenSapXep = sapXep switch
+    {
+        "ten-z-a" => "Tên Z–A",
+        "gia-tang" => "Giá thấp đến cao",
+        "gia-giam" => "Giá cao đến thấp",
+        "moi-nhat" => "Mới nhất",
+        _ => "Tên A–Z"
+    };
+    var sapXepDs = new (string Gt, string Ten)[] { ("", "Tên A–Z"), ("ten-z-a", "Tên Z–A"), ("gia-tang", "Giá thấp đến cao"), ("gia-giam", "Giá cao đến thấp"), ("moi-nhat", "Mới nhất") };
 }
+
+<link rel="stylesheet" href="~/css/loc-sp.css" asp-append-version="true" />
 
 <div class="container mx-auto px-4 py-12">
     <h1 class="page-title !mb-2">Tất cả sản phẩm</h1>
-    <p class="text-sm text-gray-600 mb-8">Vợt, giày, cầu, quần áo và phụ kiện chính hãng. Lọc theo danh mục hoặc thương hiệu để so sánh.</p>
+    <p class="text-sm text-gray-600 mb-6">Vợt, giày, cầu, quần áo và phụ kiện chính hãng. Lọc theo danh mục hoặc thương hiệu để so sánh.</p>
 
-    <form asp-controller="SanPham" asp-action="Index" method="get" class="loc-thanh" role="search">
-        <div class="md:col-span-5">
-            <label for="tuKhoa" class="field-label">Tìm kiếm</label>
-            <input id="tuKhoa" type="text" name="tuKhoa" value="@tuKhoa" class="input-box"
-                   placeholder="Tên sản phẩm hoặc thương hiệu" />
+    <form id="lspForm" asp-controller="SanPham" asp-action="Index" method="get" class="lsp" role="search">
+        <input type="hidden" name="maDM" value="@maDM" />
+        <input type="hidden" name="thuongHieu" value="@thuongHieu" />
+        <input type="hidden" name="mucGia" value="@mucGia" />
+        <input type="hidden" name="sapXep" value="@sapXep" />
+
+        <div class="lsp-head">
+            <b>Tìm kiếm sản phẩm</b>
+            <span>@tongSanPham sản phẩm@(tongSoTrang > 1 ? $" · Trang {trangHienTai}/{tongSoTrang}" : "")</span>
         </div>
 
-        <div class="md:col-span-3">
-            <label for="maDM" class="field-label">Danh mục</label>
-            <select id="maDM" name="maDM" class="input-box">
-                <option value="">Tất cả danh mục</option>
-                @foreach (var dm in danhMuc)
-                {
-                    <option value="@dm.MaDM" selected="@(maDM == dm.MaDM)">@dm.TenDanhMuc</option>
-                }
-            </select>
+        <div class="lsp-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+            <input id="tuKhoa" type="search" name="tuKhoa" value="@tuKhoa" autocomplete="off" aria-label="Tìm kiếm sản phẩm"
+                   placeholder="Tìm tên sản phẩm hoặc thương hiệu..." />
+            <button type="button" id="lspClear" class="lsp-clear @(coTuKhoa ? "show" : "")" aria-label="Xóa nội dung tìm kiếm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            </button>
         </div>
 
-        <div class="md:col-span-3">
-            <label for="thuongHieu" class="field-label">Thương hiệu</label>
-            <select id="thuongHieu" name="thuongHieu" class="input-box">
-                <option value="">Tất cả thương hiệu</option>
-                @foreach (var th in dsThuongHieu)
-                {
-                    <option value="@th" selected="@(string.Equals(thuongHieu, th, StringComparison.CurrentCultureIgnoreCase))">@th</option>
-                }
-            </select>
-        </div>
+        <div class="lsp-bar">
+            <div class="lsp-group">
+                <div class="lsp-dd lsp-desk-only">
+                    <button type="button" class="lsp-pill @(coDanhMuc ? "on" : "")" aria-haspopup="true" aria-expanded="false">
+                        @(tenDMDangChon ?? "Danh mục")
+                        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                    </button>
+                    <div class="lsp-menu" role="menu">
+                        <button type="button" class="lsp-opt" role="menuitemradio" aria-checked="@((!coDanhMuc).ToString().ToLower())" data-set="maDM" data-val="">Tất cả danh mục</button>
+                        @foreach (var dm in danhMuc)
+                        {
+                            <button type="button" class="lsp-opt" role="menuitemradio" aria-checked="@((maDM == dm.MaDM).ToString().ToLower())" data-set="maDM" data-val="@dm.MaDM">@dm.TenDanhMuc</button>
+                        }
+                    </div>
+                </div>
 
-        <div class="md:col-span-3">
-            <label for="giaTu" class="field-label">Giá từ (đ)</label>
-            <input id="giaTu" type="number" name="giaTu" value="@giaTu" min="0" step="1000" class="input-box" placeholder="0" />
-        </div>
+                <div class="lsp-dd lsp-desk-only">
+                    <button type="button" class="lsp-pill @(coThuongHieu ? "on" : "")" aria-haspopup="true" aria-expanded="false">
+                        @(coThuongHieu ? thuongHieu : "Thương hiệu")
+                        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                    </button>
+                    <div class="lsp-menu" role="menu">
+                        <button type="button" class="lsp-opt" role="menuitemradio" aria-checked="@((!coThuongHieu).ToString().ToLower())" data-set="thuongHieu" data-val="">Tất cả thương hiệu</button>
+                        @foreach (var th in dsThuongHieu)
+                        {
+                            <button type="button" class="lsp-opt" role="menuitemradio" aria-checked="@(string.Equals(thuongHieu, th, StringComparison.CurrentCultureIgnoreCase).ToString().ToLower())" data-set="thuongHieu" data-val="@th">@th</button>
+                        }
+                    </div>
+                </div>
 
-        <div class="md:col-span-3">
-            <label for="giaDen" class="field-label">Giá đến (đ)</label>
-            <input id="giaDen" type="number" name="giaDen" value="@giaDen" min="0" step="1000" class="input-box" placeholder="Không giới hạn" />
-        </div>
+                <div class="lsp-dd lsp-desk-only" id="lspGiaDd">
+                    <button type="button" class="lsp-pill @(coGia ? "on" : "")" aria-haspopup="true" aria-expanded="false">
+                        @(giaChip ?? "Khoảng giá")
+                        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                    </button>
+                    <div class="lsp-menu" role="menu">
+                        <button type="button" class="lsp-opt" role="menuitemradio" aria-checked="@((!coGia).ToString().ToLower())" data-set="mucGia" data-val="">Tất cả mức giá</button>
+                        @foreach (var m in dsMucGia)
+                        {
+                            <button type="button" class="lsp-opt" role="menuitemradio" aria-checked="@((m.Khoa == mucGia).ToString().ToLower())" data-set="mucGia" data-val="@m.Khoa">@m.Nhan</button>
+                        }
+                    </div>
+                </div>
 
-        <div class="md:col-span-3">
-            <label for="sapXep" class="field-label">Sắp xếp</label>
-            <select id="sapXep" name="sapXep" class="input-box">
-                <option value="" selected="@(string.IsNullOrEmpty(sapXep))">Tên A - Z</option>
-                <option value="ten-z-a" selected="@(sapXep == "ten-z-a")">Tên Z - A</option>
-                <option value="gia-tang" selected="@(sapXep == "gia-tang")">Giá thấp đến cao</option>
-                <option value="gia-giam" selected="@(sapXep == "gia-giam")">Giá cao đến thấp</option>
-                <option value="moi-nhat" selected="@(sapXep == "moi-nhat")">Mới nhất</option>
-            </select>
-        </div>
+                <div class="lsp-dd" id="lspPanelDd">
+                    <button type="button" class="lsp-pill @(soLocPanel > 0 ? "on" : "")" aria-haspopup="true" aria-expanded="false">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12" /><circle cx="16" cy="6" r="2" /><circle cx="10" cy="12" r="2" /><circle cx="18" cy="18" r="2" /></svg>
+                        Bộ lọc
+                        @if (soLocPanel > 0)
+                        {
+                            <span class="cnt">@soLocPanel</span>
+                        }
+                    </button>
+                    <div class="lsp-menu lsp-pop wide" id="lspPanel" role="dialog" aria-label="Bộ lọc sản phẩm">
+                        <div class="lsp-sheet-head"><span>Bộ lọc</span><button type="button" data-dong aria-label="Đóng"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg></button></div>
+                        <div class="lsp-fld">
+                            <label for="pnlDM">Danh mục</label>
+                            <select id="pnlDM">
+                                <option value="">Tất cả danh mục</option>
+                                @foreach (var dm in danhMuc)
+                                {
+                                    <option value="@dm.MaDM" selected="@(maDM == dm.MaDM)">@dm.TenDanhMuc</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="lsp-fld">
+                            <label for="pnlTH">Thương hiệu</label>
+                            <select id="pnlTH">
+                                <option value="">Tất cả thương hiệu</option>
+                                @foreach (var th in dsThuongHieu)
+                                {
+                                    <option value="@th" selected="@(string.Equals(thuongHieu, th, StringComparison.CurrentCultureIgnoreCase))">@th</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="lsp-fld">
+                            <label for="pnlGia">Khoảng giá</label>
+                            <select id="pnlGia">
+                                <option value="">Tất cả mức giá</option>
+                                @foreach (var m in dsMucGia)
+                                {
+                                    <option value="@m.Khoa" selected="@(m.Khoa == mucGia)">@m.Nhan</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="lsp-act">
+                            <a asp-controller="SanPham" asp-action="Index" class="lsp-btn" style="display:inline-flex;align-items:center;text-decoration:none">Xóa tất cả bộ lọc</a>
+                            <button type="button" class="lsp-btn dark" data-pnl-ap-dung>Áp dụng</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        <div class="md:col-span-3 flex items-end">
-            <button type="submit" class="btn-dark w-full">Áp dụng</button>
-            <button type="submit" name="lamMoi" value="true" class="btn-outline">Làm mới</button>
+            <div class="lsp-dd">
+                <button type="button" class="lsp-pill" aria-haspopup="true" aria-expanded="false">
+                    <span class="lsp-desk-only">Sắp xếp: @tenSapXep</span><span class="lsp-mobile-only">Sắp xếp</span>
+                    <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                </button>
+                <div class="lsp-menu right" role="menu">
+                    @foreach (var (gt, ten) in sapXepDs)
+                    {
+                        <button type="button" class="lsp-opt" role="menuitemradio" aria-checked="@((string.IsNullOrEmpty(sapXep) ? gt == "" : sapXep == gt).ToString().ToLower())" data-set="sapXep" data-val="@gt">@ten</button>
+                    }
+                </div>
+            </div>
         </div>
+        <div class="lsp-overlay" id="lspOverlay"></div>
     </form>
 
-    <div class="flex items-center justify-between mb-6 text-sm">
-        <p class="font-bold">@tongSanPham sản phẩm</p>
-        <div class="flex items-center gap-4 text-gray-500">
-            @if (dangLoc)
+    @if (coChip)
+    {
+        <div class="lsp-chips" aria-label="Bộ lọc đang áp dụng" style="margin-top:-.5rem;margin-bottom:1.25rem">
+            @if (coTuKhoa)
             {
-                <a asp-controller="SanPham" asp-action="Index" class="link-sub">Xóa bộ lọc</a>
+                <a class="lsp-chip" title="Bỏ từ khóa" asp-controller="SanPham" asp-action="Index" asp-route-maDM="@maDM" asp-route-sapXep="@sapXep" asp-route-thuongHieu="@thuongHieu" asp-route-mucGia="@mucGia">“@tuKhoa” <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg></a>
             }
-            @if (tongSoTrang > 1)
+            @if (coDanhMuc)
             {
-                <span class="tabular-nums">Trang @trangHienTai / @tongSoTrang</span>
+                <a class="lsp-chip" title="Bỏ danh mục" asp-controller="SanPham" asp-action="Index" asp-route-tuKhoa="@tuKhoa" asp-route-sapXep="@sapXep" asp-route-thuongHieu="@thuongHieu" asp-route-mucGia="@mucGia">@(tenDMDangChon ?? ("Danh mục #" + maDM)) <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg></a>
             }
+            @if (coThuongHieu)
+            {
+                <a class="lsp-chip" title="Bỏ thương hiệu" asp-controller="SanPham" asp-action="Index" asp-route-tuKhoa="@tuKhoa" asp-route-maDM="@maDM" asp-route-sapXep="@sapXep" asp-route-mucGia="@mucGia">@thuongHieu <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg></a>
+            }
+            @if (coGia)
+            {
+                <a class="lsp-chip" title="Bỏ khoảng giá" asp-controller="SanPham" asp-action="Index" asp-route-tuKhoa="@tuKhoa" asp-route-maDM="@maDM" asp-route-sapXep="@sapXep" asp-route-thuongHieu="@thuongHieu">@giaChip <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg></a>
+            }
+            <a class="lsp-all" asp-controller="SanPham" asp-action="Index">Xóa tất cả</a>
         </div>
-    </div>
+    }
 
     @if (Model.Count == 0)
     {
@@ -125,7 +226,7 @@
             else
             {
                 <a asp-controller="SanPham" asp-action="Index" asp-route-tuKhoa="@tuKhoa" asp-route-maDM="@maDM"
-                   asp-route-sapXep="@sapXep" asp-route-thuongHieu="@thuongHieu" asp-route-giaTu="@giaTu" asp-route-giaDen="@giaDen" asp-route-trang="@(trangHienTai - 1)">Trước</a>
+                   asp-route-sapXep="@sapXep" asp-route-thuongHieu="@thuongHieu" asp-route-mucGia="@mucGia" asp-route-trang="@(trangHienTai - 1)">Trước</a>
             }
 
             @for (int i = 1; i <= tongSoTrang; i++)
@@ -137,7 +238,7 @@
                 else
                 {
                     <a asp-controller="SanPham" asp-action="Index" asp-route-tuKhoa="@tuKhoa" asp-route-maDM="@maDM"
-                       asp-route-sapXep="@sapXep" asp-route-thuongHieu="@thuongHieu" asp-route-giaTu="@giaTu" asp-route-giaDen="@giaDen" asp-route-trang="@i">@i</a>
+                       asp-route-sapXep="@sapXep" asp-route-thuongHieu="@thuongHieu" asp-route-mucGia="@mucGia" asp-route-trang="@i">@i</a>
                 }
             }
 
@@ -148,8 +249,92 @@
             else
             {
                 <a asp-controller="SanPham" asp-action="Index" asp-route-tuKhoa="@tuKhoa" asp-route-maDM="@maDM"
-                   asp-route-sapXep="@sapXep" asp-route-thuongHieu="@thuongHieu" asp-route-giaTu="@giaTu" asp-route-giaDen="@giaDen" asp-route-trang="@(trangHienTai + 1)">Sau</a>
+                   asp-route-sapXep="@sapXep" asp-route-thuongHieu="@thuongHieu" asp-route-mucGia="@mucGia" asp-route-trang="@(trangHienTai + 1)">Sau</a>
             }
         </nav>
     }
 </div>
+
+@section Scripts {
+<script>
+(function () {
+    var form = document.getElementById('lspForm');
+    if (!form) return;
+    var f = function (n) { return form.elements[n]; };
+    var $ = function (id) { return document.getElementById(id); };
+    var tuKhoa = $('tuKhoa'), clearBtn = $('lspClear'), overlay = $('lspOverlay');
+    var timer, goc = tuKhoa.value.trim();
+
+    // Gửi form: bỏ tham số rỗng cho URL gọn; không gửi "trang" nên luôn về trang 1
+    function submitForm() {
+        ['maDM', 'thuongHieu', 'mucGia', 'sapXep', 'tuKhoa'].forEach(function (n) {
+            f(n).disabled = (f(n).value.trim() === '');
+        });
+        form.submit();
+    }
+    form.addEventListener('submit', function (e) { e.preventDefault(); clearTimeout(timer); submitForm(); });
+
+    // Dropdown / popover / bottom sheet
+    var dds = form.querySelectorAll('.lsp-dd');
+    function closeAll(except) {
+        dds.forEach(function (d) {
+            if (d === except) return;
+            d.classList.remove('open');
+            d.querySelector('.lsp-pill').setAttribute('aria-expanded', 'false');
+        });
+        overlay.classList.toggle('show', !!except && except.id === 'lspPanelDd' && window.innerWidth < 768);
+    }
+    function dongBoOnhap(d) { // đồng bộ panel với state (hidden) trước khi mở
+        if (d.id === 'lspPanelDd') {
+            $('pnlDM').value = f('maDM').value; $('pnlTH').value = f('thuongHieu').value;
+            $('pnlGia').value = f('mucGia').value;
+        }
+    }
+    dds.forEach(function (d) {
+        var pill = d.querySelector('.lsp-pill');
+        pill.addEventListener('click', function () {
+            var mo = !d.classList.contains('open');
+            closeAll(mo ? d : null);
+            if (mo) dongBoOnhap(d);
+            d.classList.toggle('open', mo);
+            pill.setAttribute('aria-expanded', String(mo));
+            overlay.classList.toggle('show', mo && d.id === 'lspPanelDd' && window.innerWidth < 768);
+        });
+    });
+    document.addEventListener('click', function (e) { if (!form.contains(e.target) || e.target === overlay) closeAll(null); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeAll(null); });
+    form.querySelectorAll('[data-dong]').forEach(function (b) { b.addEventListener('click', function () { closeAll(null); }); });
+
+    // Chọn danh mục / thương hiệu / sắp xếp
+    form.querySelectorAll('.lsp-opt').forEach(function (o) {
+        o.addEventListener('click', function () { f(o.dataset.set).value = o.dataset.val; submitForm(); });
+    });
+
+    // Panel Bộ lọc: nút Áp dụng gom danh mục, thương hiệu, khoảng giá (cùng khóa mucGia với dropdown nhanh)
+    var pnlDd = $('lspPanelDd');
+    pnlDd.querySelector('[data-pnl-ap-dung]').addEventListener('click', function () {
+        f('maDM').value = $('pnlDM').value; f('thuongHieu').value = $('pnlTH').value;
+        f('mucGia').value = $('pnlGia').value; submitForm();
+    });
+
+    // Tìm kiếm: Enter gửi ngay, đang gõ thì debounce 400ms
+    tuKhoa.addEventListener('input', function () {
+        clearBtn.classList.toggle('show', tuKhoa.value !== '');
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+            if (tuKhoa.value.trim() !== goc) {
+                try { sessionStorage.setItem('lspFocus', '1'); } catch (e) { }
+                submitForm();
+            }
+        }, 400);
+    });
+    clearBtn.addEventListener('click', function () { tuKhoa.value = ''; submitForm(); });
+    try {
+        if (sessionStorage.getItem('lspFocus')) {
+            sessionStorage.removeItem('lspFocus');
+            tuKhoa.focus(); var l = tuKhoa.value.length; tuKhoa.setSelectionRange(l, l);
+        }
+    } catch (e) { }
+})();
+</script>
+}
