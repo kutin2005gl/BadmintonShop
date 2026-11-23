@@ -21,6 +21,20 @@
 }
 
 <div class="container mx-auto px-4 py-10">
+    @* TV1: nút quay lại trang trước (giữ nguyên vị trí cuộn), không có lịch sử thì về danh sách sản phẩm *@
+    <a asp-controller="SanPham" asp-action="Index" id="nut-quay-lai"
+       class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-700 hover:text-black mb-4">
+        <span aria-hidden="true">←</span> Quay lại
+    </a>
+    <script>
+        // TV1: quay lại đúng trang/vị trí cuộn vừa xem nếu đến từ cùng website
+        document.getElementById('nut-quay-lai').addEventListener('click', function (e) {
+            if (document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1) {
+                e.preventDefault();
+                history.back();
+            }
+        });
+    </script>
     <nav class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-8" aria-label="Điều hướng">
         <a asp-controller="Home" asp-action="Index" class="hover:text-black">Trang chủ</a>
         <span class="mx-2">/</span>
