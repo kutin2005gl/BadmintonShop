@@ -95,7 +95,7 @@ public class FrmThongKe : Form
     // TV1: tao the hien thi so tien tong hop
     private static Panel TaoThe(string ten, Label giaTri)
     {
-        var the = new Panel { Dock = DockStyle.Fill, BackColor = Color.White, Padding = new Padding(12, 8, 12, 4), Margin = new Padding(4) };
+        var the = new Panel { Dock = DockStyle.Fill, BackColor = ShopTheme.Surface, Padding = new Padding(12, 8, 12, 4), Margin = new Padding(4) };
         giaTri.Dock = DockStyle.Fill;
         the.Controls.Add(giaTri);
         the.Controls.Add(new Label { Text = ten, Dock = DockStyle.Top, Height = 24, ForeColor = ShopTheme.Muted });
@@ -169,7 +169,7 @@ public class FrmThongKe : Form
                     grid.Columns["Chi"].MinimumWidth = 92;
                 };
                 grid.DataSource = dt;
-                var chia = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, BackColor = Color.White, Padding = new Padding(8) };
+                var chia = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, BackColor = ShopTheme.Surface, Padding = new Padding(8) };
                 chia.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 43));
                 chia.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 57));
                 chia.Controls.Add(grid, 0, 0);

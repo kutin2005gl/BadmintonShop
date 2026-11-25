@@ -9,7 +9,7 @@ internal static class Sv4Ui
     {
         var grid=new DataGridView { Dock=DockStyle.Fill,ReadOnly=true,AutoGenerateColumns=true,
             AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.Fill,SelectionMode=DataGridViewSelectionMode.FullRowSelect,
-            MultiSelect=false,AllowUserToAddRows=false,AllowUserToDeleteRows=false,RowHeadersVisible=false,BackgroundColor=Color.White,
+            MultiSelect=false,AllowUserToAddRows=false,AllowUserToDeleteRows=false,RowHeadersVisible=false,BackgroundColor=ShopTheme.Surface,
             ColumnHeadersHeightSizeMode=DataGridViewColumnHeadersHeightSizeMode.AutoSize };
         ShopTheme.StyleGrid(grid);
         grid.Paint+=(_,e)=> {
@@ -23,8 +23,8 @@ internal static class Sv4Ui
             var name=grid.Columns[e.ColumnIndex].Name;
             var text=Convert.ToString(e.Value)??"";
             if(name is "TrangThai" or "CanhBao") {
-                var color=text.Contains("hủy") || text.Contains("Hết hàng") || text.Contains("Ngừng")?Color.Firebrick:
-                    text.Contains("Chờ") || text.Contains("Sắp")?Color.FromArgb(155,96,10):ShopTheme.Green;
+                var color=text.Contains("hủy") || text.Contains("Hết hàng") || text.Contains("Ngừng")?ShopTheme.Danger:
+                    text.Contains("Chờ") || text.Contains("Sắp")?ShopTheme.Warn:ShopTheme.Green;
                 e.CellStyle!.ForeColor=color;e.CellStyle.SelectionForeColor=color;
             }
         };
@@ -52,7 +52,7 @@ internal static class Sv4Ui
             if(c.ValueType==typeof(DateTime))c.DefaultCellStyle.Format="dd/MM/yyyy HH:mm";
         }
     }
-    public static FlowLayoutPanel ThanhCongCu(int height=90) => new() { Dock=DockStyle.Top,Height=height,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,MinimumSize=new Size(0,58),Padding=new Padding(10),AutoScroll=true,WrapContents=true,BackColor=Color.White };
+    public static FlowLayoutPanel ThanhCongCu(int height=90) => new() { Dock=DockStyle.Top,Height=height,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,MinimumSize=new Size(0,58),Padding=new Padding(10),AutoScroll=true,WrapContents=true,BackColor=ShopTheme.Surface };
     public static Button Nut(string text,Action action)
     {
         var b=new Button { Text=text,AutoSize=true,Height=32,Margin=new Padding(4) };ShopTheme.StyleButton(b);b.Click+=(_,_)=>action();return b;

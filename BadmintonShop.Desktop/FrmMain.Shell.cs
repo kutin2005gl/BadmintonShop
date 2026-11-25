@@ -4,82 +4,134 @@ namespace BadmintonShop.Desktop;
 
 public partial class FrmMain
 {
+    private sealed record NavItem(string Group, string Glyph, string Text, Action Action, Type? Page);
+
     private readonly Dictionary<Type, Form> pages = new();
-    private readonly Dictionary<Type, Button> navigation = new();
+    private readonly Dictionary<Type, NavButton> navigation = new();
+    private readonly List<NavItem> navItems = new();
     private Panel workspace = null!;
     private Label screenTitle = null!;
     private Form? currentPage;
+    private Type? currentType;
     private bool daXacNhanDong;
 
+    // TV1: dựng danh sách mục điều hướng theo quyền, rồi dựng khung
     private void TaoKhungMoi()
     {
         Controls.Remove(lblChao); Controls.Remove(menuStrip); Controls.Remove(statusStrip);
         MainMenuStrip = null;
-        Font = new Font("Segoe UI", 10); BackColor = ShopTheme.Background;
+        Font = new Font("Segoe UI", 10);
         MinimumSize = new Size(900, 600);
-        workspace = new Panel { Dock = DockStyle.Fill, AutoScroll = true, BackColor = ShopTheme.Background };
+        workspace = new Panel { Dock = DockStyle.Fill, AutoScroll = true };
         workspace.Resize += (_, _) => BoTriTrang();
-        var header = new TableLayoutPanel { Dock = DockStyle.Top, Height = 76, BackColor = Color.White, ColumnCount = 3, Padding = new Padding(20, 8, 12, 8) };
-        header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); header.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize)); header.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        screenTitle = ShopTheme.Title("Tổng quan", 18); screenTitle.Dock = DockStyle.Fill; screenTitle.AutoSize = false; screenTitle.TextAlign = ContentAlignment.MiddleLeft;
-        var user = new Label { AutoSize = true, Anchor = AnchorStyles.Right, Text = $"{PhienDangNhap.HoTen}\n{PhanQuyen.TenVaiTro(PhienDangNhap.VaiTro)}", ForeColor = ShopTheme.Muted, Margin = new Padding(8) };
-        var logout = Sv4Ui.Nut("Đăng xuất", () => mnuDangXuat_Click(this, EventArgs.Empty)); logout.Anchor = AnchorStyles.Right;
-        header.Controls.Add(screenTitle, 0, 0); header.Controls.Add(user, 1, 0); header.Controls.Add(logout, 2, 0);
-        var side = new Panel { Dock = DockStyle.Left, Width = 210, BackColor = ShopTheme.Green };
-        var links = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoScroll = true, Padding = new Padding(8) };
-        var brand = new Label { Text = "BADMINTON\nSHOP  /  QUẢN LÝ", Dock = DockStyle.Top, Height = 90, ForeColor = Color.White, Padding = new Padding(18, 18, 8, 8), Font = new Font("Segoe UI", 14, FontStyle.Bold) };
-        void Group(string text) => links.Controls.Add(new Label { Text = text, ForeColor = Color.FromArgb(165, 204, 183), AutoSize = true, Margin = new Padding(12, 18, 0, 8), Font = new Font("Segoe UI", 9, FontStyle.Bold) });
-        void Link(string text, Action action, Type? type = null)
-        {
-            var button = new Button { Text = "  " + text, Width = 174, Height = 40, TextAlign = ContentAlignment.MiddleLeft, FlatStyle = FlatStyle.Flat, ForeColor = Color.White, BackColor = ShopTheme.Green, Cursor = Cursors.Hand, Margin = new Padding(2) };
-            button.FlatAppearance.BorderSize = 0; button.FlatAppearance.MouseOverBackColor = Color.FromArgb(40, 110, 82);
-            button.Click += (_, _) => action(); links.Controls.Add(button); if (type != null) navigation[type] = button;
-        }
-        Group("CỬA HÀNG"); Link("◈   Tổng quan", () => HienTrang(typeof(FrmTongQuan), () => new FrmTongQuan()), typeof(FrmTongQuan));
+        Controls.Add(workspace);
+
+        void Add(string group, string glyph, string text, Action action, Type? type = null) => navItems.Add(new NavItem(group, glyph, text, action, type));
+        // Mã icon: Segoe MDL2 Assets (Home, Shop, Bullets, Tag, Cart, Document, People, Download, Package, Chart, Star, Contact, Lock, Restore, Power)
+        Add("CỬA HÀNG", "", "Tổng quan", () => HienTrang(typeof(FrmTongQuan), () => new FrmTongQuan()), typeof(FrmTongQuan));
         if (PhienDangNhap.CoQuyen(ChucNang.SanPhamDanhMucKhuyenMai))
         {
-            Link("▦   Sản phẩm", () => mnuDsSanPham_Click(this, EventArgs.Empty), typeof(FrmSanPham));
-            Link("▤   Danh mục", () => mnuDanhMuc_Click(this, EventArgs.Empty), typeof(FrmDanhMuc));
-            Link("◇   Khuyến mãi", () => mnuKhuyenMai.PerformClick());
+            Add("CỬA HÀNG", "", "Sản phẩm", () => mnuDsSanPham_Click(this, EventArgs.Empty), typeof(FrmSanPham));
+            Add("CỬA HÀNG", "", "Danh mục", () => mnuDanhMuc_Click(this, EventArgs.Empty), typeof(FrmDanhMuc));
+            Add("CỬA HÀNG", "", "Khuyến mãi", () => mnuKhuyenMai.PerformClick(), typeof(FrmKhuyenMai));
         }
         if (PhienDangNhap.CoQuyen(ChucNang.DonHangPOS))
         {
-            Group("BÁN HÀNG"); Link("▤   Đơn hàng", () => mnuDonHang_Click(this, EventArgs.Empty), typeof(FrmDonHang));
-            Link("▣   Bán tại quầy", () => mnuPOS_Click(this, EventArgs.Empty), typeof(FrmPOS));
-            Link("☺   Khách hàng", () => MoForm<FrmKhachHang>(ChucNang.DonHangPOS), typeof(FrmKhachHang));
+            Add("BÁN HÀNG", "", "Đơn hàng", () => mnuDonHang_Click(this, EventArgs.Empty), typeof(FrmDonHang));
+            Add("BÁN HÀNG", "", "Bán tại quầy", () => mnuPOS_Click(this, EventArgs.Empty), typeof(FrmPOS));
+            Add("BÁN HÀNG", "", "Khách hàng", () => MoForm<FrmKhachHang>(ChucNang.DonHangPOS), typeof(FrmKhachHang));
         }
         if (PhienDangNhap.CoQuyen(ChucNang.NhaCungCapPhieuNhap))
         {
-            Group("NHẬP HÀNG"); Link("▥   Phiếu nhập", () => mnuPhieuNhap_Click(this, EventArgs.Empty), typeof(FrmDanhSachPhieuNhap));
-            Link("◇   Nhà cung cấp", () => mnuNhaCungCap_Click(this, EventArgs.Empty), typeof(FrmNhaCungCap));
+            Add("NHẬP HÀNG", "", "Phiếu nhập", () => mnuPhieuNhap_Click(this, EventArgs.Empty), typeof(FrmDanhSachPhieuNhap));
+            Add("NHẬP HÀNG", "", "Nhà cung cấp", () => mnuNhaCungCap_Click(this, EventArgs.Empty), typeof(FrmNhaCungCap));
         }
         if (PhienDangNhap.CoQuyen(ChucNang.ThongKeBinhLuan))
         {
-            Group("BÁO CÁO");
-
-            Link(
-                "▥   Thống kê",
-                () => mnuThongKe_Click(this, EventArgs.Empty),
-                typeof(FrmThongKe)
-            );
-
+            Add("BÁO CÁO", "", "Thống kê", () => mnuThongKe_Click(this, EventArgs.Empty), typeof(FrmThongKe));
             // SV2: Quản lý đánh giá sản phẩm
-            Link(
-                "★   Quản lý đánh giá",
-                () => mnuQuanLyDanhGia_Click(this, EventArgs.Empty),
-                typeof(FrmQuanLyDanhGia)
-            );
+            Add("BÁO CÁO", "", "Quản lý đánh giá", () => mnuQuanLyDanhGia_Click(this, EventArgs.Empty), typeof(FrmQuanLyDanhGia));
         }
-        Group("HỆ THỐNG");
-        if (PhienDangNhap.CoQuyen(ChucNang.NhanVienTaiKhoan)) Link("◇   Nhân viên, tài khoản", () => mnuNhanVien_Click(this, EventArgs.Empty), typeof(FrmNhanVien));
-        Link("◇   Đổi mật khẩu", () => mnuDoiMatKhau_Click(this, EventArgs.Empty));
-        if (PhienDangNhap.CoQuyen(ChucNang.SaoLuuPhucHoi)) Link("▤   Sao lưu, phục hồi", () => mnuSaoLuu_Click(this, EventArgs.Empty));
-        Link("↪   Thoát", Close);
-        side.Controls.Add(links); side.Controls.Add(brand);
-        Controls.Add(workspace); Controls.Add(header); Controls.Add(side);
+        if (PhienDangNhap.CoQuyen(ChucNang.NhanVienTaiKhoan)) Add("HỆ THỐNG", "", "Nhân viên, tài khoản", () => mnuNhanVien_Click(this, EventArgs.Empty), typeof(FrmNhanVien));
+        Add("HỆ THỐNG", "", "Đổi mật khẩu", () => mnuDoiMatKhau_Click(this, EventArgs.Empty));
+        if (PhienDangNhap.CoQuyen(ChucNang.SaoLuuPhucHoi)) Add("HỆ THỐNG", "", "Sao lưu, phục hồi", () => mnuSaoLuu_Click(this, EventArgs.Empty));
+        Add("HỆ THỐNG", "", "Thoát", Close);
+
         Shown += (_, _) => HienTrang(typeof(FrmTongQuan), () => new FrmTongQuan());
         FormClosing += (_, e) => { if (!daXacNhanDong && !ChoPhepDong()) e.Cancel = true; };
+        DungKhung();
     }
+
+    // TV1: dựng khung chính: thanh điều hướng bên trái và thanh trên
+    private void DungKhung()
+    {
+        var t = ShopTheme.Current;
+        BackColor = t.Bg; ForeColor = t.Ink; workspace.BackColor = t.Bg;
+
+        // thanh trên: tiêu đề màn hình, người dùng, đăng xuất
+        var header = new Panel { Dock = DockStyle.Top, Height = 72, BackColor = t.TopBg };
+        header.Paint += (_, e) => { using var p = new Pen(t.Line); e.Graphics.DrawLine(p, 0, header.Height - 1, header.Width, header.Height - 1); };
+        var bar = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, BackColor = t.TopBg, Padding = new Padding(24, 6, 14, 6) };
+        bar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); bar.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize)); bar.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        var sub = Mix(t.TopInk, t.TopBg, 0.38f);
+        screenTitle = new Label { AutoSize = false, Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, AutoEllipsis = true, BackColor = t.TopBg,
+            Font = ShopTheme.TitleFace(18), ForeColor = t.Accent, Text = "Tổng quan" };
+        var user = new Label { AutoSize = true, Anchor = AnchorStyles.Right, Text = $"{PhienDangNhap.HoTen}\n{PhanQuyen.TenVaiTro(PhienDangNhap.VaiTro)}", ForeColor = sub, BackColor = t.TopBg, TextAlign = ContentAlignment.MiddleRight, Margin = new Padding(8, 0, 12, 0) };
+        var logout = Sv4Ui.Nut("Đăng xuất", () => mnuDangXuat_Click(this, EventArgs.Empty)); logout.Anchor = AnchorStyles.Right;
+        bar.Controls.Add(screenTitle, 0, 0); bar.Controls.Add(user, 1, 0); bar.Controls.Add(logout, 2, 0);
+        header.Controls.Add(bar);
+
+        DungThanhBen(header, t);
+        Controls.SetChildIndex(workspace, 0);
+    }
+
+    // TV1: thanh điều hướng dọc bên trái
+    private void DungThanhBen(Panel header, ThemeDef t)
+    {
+        var side = new Panel { Dock = DockStyle.Left, Width = 232, BackColor = t.NavBg };
+        side.Paint += (_, e) => { using var p = new Pen(t.Line); e.Graphics.DrawLine(p, side.Width - 1, 0, side.Width - 1, side.Height); };
+        var clip = new Panel { Dock = DockStyle.Fill, BackColor = t.NavBg };
+        var links = new FlowLayoutPanel { FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoScroll = true, BackColor = t.NavBg, Padding = new Padding(8, 0, 8, 8) };
+        // Thanh cuộn nằm ngoài vùng nhìn thấy (bị cắt); cuộn bằng con lăn chuột, nên nút không bị che khi cửa sổ thấp
+        void SizeLinks() => links.SetBounds(0, 0, clip.Width + SystemInformation.VerticalScrollBarWidth + 2, clip.Height);
+        clip.Resize += (_, _) => SizeLinks(); clip.Controls.Add(links); SizeLinks();
+        links.MouseEnter += (_, _) => links.Focus();
+        var brand = new Label { Dock = DockStyle.Top, Height = 84, BackColor = t.NavBg, ForeColor = t.NavInk, Font = ShopTheme.TitleFace(14),
+            Padding = new Padding(20, 20, 8, 8), TextAlign = ContentAlignment.TopLeft, Text = "BADMINTON\nSHOP" };
+        string? last = null;
+        foreach (var item in navItems)
+        {
+            if (item.Group != last)
+            {
+                last = item.Group;
+                links.Controls.Add(new Label { Text = item.Group, AutoSize = true, ForeColor = t.NavMuted, BackColor = t.NavBg, Margin = new Padding(14, 12, 0, 4), Font = ShopTheme.Face("Segoe UI", 8.5f, FontStyle.Bold) });
+            }
+            var b = new NavButton(item.Glyph, item.Text) { Width = 196, Height = 38 };
+            b.Click += (_, _) => item.Action();
+            links.Controls.Add(b); if (item.Page != null) navigation[item.Page] = b;
+        }
+        // Co chiều cao nút theo chiều cao cửa sổ để thanh điều hướng không phải cuộn (tối thiểu 34px)
+        void Fit()
+        {
+            var buttons = links.Controls.OfType<NavButton>().ToList(); if (buttons.Count == 0) return;
+            int fixedPart = links.Controls.Cast<Control>().Where(c => c is not NavButton).Sum(c => c.Height + c.Margin.Vertical) + links.Padding.Vertical;
+            int per = (links.ClientSize.Height - fixedPart) / buttons.Count - buttons[0].Margin.Vertical;
+            foreach (var b in buttons) b.Height = Math.Clamp(per, 34, 38);
+        }
+        links.Resize += (_, _) => Fit();
+        side.Controls.Add(clip); side.Controls.Add(brand);
+        Controls.Add(header); Controls.Add(side);
+    }
+
+    // TV1: tô sáng mục điều hướng của trang đang xem
+    private void MarkActive()
+    {
+        foreach (var (page, button) in navigation) button.Active = page == currentType;
+    }
+
+    // TV1: trộn hai màu theo tỉ lệ, dùng cho chữ phụ trên thanh trên
+    private static Color Mix(Color a, Color b, float toB) => Color.FromArgb((int)(a.R + (b.R - a.R) * toB), (int)(a.G + (b.G - a.G) * toB), (int)(a.B + (b.B - a.B) * toB));
+
     private bool ChoPhepDong()
     {
         if (pages.Values.Any(ShopTheme.IsBusy)) { MessageBox.Show(this, "Có tác vụ đang chạy. Vui lòng chờ hoàn tất trước khi đóng hoặc đăng xuất."); return false; }
@@ -102,10 +154,10 @@ public partial class FrmMain
             ShopTheme.Apply(page); page.TopLevel = false; page.FormBorderStyle = FormBorderStyle.None;
             page.AutoScroll = true; workspace.Controls.Add(page);
         }
-        if(currentPage is { IsDisposed:false,Disposing:false })currentPage.Hide(); currentPage = page;
+        if(currentPage is { IsDisposed:false,Disposing:false })currentPage.Hide(); currentPage = page; currentType = type;
         screenTitle.Text = type == typeof(FrmPOS) ? "Bán tại quầy" : page.Text;
         screenTitle.AutoEllipsis = true;
-        foreach (var (key, button) in navigation) button.BackColor = key == type ? Color.FromArgb(49, 122, 90) : ShopTheme.Green;
+        MarkActive();
         BoTriTrang(); page.Show(); page.BringToFront();
         LifecycleDiagnostics.Record("NAV shown "+type.Name);
     }

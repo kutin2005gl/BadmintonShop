@@ -19,7 +19,7 @@ public class FrmTongQuan : Form
         for (int i = 0; i < 4; i++)
         {
             cards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
-            var card = new Panel { Dock = DockStyle.Fill, BackColor = Color.White, Padding = new Padding(12), Margin = new Padding(4) };
+            var card = new Panel { Dock = DockStyle.Fill, BackColor = ShopTheme.Surface, Padding = new Padding(12), Margin = new Padding(4) };
             values[i] = new Label { Text = "—", Dock = DockStyle.Fill, Font = new Font("Segoe UI", 20, FontStyle.Bold), ForeColor = ShopTheme.Green, AutoEllipsis = true };
             card.Controls.Add(values[i]); card.Controls.Add(new Label { Text = names[i], Dock = DockStyle.Top, Height = 30, ForeColor = ShopTheme.Muted, AutoEllipsis = true }); cards.Controls.Add(card, i, 0);
         }
@@ -36,7 +36,7 @@ public class FrmTongQuan : Form
     }
     private static Panel Section(string title, Control content)
     {
-        var p = new Panel { Dock = DockStyle.Fill, BackColor = Color.White, Padding = new Padding(10), Margin = new Padding(4) };
+        var p = new Panel { Dock = DockStyle.Fill, BackColor = ShopTheme.Surface, Padding = new Padding(10), Margin = new Padding(4) };
         p.Controls.Add(content); p.Controls.Add(new Label { Text = title, Dock = DockStyle.Top, Height = 36, Font = new Font("Segoe UI", 11, FontStyle.Bold), ForeColor = ShopTheme.Green }); return p;
     }
     protected override void OnLoad(EventArgs e) { base.OnLoad(e); if (!DesignMode) Tai(); }

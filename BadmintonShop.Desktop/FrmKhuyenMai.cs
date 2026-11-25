@@ -12,7 +12,7 @@ namespace BadmintonShop.Desktop;
 /// <summary>
 /// Quan ly chuong trinh khuyen mai (SV3): mot chuong trinh co the co CA BA nhom uu dai —
 /// tab San pham, tab Hoa don (nhieu bac), tab Voucher (co sinh ma hang loat) — dung chung ten, thoi han, trang thai.
-/// Bang tren: danh sach; phan giua: thong tin chung; 3 tab duoi: chi tiet (sua truc tiep, Delete de xoa dong).
+/// Bo cuc main-sub theo mau Don hang: danh sach ben trai; ben phai la thong tin chung va 3 tab chi tiet (sua truc tiep, Delete de xoa dong).
 /// </summary>
 public class FrmKhuyenMai : Form, IUnsavedWork
 {
@@ -28,7 +28,7 @@ public class FrmKhuyenMai : Form, IUnsavedWork
     private TextBox ten = null!;
     private DateTimePicker tuNgay = null!, denNgay = null!;
     private CheckBox bat = null!;
-    private Label nhanMa = null!, nhanChiTiet = null!;
+    private Label nhanMa = null!, nhanChiTiet = null!, badge = null!;
     private Button btnSinh = null!;
 
     private int ma;                                   // 0 = dang them moi
@@ -45,13 +45,11 @@ public class FrmKhuyenMai : Form, IUnsavedWork
     private void InitializeComponent()
     {
         Text = "Chương trình khuyến mãi";
-        Size = new Size(1100, 760);
-        MinimumSize = new Size(900, 600);
+        Size = new Size(1250, 800);
+        MinimumSize = new Size(1000, 650);
         AutoScaleMode = AutoScaleMode.Font;
 
         luoi = Sv4Ui.Luoi();
-        luoi.Dock = DockStyle.Top;
-        luoi.Height = 220;
 
         tabs = new TabControl { Dock = DockStyle.Fill };
         foreach (var nhom in CacNhom)
@@ -74,17 +72,9 @@ public class FrmKhuyenMai : Form, IUnsavedWork
             tabs.TabPages.Add(trang);
         }
 
-        ten = new TextBox { Width = 280, MaxLength = 150 };
-        tuNgay = new DateTimePicker { Format = DateTimePickerFormat.Short, Width = 110 };
-        denNgay = new DateTimePicker { Format = DateTimePickerFormat.Short, Width = 110 };
-        bat = new CheckBox { Text = "Đang áp dụng", AutoSize = true, Checked = true, Margin = new Padding(8, 8, 8, 3) };
-        nhanMa = Sv4Ui.Nhan("Chương trình mới");
-
-        var edit = Sv4Ui.ThanhCongCu(120);
-        edit.Controls.AddRange(new Control[]
+        var bar = Sv4Ui.ThanhCongCu();
+        bar.Controls.AddRange(new Control[]
         {
-            nhanMa, Sv4Ui.Nhan("Tên"), ten,
-            Sv4Ui.Nhan("Từ ngày"), tuNgay, Sv4Ui.Nhan("Đến ngày"), denNgay, bat,
             Sv4Ui.Nut("Mới", () => { if (!HasUnsavedWork || Sv4Ui.XacNhan(this, "Bỏ thay đổi để tạo chương trình mới?")) Moi(); }),
             Sv4Ui.Nut("Lưu", () => Chay(Luu)),
             Sv4Ui.Nut("Bật/Tắt", () => Chay(BatTat)),
@@ -92,16 +82,13 @@ public class FrmKhuyenMai : Form, IUnsavedWork
             Sv4Ui.Nut("Tải lại", () => Chay(Nap)),
         });
 
-        nhanChiTiet = Sv4Ui.Nhan("");
-        btnSinh = Sv4Ui.Nut("Sinh voucher hàng loạt", () => Chay(SinhVoucher));
-        var thanhChiTiet = Sv4Ui.ThanhCongCu(58);
-        thanhChiTiet.Controls.AddRange(new Control[] { nhanChiTiet, btnSinh });
+        var split = KhungChiTiet.Chia(this, 0.55, 420, 520);
+        split.Panel1.Controls.Add(luoi);
+        XayChiTiet(split.Panel2);
 
         // thu tu Add: Fill truoc, Top sau cung nam tren cung
-        Controls.Add(tabs);
-        Controls.Add(thanhChiTiet);
-        Controls.Add(edit);
-        Controls.Add(luoi);
+        Controls.Add(split);
+        Controls.Add(bar);
         ShopTheme.Apply(this);
 
         tabs.SelectedIndexChanged += (_, _) => CapNhatNhanTab();
@@ -118,6 +105,37 @@ public class FrmKhuyenMai : Form, IUnsavedWork
             if (dangNap) return;
             if (luoi.CurrentRow is { Selected: true } row && row.Cells["MaCTKM"].Value is int id) Chay(() => NapChiTiet(id));
         };
+    }
+
+    // TV3: panel chi tiet ben phai: ma + badge trang thai, thong tin chung, mo ta nhom va 3 tab uu dai
+    private void XayChiTiet(Control host)
+    {
+        var root = new Panel { Dock = DockStyle.Fill, Padding = new Padding(14, 12, 14, 12), BackColor = ShopTheme.Surface };
+        var header = KhungChiTiet.TieuDe(out nhanMa, out badge);
+
+        ten = new TextBox { MaxLength = 150 };
+        tuNgay = new DateTimePicker { Format = DateTimePickerFormat.Custom, CustomFormat = "dd/MM/yyyy", Width = 150 };
+        denNgay = new DateTimePicker { Format = DateTimePickerFormat.Custom, CustomFormat = "dd/MM/yyyy", Width = 150 };
+        bat = new CheckBox { Text = "Đang áp dụng", AutoSize = true, Checked = true };
+        var thongTin = KhungChiTiet.BangThongTin();
+        KhungChiTiet.Dong(thongTin, "Tên chương trình", ten);
+        KhungChiTiet.Dong(thongTin, "Từ ngày", tuNgay);
+        KhungChiTiet.Dong(thongTin, "Đến ngày", denNgay);
+        KhungChiTiet.Dong(thongTin, "Trạng thái", bat);
+
+        nhanChiTiet = new Label { Dock = DockStyle.Top, AutoSize = true, ForeColor = ShopTheme.Muted, Font = new Font("Segoe UI", 9), Padding = new Padding(0, 4, 0, 4) };
+        btnSinh = Sv4Ui.Nut("Sinh voucher hàng loạt", () => Chay(SinhVoucher));
+        var hangSinh = KhungChiTiet.HangNut(btnSinh);
+        root.SizeChanged += (_, _) => nhanChiTiet.MaximumSize = new Size(Math.Max(120, root.ClientSize.Width - root.Padding.Horizontal), 0);
+
+        // Thứ tự thêm: Fill trước, các Top sau (Top thêm sau nằm cao hơn).
+        root.Controls.Add(tabs);
+        root.Controls.Add(hangSinh);
+        root.Controls.Add(nhanChiTiet);
+        root.Controls.Add(KhungChiTiet.Muc("Chi tiết ưu đãi"));
+        root.Controls.Add(thongTin);
+        root.Controls.Add(header);
+        host.Controls.Add(root);
     }
 
     // TV3: khi form hien len - kiem tra quyen roi nap du lieu
@@ -155,7 +173,9 @@ public class FrmKhuyenMai : Form, IUnsavedWork
         Tieu("Loai", "Loại");
         Tieu("TuNgay", "Từ ngày");
         Tieu("DenNgay", "Đến ngày");
-        Tieu("SoMuc", "Số mục chi tiết");
+        Tieu("SoMuc", "Số mục");
+        Tieu("TrangThai", "Trạng thái");
+        KhungChiTiet.DoRong(luoi, ("MaCTKM", 40, 55), ("TenCTKM", 190, 160), ("Loai", 100, 90), ("TuNgay", 100, 125), ("DenNgay", 100, 125), ("SoMuc", 60, 70), ("TrangThai", 110, 110));
     }
 
     // TV3: chon 1 dong trong danh sach -> hien thong tin + chi tiet (ca ba nhom) de sua
@@ -167,7 +187,9 @@ public class FrmKhuyenMai : Form, IUnsavedWork
         try
         {
             ma = k.MaCTKM;
-            nhanMa.Text = $"Mã: {ma}";
+            nhanMa.Text = $"CTKM {ma}";
+            var trangThai = Convert.ToString(luoi.CurrentRow?.Cells["TrangThai"].Value) ?? "";
+            KhungChiTiet.DatBadge(badge, trangThai, trangThai.Contains("Sắp"), trangThai.Contains("Ngừng"));
             ten.Text = k.TenCTKM;
             tuNgay.Value = k.NgayBatDau.Date;
             denNgay.Value = k.NgayKetThuc.Date;
@@ -185,6 +207,7 @@ public class FrmKhuyenMai : Form, IUnsavedWork
         {
             ma = 0;
             nhanMa.Text = "Chương trình mới";
+            KhungChiTiet.DatBadge(badge, "");
             ten.Clear();
             tuNgay.Value = DateTime.Today;
             denNgay.Value = DateTime.Today.AddDays(30);

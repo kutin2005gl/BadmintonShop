@@ -107,8 +107,8 @@ internal static partial class Program
                 form.Show();WaitUi(form);
                 bool invoice=form is FrmDonHang;
                 var grids=Controls(form).OfType<DataGridView>().ToArray();
-                var main=grids.Single(g=>g.Columns.Contains(invoice?"MaHD":"MaPN"));var sub=invoice?null:grids.Single(g=>g!=main);
-                // FrmDonHang hiển thị chi tiết dạng thẻ sản phẩm (Tag = DataRow chi tiết) thay vì lưới phụ.
+                var main=grids.Single(g=>g.Columns.Contains(invoice?"MaHD":"MaPN"));
+                // Cả hai form hiển thị chi tiết dạng thẻ sản phẩm (Tag = DataRow chi tiết) thay vì lưới phụ.
                 System.Data.DataRow[] Cards()=>Controls(form).OfType<Panel>().Where(p=>p.Name=="TheSanPham").Select(p=>(System.Data.DataRow)p.Tag!).ToArray();
                 if(invoice)
                 {
@@ -123,12 +123,12 @@ internal static partial class Program
                     main.CurrentCell=row.Cells[column.Index];WaitUi(form);
                     int id=Convert.ToInt32(row.Cells[invoice?"MaHD":"MaPN"].Value);
                     var expected=invoice?new HoaDonRepository().LayChiTietHienThi(id):new PhieuNhapRepository().LayChiTietHienThi(id);
-                    var actual=invoice?Cards():((System.Data.DataTable)sub!.DataSource!).Rows.Cast<System.Data.DataRow>().ToArray();
+                    var actual=Cards();
                     Eq(expected.Rows.Count,actual.Length);
                     for(int i=0;i<expected.Rows.Count;i++)
                     { Eq(expected.Rows[i]["MaSP"],actual[i]["MaSP"]);Eq(expected.Rows[i]["ThanhTien"],actual[i]["ThanhTien"]); }
                 }
-                main.DataSource=((System.Data.DataTable)main.DataSource!).Clone();WaitUi(form);True(invoice?Cards().Length==0:sub!.DataSource==null);
+                main.DataSource=((System.Data.DataTable)main.DataSource!).Clone();WaitUi(form);True(Cards().Length==0);
                 form.Close();
             }
         });

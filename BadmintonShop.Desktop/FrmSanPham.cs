@@ -22,7 +22,7 @@ public class FrmSanPham : Form
         bar.Controls.AddRange([tim,dm,thuongHieu,tt,ton,Sv4Ui.Nut("Lọc",Loc),Sv4Ui.Nut("Tải lại",()=>Chay(Nap)),
             Sv4Ui.Nut("Thêm",()=>Sua(0)),Sv4Ui.Nut("Nhập Excel",()=>Chay(()=> { using var form=new FrmNhapSanPhamExcel();form.ShowDialog(this);if(form.DaNhap)Nap(); })),Sv4Ui.Nut("Sửa",()=>Chay(()=>Sua(Sv4Ui.MaDong(grid,"MaSP")??throw new ArgumentException("Hãy chọn sản phẩm cần sửa.")))),
             Sv4Ui.Nut("Ngừng bán",()=>Chay(Ngung)),Sv4Ui.Nhan("Cảnh báo: hết hàng = 0; sắp hết = 1–5. Bấm tiêu đề cột để sắp xếp.")]);
-        var pane=new Panel { Dock=DockStyle.Right,Width=200,Padding=new Padding(12),BackColor=Color.White };
+        var pane=new Panel { Dock=DockStyle.Right,Width=200,Padding=new Padding(12),BackColor=ShopTheme.Surface };
         preview=new PictureBox { Dock=DockStyle.Top,Height=185,SizeMode=PictureBoxSizeMode.Zoom };
         anhNhan=new Label { Dock=DockStyle.Fill,Text="Chọn sản phẩm để xem ảnh",AutoEllipsis=true,Padding=new Padding(4) };
         pane.Controls.Add(anhNhan);pane.Controls.Add(preview);
