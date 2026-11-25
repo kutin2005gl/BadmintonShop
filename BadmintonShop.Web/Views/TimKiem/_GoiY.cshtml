@@ -1,0 +1,39 @@
+@model GoiYTimKiemViewModel
+
+@if (Model.TongSo == 0)
+{
+    <p class="tim-trong" data-thong-bao="Không có sản phẩm phù hợp">Không tìm thấy sản phẩm nào cho “<strong class="text-black break-all">@Model.TuKhoa</strong>”. Hãy thử tên hoặc thương hiệu khác.</p>
+}
+else
+{
+    <h2 class="tim-tieu-de" data-thong-bao="Có @Model.TongSo sản phẩm phù hợp">Sản phẩm gợi ý</h2>
+    <ul class="-mx-2">
+        @foreach (var (sp, tenDanhMuc) in Model.SanPham)
+        {
+            var pt = KhuyenMaiHienThi.LayPhanTram(sp.MaSP);
+            <li>
+                <a asp-controller="SanPham" asp-action="ChiTiet" asp-route-id="@sp.MaSP" class="tim-sp">
+                    <span class="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                        <img src="@AnhMinhHoa.CuaSanPham(sp.HinhAnh, tenDanhMuc)" alt="" data-chu="@sp.TenSP.Substring(0, 1)" class="h-full w-full object-cover" />
+                    </span>
+                    <span class="min-w-0 flex-1">
+                        <span class="block truncate text-sm font-semibold">@sp.TenSP</span>
+                        <span class="block truncate text-xs text-gray-500">@tenDanhMuc@(string.IsNullOrWhiteSpace(sp.ThuongHieu) ? "" : " · " + sp.ThuongHieu)</span>
+                        <span class="block text-sm tabular-nums">
+                            @if (pt > 0)
+                            {
+                                <span class="font-bold text-red-600">@KhuyenMaiHienThi.GiaSauGiam(sp.DonGiaBan, pt).Dong()</span>
+                                <span class="ml-2 text-xs text-gray-500 line-through">@sp.DonGiaBan.Dong()</span>
+                            }
+                            else
+                            {
+                                <span class="font-bold">@sp.DonGiaBan.Dong()</span>
+                            }
+                        </span>
+                    </span>
+                </a>
+            </li>
+        }
+    </ul>
+    <a asp-controller="SanPham" asp-action="Index" asp-route-tuKhoa="@Model.TuKhoa" class="btn-outline mt-3 w-full rounded-full normal-case tracking-normal">Xem tất cả @Model.TongSo kết quả</a>
+}

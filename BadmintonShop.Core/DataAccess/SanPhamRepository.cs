@@ -52,6 +52,14 @@ public class SanPhamRepository
     }
     private const string Cot = "MaSP, TenSP, MaDM, ThuongHieu, DonGiaBan, SoLuongTon, DonViTinh, HinhAnh, MoTa, TrangThai";
 
+    // TV1: tong so luong da ban cua tung san pham (bo don da huy), dung de xep hang goi y tim kiem
+    public Dictionary<int, int> LayTongSoLuongBan()
+        => DbHelper.ExecuteQuery(@"SELECT ct.MaSP, SUM(ct.SoLuong) AS DaBan
+                                   FROM ChiTietHoaDon ct JOIN HoaDon h ON h.MaHD = ct.MaHD
+                                   WHERE h.TrangThai <> N'Đã hủy' GROUP BY ct.MaSP")
+            .Rows.Cast<DataRow>()
+            .ToDictionary(r => Convert.ToInt32(r["MaSP"]), r => Convert.ToInt32(r["DaBan"]));
+
     // TV1: lay danh sach san pham, loc theo tu khoa (ten / thuong hieu) va danh muc neu co
     public List<SanPham> LayTatCa(string? tuKhoa = null, int? maDM = null)
     {

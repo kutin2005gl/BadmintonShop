@@ -41,14 +41,38 @@ public class DatHangController : Controller
         var gio = _gioHang.TinhTuSession(HttpContext.Session);
         if (gio.Dong.Count == 0) return RedirectToAction("Index", "GioHang");
         HttpContext.Session.SetString(QuoteKey, XacNhanGia.DauVanTay(gio));
-        if (!DaDangNhap) return View(new DatHangViewModel { Gio = gio });
-        var kh = _khachHang.LayTheoMa(MaKHDangNhap);
-        return View(new DatHangViewModel { Gio = gio, DaDangNhap = true, HoTen = kh?.HoTen ?? "", SDT = kh?.SDT ?? "", DiaChi = kh?.DiaChi ?? "" });
+        var vm = new DatHangViewModel { Gio = gio, DaDangNhap = DaDangNhap };
+        if (DaDangNhap) vm.DiaChi = _khachHang.LayTheoMa(MaKHDangNhap)?.DiaChi ?? "";
+        return TrangDatHang(vm);
     }
+
+    // TV1: bo sung ho ten/SDT tu ho so va thuong hieu, danh muc cua tung dong roi hien trang dat hang
+    private IActionResult TrangDatHang(DatHangViewModel vm)
+    {
+        if (vm.DaDangNhap)
+        {
+            var kh = _khachHang.LayTheoMa(MaKHDangNhap);
+            vm.HoTen = kh?.HoTen ?? "";
+            vm.SDT = kh?.SDT ?? "";
+        }
+        var danhMuc = new DanhMucRepository().LayTatCa().ToDictionary(d => d.MaDM, d => d.TenDanhMuc);
+        var sanPham = new SanPhamRepository();
+        foreach (var d in vm.Gio.Dong)
+            if (sanPham.LayTheoMa(d.MaSP) is { } sp)
+                vm.ThongTinSP[d.MaSP] = (sp.ThuongHieu, danhMuc.GetValueOrDefault(sp.MaDM, ""));
+        return View("Index", vm);
+    }
+
+    // TV1: gop dia chi chi tiet, phuong/xa, tinh/thanh thanh mot chuoi dia chi giao
+    private static string GopDiaChi(string? chiTiet, string? phuongXa, string? tinhThanh)
+        => string.IsNullOrWhiteSpace(chiTiet)
+            ? ""
+            : string.Join(", ", new[] { chiTiet, phuongXa, tinhThanh }.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x!.Trim()));
 
     // TV3: bam "Dat hang" -> tao don trong 1 transaction
     [HttpPost, ValidateAntiForgeryToken]
-    public IActionResult XacNhan(string? diaChi, string? hinhThucTT, string? hoTen, string? sdt, string? ghiChu)
+    public IActionResult XacNhan(string? diaChi, string? hinhThucTT, string? hoTen, string? sdt, string? ghiChu,
+        string? tinhThanh = null, string? phuongXa = null)
     {
         var gio = _gioHang.TinhTuSession(HttpContext.Session);
         if (gio.Dong.Count == 0) return RedirectToAction("Index", "GioHang");
@@ -61,9 +85,12 @@ public class DatHangController : Controller
             HoTen = DaDangNhap ? User.LayHoTen() ?? "" : hoTen ?? "",
             SDT = DaDangNhap ? "" : sdt ?? "",
             DiaChi = diaChi ?? "",
+            TinhThanh = tinhThanh ?? "",
+            PhuongXa = phuongXa ?? "",
             GhiChu = ghiChu ?? "",
             HinhThucTT = tt,
         };
+        var diaChiGiao = GopDiaChi(diaChi, phuongXa, tinhThanh);
 
         try
         {
@@ -71,10 +98,12 @@ public class DatHangController : Controller
             {
                 HttpContext.Session.SetString(QuoteKey, XacNhanGia.DauVanTay(gio));
                 vm.Loi = "Giỏ hàng hoặc khuyến mãi đã thay đổi. Kiểm tra tổng mới và bấm Đặt hàng để xác nhận lại.";
-                return View("Index", vm);
+                return TrangDatHang(vm);
             }
-            var maKH = DaDangNhap ? MaKHDangNhap : _khachHang.LayHoacTaoKhachVangLai(vm.HoTen, vm.SDT, vm.DiaChi);
-            var maHD = _donHang.TaoDon(maKH, vm.DiaChi, tt, gio, vm.GhiChu);
+            // kiem tra do dai truoc khi tao khach vang lai, tranh loi cot DiaChi
+            if (diaChiGiao.Length > 255) throw new ArgumentException("Địa chỉ giao hàng quá dài, vui lòng rút gọn địa chỉ chi tiết.");
+            var maKH = DaDangNhap ? MaKHDangNhap : _khachHang.LayHoacTaoKhachVangLai(vm.HoTen, vm.SDT, diaChiGiao);
+            var maHD = _donHang.TaoDon(maKH, diaChiGiao, tt, gio, vm.GhiChu);
             HttpContext.Session.XoaGio(); HttpContext.Session.Remove(QuoteKey);
             if (!DaDangNhap)
             {
@@ -99,7 +128,7 @@ public class DatHangController : Controller
         {
             vm.Loi = LoiCsdl.ThongBao(ex);
         }
-        return View("Index", vm);
+        return TrangDatHang(vm);
     }
 
     // TV3: man hinh thanh toan online GIA LAP (khong goi cong thanh toan that)
