@@ -13,6 +13,10 @@ public class DatHangViewModel
     public string GhiChu { get; set; } = "";
     public string HinhThucTT { get; set; } = "COD";
     public string? Loi { get; set; }
+    public string TinhThanh { get; set; } = "";
+    public string PhuongXa { get; set; } = "";
+    /// <summary>Thuong hieu + ten danh muc theo MaSP, de hien duoi ten san pham trong cot tom tat.</summary>
+    public Dictionary<int, (string? ThuongHieu, string TenDanhMuc)> ThongTinSP { get; } = new();
 }
 
 /// <summary>Man hinh thanh toan online gia lap: so lieu giam gia lay tu hoa don va chi tiet DA LUU (khong tinh lai).</summary>

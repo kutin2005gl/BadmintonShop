@@ -43,6 +43,87 @@
   .auth-sub    { @apply text-sm text-gray-600 mb-8 leading-relaxed; }
   .link-sub    { @apply text-sm font-semibold underline underline-offset-4 decoration-gray-300 hover:text-primary hover:decoration-primary transition-colors; }
 
+  /* TV1: dropdown tai khoan tren header (mo khi re chuot hoac focus) */
+  .nut-tk      { @apply flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition-colors; }
+  .ten-tk      { @apply max-w-[140px] truncate; }
+  .mui-ten     { @apply transition-transform; }
+  .menu-tk     { @apply invisible absolute right-0 top-full z-50 mt-3 w-56 rounded-xl border border-gray-100 bg-white p-2 opacity-0 shadow-xl transition-all duration-150 translate-y-1; }
+  .menu-tk::before { content: ""; @apply absolute -top-[7px] right-8 h-3 w-3 rotate-45 border-l border-t border-gray-100 bg-white; }
+  .menu-tk::after { content: ""; @apply absolute inset-x-0 -top-3 h-3; }   /* cau noi: re chuot qua khe khong bi dong menu */
+  .menu-tk-wrap:hover .menu-tk,.menu-tk-wrap:focus-within .menu-tk { @apply visible translate-y-0 opacity-100; }
+  .menu-tk-wrap:hover .nut-tk, .menu-tk-wrap:focus-within .nut-tk { @apply bg-gray-100; }
+  .menu-tk-wrap:hover .mui-ten, .menu-tk-wrap:focus-within .mui-ten { @apply rotate-180; }
+  .muc-tk      { @apply flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-gray-800 transition-colors hover:bg-gray-100 focus-visible:bg-gray-100; }
+  .muc-tk-thoat { @apply text-red-600 hover:bg-red-50 focus-visible:bg-red-50; }
+
+  /* TV1: o tim kiem mo rong tren header. Duoi xl: phu len thanh header, lo dan tu phai sang trai.
+     Tu xl: rong dan ra, menu giua tu nhuong cho (khong de len nhau). */
+  .tim         { @apply flex items-center justify-end; }
+  .tim-nut     { @apply text-black transition-colors hover:text-primary; }
+  .tim-form {
+    @apply invisible absolute inset-x-2 top-4 z-20 flex h-12 items-center gap-3 rounded-full border border-black bg-white pl-4 pr-1;
+    clip-path: inset(0 0 0 100% round 999px);
+    transition: clip-path .35s cubic-bezier(.22,1,.36,1), visibility 0s .35s;
+  }
+  .tim[data-mo="co"] .tim-form { visibility: visible; clip-path: inset(0 0 0 0 round 999px); transition-delay: 0s; }
+  .tim-nhap    { @apply h-full min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-gray-500; }
+  .tim-gui     { @apply h-10 shrink-0 rounded-full bg-black px-5 text-sm font-bold text-white transition-colors hover:bg-gray-800 sm:px-7; }
+  .tim-bang {
+    @apply invisible absolute inset-x-2 top-[4.5rem] z-50 max-h-[calc(100vh-9rem)] -translate-y-1 overflow-y-auto overscroll-contain rounded-2xl border border-gray-100 bg-white p-4 text-left text-black opacity-0 shadow-2xl sm:p-6;
+    transition: opacity .2s ease-out, transform .2s ease-out, visibility 0s .2s;
+  }
+  .tim[data-mo="co"] .tim-bang { @apply visible translate-y-0 opacity-100; transition-delay: .12s, .12s, 0s; }
+  .tim-tieu-de { @apply mb-3 text-sm font-bold; }
+  .tim-khoi    { @apply mt-5 border-t border-gray-200 pt-5; }
+  .tim-chip    { @apply inline-block rounded-full bg-gray-100 px-3.5 py-2 text-xs font-semibold transition-colors hover:bg-black hover:text-white; }
+  .tim-o       { @apply flex h-16 w-full items-center justify-center rounded-xl bg-gray-100 transition-colors group-hover:bg-gray-200; }
+  .tim-hang    { @apply px-2 text-center text-sm font-extrabold uppercase italic tracking-tight hover:bg-gray-200; }
+  .tim-sp      { @apply flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-100 focus-visible:bg-gray-100; }
+  .tim-trong   { @apply text-sm leading-relaxed text-gray-600; }
+  @media (min-width: 640px) {
+    .tim-form, .tim-bang { left: 1rem; right: 1rem; }
+  }
+  @media (min-width: 1024px) {
+    .tim-form  { left: 16rem; }                       /* chua logo */
+    .tim-bang  { left: auto; width: 32rem; }
+  }
+  @media (min-width: 1024px) and (max-width: 1279px) {
+    header:has(.tim[data-mo="co"]) nav { visibility: hidden; }   /* menu nhuong cho, khong bi che nua chung */
+  }
+  @media (min-width: 1280px) {
+    .tim       { position: relative; width: 1.375rem; height: 3rem; transition: width .35s cubic-bezier(.22,1,.36,1); }
+    .tim[data-mo="co"] { width: 27rem; }
+    .tim-nut   { position: absolute; right: 0; top: .8125rem; transition: opacity .15s, visibility 0s; }
+    .tim[data-mo="co"] .tim-nut { visibility: hidden; opacity: 0; }
+    .tim-form {
+      left: 0; right: 0; top: 0; width: auto; overflow: hidden; clip-path: none; opacity: 0;
+      transition: opacity .2s ease-out .15s, visibility 0s .35s;
+    }
+    .tim[data-mo="co"] .tim-form { clip-path: none; opacity: 1; transition: opacity .1s ease-out, visibility 0s; }
+    .tim-bang  { right: 0; top: calc(100% + .75rem); width: 32rem; }
+  }
+  @media (min-width: 1536px) {
+    .tim[data-mo="co"] { width: 32rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tim, .tim-nut, .tim-form, .tim-bang, .tim[data-mo] .tim-form, .tim[data-mo] .tim-bang { transition: none; }
+  }
+
+  /* TV1: trang dat hang */
+  .dh-the      { @apply min-w-0 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6; }
+  .dh-khoi     { @apply mt-5 min-w-0 border-t border-gray-200 pt-5; }
+  .dh-tieu-de  { @apply mb-4 flex items-center gap-3 text-lg font-bold tracking-tight; }
+  .dh-nhan     { @apply mb-1.5 block text-sm font-medium; }
+  .dh-o        { @apply relative; }
+  .dh-icon     { @apply pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500; }
+  .dh-nhap     { @apply block h-11 w-full min-w-0 rounded-lg border border-gray-300 bg-white px-4 text-sm transition-colors placeholder:text-gray-500 focus:border-black focus:ring-1 focus:ring-black disabled:bg-gray-50 disabled:text-gray-500; }
+  .dh-nhap[readonly] { @apply bg-gray-50 text-gray-600; }
+  .dh-nhap-icon { @apply pl-12; }
+  .dh-tt       { @apply flex cursor-pointer items-center gap-4 rounded-xl border border-gray-300 p-4 transition-colors hover:border-gray-500 sm:gap-5 sm:px-5; }
+  .dh-tt:has(:checked) { @apply border-black ring-1 ring-black; }
+  .dh-tt input { @apply h-5 w-5 shrink-0 accent-black; }
+  .dh-sl       { @apply flex h-8 w-9 items-center justify-center text-lg leading-none transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-300 disabled:hover:bg-transparent; }
+
   /* Trang san pham */
   .loc-thanh   { @apply grid grid-cols-1 md:grid-cols-12 gap-3 border-y border-gray-200 py-5 mb-8; }
   .phan-trang a, .phan-trang span { @apply inline-flex items-center justify-center min-w-[2.5rem] h-10 px-3 border border-gray-200 text-sm font-semibold transition-colors; }

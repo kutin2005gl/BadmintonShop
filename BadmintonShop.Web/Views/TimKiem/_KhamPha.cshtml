@@ -1,0 +1,69 @@
+@model KhamPhaTimKiemViewModel
+@{
+    // Duong dan trang san pham da loc theo danh muc hoac thuong hieu
+    string DuongDan(MucTimKiem m) => m.MaDM is int ma
+        ? Url.Action("Index", "SanPham", new { maDM = ma })!
+        : Url.Action("Index", "SanPham", new { thuongHieu = m.Ten })!;
+
+    // Icon net theo ten danh muc
+    string NetVe(string ten)
+    {
+        var t = ten.ToLowerInvariant();
+        if (t.Contains("vợt")) return "<ellipse cx='15' cy='9' rx='5' ry='6.5' transform='rotate(45 15 9)'/><path d='m10.5 13.5-7 7M13 7l4 4M15.5 5.5l3 3M11.5 9.5l3 3'/>";
+        if (t.Contains("giày")) return "<path d='M3 17v-6l4 1 2-4 4 4 6 2c1.3.4 2 1.4 2 3v1H3Z'/><path d='M3 15h18M11 11l-1.5 1.5M13.5 12.5 12 14'/>";
+        if (t.Contains("áo") || t.Contains("quần")) return "<path d='M8 3 3 6l2 5 2-1v11h10V10l2 1 2-5-5-3c-.5 1.5-2 2.5-4 2.5S8.500 4.500 8 3Z'/>";
+        if (t.Contains("túi") || t.Contains("balo")) return "<path d='M5 9h14l1 12H4L5 9Z'/><path d='M9 9V7a3 3 0 0 1 6 0v2M9 14h6'/>";
+        if (t.Contains("cầu")) return "<path d='M9 15 3 6l4 1 1-4 4 3 3-3 1 4 5 1-6 7Z'/><path d='m9 15 6-2M12 6l0 8M7 7l3.500 7M17 9l-4 5'/><path d='M9 15c-1.500 1.500-1.800 3.200-.500 4.500s3 1 4.500-.500c1-1 1.800-4 2-6'/>";
+        return "<path d='M12 3 4 7v10l8 4 8-4V7l-8-4Z'/><path d='m4 7 8 4 8-4M12 11v10'/>";
+    }
+}
+
+@if (Model.DanhMuc.Count == 0)
+{
+    <p class="tim-trong">Chưa có sản phẩm đang bán.</p>
+}
+else
+{
+    <section aria-labelledby="tim-pho-bien">
+        <h2 id="tim-pho-bien" class="tim-tieu-de">Tìm kiếm phổ biến</h2>
+        <ul class="flex flex-wrap gap-2">
+            @foreach (var m in Model.PhoBien)
+            {
+                <li><a href="@DuongDan(m)" class="tim-chip">@m.Ten</a></li>
+            }
+        </ul>
+    </section>
+
+    <section class="tim-khoi" aria-labelledby="tim-danh-muc">
+        <h2 id="tim-danh-muc" class="tim-tieu-de">Danh mục nổi bật</h2>
+        <ul class="grid grid-cols-4 gap-2 sm:gap-3">
+            @foreach (var m in Model.DanhMuc)
+            {
+                <li>
+                    <a href="@DuongDan(m)" class="group flex flex-col items-center gap-2 text-center">
+                        <span class="tim-o">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">@Html.Raw(NetVe(m.Ten))</svg>
+                        </span>
+                        <span class="text-xs font-semibold leading-snug">@m.Ten</span>
+                    </a>
+                </li>
+            }
+        </ul>
+    </section>
+
+    @if (Model.ThuongHieu.Count > 0)
+    {
+        <section class="tim-khoi" aria-labelledby="tim-thuong-hieu">
+            <div class="flex items-baseline justify-between gap-3">
+                <h2 id="tim-thuong-hieu" class="tim-tieu-de">Thương hiệu nổi bật</h2>
+                <a asp-controller="SanPham" asp-action="Index" class="mb-3 text-xs font-semibold text-gray-500 hover:text-black transition-colors">Xem tất cả <span aria-hidden="true">&rarr;</span></a>
+            </div>
+            <ul class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+                @foreach (var m in Model.ThuongHieu)
+                {
+                    <li><a href="@DuongDan(m)" class="tim-o tim-hang">@m.Ten</a></li>
+                }
+            </ul>
+        </section>
+    }
+}

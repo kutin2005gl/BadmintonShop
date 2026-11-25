@@ -1,109 +1,262 @@
 ﻿@model DatHangViewModel
-@{ ViewData["Title"] = "Đặt hàng"; var g = Model.Gio; }
+@{
+    ViewData["Title"] = "Đặt hàng";
+    var g = Model.Gio;
+    var trangNay = Url.Action("Index", "DatHang");
 
-<div class="container mx-auto px-4 py-12">
-<h1 class="page-title">Xác nhận đơn hàng</h1>
+    // Icon net 24x24 dung chung trong trang
+    Microsoft.AspNetCore.Html.IHtmlContent Icon(string ten, int co = 22, string lop = "shrink-0")
+    {
+        var net = ten switch
+        {
+            "gio" => "<circle cx='9' cy='20' r='1.5'/><circle cx='18' cy='20' r='1.5'/><path d='M2 3h3l2.600 12.200a1.500 1.500 0 0 0 1.500 1.200h8.700a1.500 1.500 0 0 0 1.500-1.200L21 7H6'/>",
+            "nguoi" => "<circle cx='12' cy='8' r='4.500'/><path d='M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1'/>",
+            "dien-thoai" => "<path d='M22 16.900v3a2 2 0 0 1-2.200 2 19.800 19.800 0 0 1-8.600-3.100 19.500 19.500 0 0 1-6-6A19.800 19.800 0 0 1 2.100 4.200 2 2 0 0 1 4.100 2h3a2 2 0 0 1 2 1.700c.1 1 .4 1.900.7 2.800a2 2 0 0 1-.5 2.100L8.100 9.900a16 16 0 0 0 6 6l1.300-1.300a2 2 0 0 1 2.100-.4c.9.3 1.8.6 2.800.7a2 2 0 0 1 1.7 2Z'/>",
+            "ghim" => "<path d='M20 10c0 5-8 12-8 12s-8-7-8-12a8 8 0 0 1 16 0Z'/><circle cx='12' cy='10' r='3'/>",
+            "nha" => "<path d='m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10Z'/><path d='M9 21v-8h6v8'/>",
+            "ghi-chu" => "<path d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z'/><path d='M7 8h10M7 12h7'/>",
+            "the" => "<rect x='2' y='5' width='20' height='14' rx='2'/><path d='M2 10h20M6 15h4'/>",
+            "tien" => "<rect x='2' y='6' width='20' height='12' rx='2'/><circle cx='12' cy='12' r='2.500'/><path d='M6 12h.01M18 12h.01'/>",
+            "nhan" => "<path d='M12.600 2.600A2 2 0 0 0 11.200 2H4a2 2 0 0 0-2 2v7.200a2 2 0 0 0 .6 1.400l8.700 8.700a2.400 2.400 0 0 0 3.400 0l6.600-6.600a2.400 2.400 0 0 0 0-3.400Z'/><circle cx='7.500' cy='7.500' r='.8'/>",
+            "xoa" => "<path d='M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6M10 11v6M14 11v6'/>",
+            "tui" => "<path d='M6 2 4 6v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6l-2-4Z'/><path d='M4 6h16M16 10a4 4 0 0 1-8 0'/>",
+            "khien" => "<path d='M20 13c0 5-3.500 7.500-8 9-4.500-1.500-8-4-8-9V5l8-3 8 3Z'/><path d='m9 12 2 2 4-4'/>",
+            "lui" => "<path d='M19 12H5M12 19l-7-7 7-7'/>",
+            _ => ""
+        };
+        return Html.Raw($"<svg class='{lop}' width='{co}' height='{co}' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>{net}</svg>");
+    }
+}
 
-@if (Model.Loi != null) { <div class="alert-err">@Model.Loi</div> }
-@if (TempData["Loi"] is string loiTam) { <div class="alert-err">@loiTam</div> }
-@foreach (var cb in g.CanhBao) { <div class="alert-warn">@cb</div> }
+<div class="mx-auto w-full max-w-[1390px] px-4 pb-16 pt-5 sm:px-6">
+    <a asp-controller="GioHang" asp-action="Index" class="inline-flex items-center gap-2 py-1 text-sm font-medium hover:text-primary transition-colors">
+        @Icon("lui", 18) Quay lại giỏ hàng
+    </a>
 
-<div class="flex flex-col lg:flex-row gap-12">
-    <div class="w-full lg:w-3/5">
-        <form asp-action="XacNhan" method="post" class="space-y-6" id="form-dat-hang">
-            @if (Model.DaDangNhap)
-            {
-                <div>
-                    <label class="block text-sm font-bold uppercase tracking-wider mb-2">Người nhận</label>
-                    <input type="text" class="input-box bg-gray-50" value="@Model.HoTen" disabled />
-                </div>
-            }
-            else
-            {
-                <p class="text-sm text-gray-600">Bạn có thể đặt hàng không cần đăng nhập. Đã có tài khoản?
-                    <a asp-controller="TaiKhoan" asp-action="DangNhap" asp-route-returnUrl="@Url.Action("Index", "DatHang")" class="font-bold underline hover:text-primary">Đăng nhập</a>.</p>
-                <div>
-                    <label for="hoTen" class="block text-sm font-bold uppercase tracking-wider mb-2">Họ và tên</label>
-                    <input type="text" id="hoTen" name="hoTen" class="input-box" value="@Model.HoTen" maxlength="100" autocomplete="name" required />
-                </div>
-                <div>
-                    <label for="sdt" class="block text-sm font-bold uppercase tracking-wider mb-2">Số điện thoại</label>
-                    <input type="tel" id="sdt" name="sdt" class="input-box" value="@Model.SDT" maxlength="15" inputmode="tel" autocomplete="tel" required />
-                    <p class="text-xs text-gray-500 mt-1">Đơn hàng được lưu theo số điện thoại này.</p>
-                </div>
-            }
-            <div>
-                <label for="diaChi" class="block text-sm font-bold uppercase tracking-wider mb-2">Địa chỉ giao hàng</label>
-                <textarea id="diaChi" name="diaChi" class="input-box" rows="3" maxlength="255" required>@Model.DiaChi</textarea>
-            </div>
-            <div>
-                <label for="ghiChu" class="block text-sm font-bold uppercase tracking-wider mb-2">Ghi chú đơn hàng <span class="font-normal normal-case text-gray-500">(không bắt buộc)</span></label>
-                <textarea id="ghiChu" name="ghiChu" class="input-box" rows="2" maxlength="500" placeholder="Ví dụ: giao giờ hành chính, gọi trước khi giao">@Model.GhiChu</textarea>
-            </div>
-            <div>
-                <span class="block text-sm font-bold uppercase tracking-wider mb-3">Hình thức thanh toán</span>
-                <label class="flex items-center gap-3 border border-gray-300 p-4 mb-2 cursor-pointer has-[:checked]:border-black">
-                    <input type="radio" name="hinhThucTT" id="tt-cod" value="COD" checked="@(Model.HinhThucTT == "COD")" class="accent-black" />
-                    <span class="text-sm font-medium">Thanh toán khi nhận hàng (COD)</span>
-                </label>
-                <label class="flex items-center gap-3 border border-gray-300 p-4 cursor-pointer has-[:checked]:border-black">
-                    <input type="radio" name="hinhThucTT" id="tt-online" value="Online" checked="@(Model.HinhThucTT == "Online")" class="accent-black" />
-                    <span class="text-sm font-medium">Thanh toán online (giả lập)</span>
-                </label>
-            </div>
-            <div class="flex items-center gap-6">
-                <button type="submit" class="btn-dark">Đặt hàng</button>
-                <a asp-controller="GioHang" asp-action="Index" class="text-sm font-bold uppercase underline hover:text-primary">Quay lại giỏ hàng</a>
-            </div>
-        </form>
+    <div class="mb-7 mt-3 flex items-center gap-4">
+        @Icon("gio", 42)
+        <div>
+            <h1 class="text-3xl font-extrabold tracking-tight">Đặt hàng</h1>
+            <p class="mt-1 text-sm text-gray-600">Vui lòng kiểm tra và hoàn tất thông tin đơn hàng của bạn.</p>
+        </div>
     </div>
 
-    <div class="w-full lg:w-2/5">
-        <div class="bg-gray-50 p-6 md:p-8">
-            <h2 class="text-xl font-extrabold uppercase mb-6 tracking-tight border-b border-gray-200 pb-4">Đơn hàng của bạn</h2>
-            <div class="space-y-3 mb-6 text-sm">
+    @if (Model.Loi != null) { <div class="alert-err rounded-lg" role="alert">@Model.Loi</div> }
+    @if (TempData["Loi"] is string loiTam) { <div class="alert-err rounded-lg" role="alert">@loiTam</div> }
+    @foreach (var cb in g.CanhBao) { <div class="alert-warn rounded-lg">@cb</div> }
+
+    <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1.58fr)_minmax(0,1fr)] lg:gap-8">
+        <form asp-action="XacNhan" method="post" id="form-dat-hang" class="dh-the">
+            <section aria-labelledby="dh-nguoi-nhan">
+                <h2 id="dh-nguoi-nhan" class="dh-tieu-de">@Icon("nguoi", 24) Thông tin người nhận</h2>
+                <div class="grid gap-4 sm:grid-cols-2 sm:gap-7">
+                    <div>
+                        <label for="hoTen" class="dh-nhan">Họ và tên <span class="text-red-600" aria-hidden="true">*</span></label>
+                        <div class="dh-o">
+                            @Icon("nguoi", 20, "dh-icon")
+                            @if (Model.DaDangNhap)
+                            {
+                                <input type="text" id="hoTen" class="dh-nhap dh-nhap-icon" value="@Model.HoTen" readonly />
+                            }
+                            else
+                            {
+                                <input type="text" id="hoTen" name="hoTen" class="dh-nhap dh-nhap-icon" value="@Model.HoTen" maxlength="100" autocomplete="name" placeholder="Nhập họ và tên" required />
+                            }
+                        </div>
+                    </div>
+                    <div>
+                        <label for="sdt" class="dh-nhan">Số điện thoại <span class="text-red-600" aria-hidden="true">*</span></label>
+                        <div class="dh-o">
+                            @Icon("dien-thoai", 20, "dh-icon")
+                            @if (Model.DaDangNhap)
+                            {
+                                <input type="tel" id="sdt" class="dh-nhap dh-nhap-icon" value="@Model.SDT" placeholder="Chưa có trong hồ sơ" readonly />
+                            }
+                            else
+                            {
+                                <input type="tel" id="sdt" name="sdt" class="dh-nhap dh-nhap-icon" value="@Model.SDT" maxlength="15" inputmode="tel" autocomplete="tel" placeholder="Nhập số điện thoại" required />
+                            }
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-2 text-xs text-gray-500">
+                    @if (Model.DaDangNhap)
+                    {
+                        <text>Lấy từ tài khoản của bạn.</text> <a asp-controller="TaiKhoan" asp-action="HoSo" class="font-semibold text-black underline hover:text-primary">Sửa trong hồ sơ</a>
+                    }
+                    else
+                    {
+                        <text>Đơn hàng được lưu theo số điện thoại này. Đã có tài khoản?</text> <a asp-controller="TaiKhoan" asp-action="DangNhap" asp-route-returnUrl="@trangNay" class="font-semibold text-black underline hover:text-primary">Đăng nhập</a>
+                    }
+                </p>
+            </section>
+
+            <section class="dh-khoi" aria-labelledby="dh-dia-chi" data-dia-chi="@Url.Content("~/data/vn-units.json")">
+                <h2 id="dh-dia-chi" class="dh-tieu-de">@Icon("ghim", 24) Địa chỉ giao hàng</h2>
+                <div class="grid gap-4 sm:grid-cols-2 sm:gap-7">
+                    <div>
+                        <label for="tinhThanh" class="dh-nhan">Tỉnh/Thành phố <span class="text-red-600" aria-hidden="true">*</span></label>
+                        <select id="tinhThanh" name="tinhThanh" class="dh-nhap" data-chon="@Model.TinhThanh" autocomplete="address-level1" required disabled>
+                            <option value="">Đang tải danh sách…</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="phuongXa" class="dh-nhan">Phường/Xã <span class="text-red-600" aria-hidden="true">*</span></label>
+                        <select id="phuongXa" name="phuongXa" class="dh-nhap" data-chon="@Model.PhuongXa" autocomplete="address-level2" required disabled>
+                            <option value="">Chọn tỉnh/thành trước</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label for="diaChi" class="dh-nhan">Địa chỉ chi tiết <span class="text-red-600" aria-hidden="true">*</span></label>
+                    <div class="dh-o">
+                        @Icon("nha", 20, "dh-icon")
+                        <input type="text" id="diaChi" name="diaChi" class="dh-nhap dh-nhap-icon" value="@Model.DiaChi" maxlength="255" autocomplete="street-address" placeholder="Số nhà, tên đường" required />
+                    </div>
+                    <p id="dh-goi-y-dia-chi" class="mt-2 hidden text-xs text-gray-600" role="status"></p>
+                </div>
+            </section>
+
+            <section class="dh-khoi">
+                <h2 class="dh-tieu-de">
+                    @Icon("ghi-chu", 24)
+                    <label for="ghiChu">Ghi chú đơn hàng <span class="font-normal text-gray-500">(tùy chọn)</span></label>
+                </h2>
+                <textarea id="ghiChu" name="ghiChu" class="dh-nhap h-auto resize-y py-3" rows="3" maxlength="500" placeholder="Ví dụ: giao giờ hành chính, gọi trước khi giao...">@Model.GhiChu</textarea>
+            </section>
+
+            <fieldset class="dh-khoi">
+                <legend class="sr-only">Phương thức thanh toán</legend>
+                <h2 class="dh-tieu-de" aria-hidden="true">@Icon("the", 24) Phương thức thanh toán</h2>
+                <label class="dh-tt">
+                    <input type="radio" name="hinhThucTT" id="tt-cod" value="COD" checked="@(Model.HinhThucTT == "COD")" />
+                    @Icon("tien", 32)
+                    <span>
+                        <span class="block text-sm font-bold">Thanh toán khi nhận hàng (COD)</span>
+                        <span class="mt-0.5 block text-xs text-gray-600">Thanh toán bằng tiền mặt khi nhận hàng</span>
+                    </span>
+                </label>
+                <label class="dh-tt mt-3">
+                    <input type="radio" name="hinhThucTT" id="tt-online" value="Online" checked="@(Model.HinhThucTT == "Online")" />
+                    @Icon("the", 32)
+                    <span>
+                        <span class="block text-sm font-bold">Thanh toán online</span>
+                        <span class="mt-0.5 block text-xs text-gray-600">Thanh toán giả lập, không trừ tiền thật</span>
+                    </span>
+                </label>
+            </fieldset>
+        </form>
+
+        <aside class="dh-the" aria-labelledby="dh-don-hang">
+            <div class="flex items-center justify-between gap-3 border-b border-gray-200 pb-4">
+                <h2 id="dh-don-hang" class="dh-tieu-de mb-0">@Icon("gio", 24) Đơn hàng của bạn</h2>
+                <span class="flex h-7 min-w-[1.75rem] items-center justify-center rounded-full bg-black px-2 text-xs font-bold text-white" title="Số loại sản phẩm">@g.Dong.Count</span>
+            </div>
+
+            <ul class="divide-y divide-gray-200">
                 @foreach (var d in g.Dong)
                 {
-                    <div class="flex justify-between gap-4"><span>@d.TenSP × @d.SoLuong</span><span class="font-medium whitespace-nowrap">@d.ThanhTien.Dong()</span></div>
+                    var tt = Model.ThongTinSP.GetValueOrDefault(d.MaSP);
+                    var phu = string.Join(" · ", new[] { tt.ThuongHieu, tt.TenDanhMuc }.Where(x => !string.IsNullOrWhiteSpace(x)));
+                    <li class="flex gap-3 py-4 sm:gap-5">
+                        <a asp-controller="SanPham" asp-action="ChiTiet" asp-route-id="@d.MaSP" class="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-100 sm:h-24 sm:w-24" tabindex="-1" aria-hidden="true">
+                            <img src="@AnhMinhHoa.CuaSanPham(d.HinhAnh, tt.TenDanhMuc)" alt="" data-chu="@d.TenSP.Substring(0, 1)" class="h-full w-full object-cover" />
+                        </a>
+                        <div class="flex min-w-0 flex-1 flex-col">
+                            <div class="flex flex-wrap items-start justify-between gap-x-3">
+                                <h3 class="min-w-0 flex-1 basis-32 text-sm font-semibold leading-snug">@d.TenSP</h3>
+                                <p class="whitespace-nowrap text-sm font-bold tabular-nums">@d.ThanhTien.Dong()</p>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">@phu</p>
+                            @if (!d.DuHang) { <p class="mt-1 text-xs font-semibold text-red-600">Chỉ còn @d.TonKho sản phẩm</p> }
+                            <div class="mt-auto flex items-center justify-between gap-3 pt-2">
+                                <div class="flex items-center rounded-lg border border-gray-300">
+                                    <form asp-controller="GioHang" asp-action="CapNhat" method="post" class="giu-thong-tin">
+                                        <input type="hidden" name="returnUrl" value="@trangNay" />
+                                        <input type="hidden" name="maSP" value="@d.MaSP" /><input type="hidden" name="soLuong" value="@(d.SoLuong - 1)" />
+                                        <button type="submit" class="dh-sl" disabled="@(d.SoLuong <= 1)" aria-label="Giảm số lượng @d.TenSP">&minus;</button>
+                                    </form>
+                                    <span class="min-w-[2rem] text-center text-sm font-semibold tabular-nums"><span class="sr-only">Số lượng </span>@d.SoLuong</span>
+                                    <form asp-controller="GioHang" asp-action="CapNhat" method="post" class="giu-thong-tin">
+                                        <input type="hidden" name="returnUrl" value="@trangNay" />
+                                        <input type="hidden" name="maSP" value="@d.MaSP" /><input type="hidden" name="soLuong" value="@(d.SoLuong + 1)" />
+                                        <button type="submit" class="dh-sl" disabled="@(d.SoLuong >= d.TonKho)" aria-label="Tăng số lượng @d.TenSP">+</button>
+                                    </form>
+                                </div>
+                                <form asp-controller="GioHang" asp-action="Xoa" method="post" class="giu-thong-tin">
+                                    <input type="hidden" name="returnUrl" value="@trangNay" />
+                                    <input type="hidden" name="maSP" value="@d.MaSP" />
+                                    <button type="submit" class="rounded-lg p-2 text-gray-700 transition-colors hover:bg-red-50 hover:text-red-600" aria-label="Xóa @d.TenSP khỏi giỏ">@Icon("xoa", 18)</button>
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                }
+            </ul>
+
+            <div class="border-t border-gray-200 py-5">
+                <h3 class="dh-tieu-de text-base">@Icon("nhan", 22) Mã giảm giá</h3>
+                @if (g.VoucherYeuCau == null)
+                {
+                    <form asp-controller="GioHang" asp-action="ApDungVoucher" method="post" class="giu-thong-tin flex gap-3">
+                        <input type="hidden" name="returnUrl" value="@trangNay" />
+                        <input type="text" name="maVoucher" class="dh-nhap min-w-0 flex-1" placeholder="Nhập mã giảm giá" maxlength="30" aria-label="Mã giảm giá" required />
+                        <button type="submit" class="h-11 shrink-0 rounded-lg bg-black px-6 text-sm font-bold text-white transition-colors hover:bg-gray-800">Áp dụng</button>
+                    </form>
+                }
+                else
+                {
+                    <div class="flex items-center justify-between gap-3 rounded-lg border border-gray-300 px-4 py-2.5">
+                        <p class="min-w-0 break-all text-sm">Mã <strong>@g.VoucherYeuCau</strong></p>
+                        <form asp-controller="GioHang" asp-action="BoVoucher" method="post" class="giu-thong-tin">
+                            <input type="hidden" name="returnUrl" value="@trangNay" />
+                            <button type="submit" class="whitespace-nowrap text-sm font-bold underline hover:text-primary">Bỏ mã</button>
+                        </form>
+                    </div>
+                    @if (g.LoiVoucher != null)
+                    {
+                        <p class="mt-2 text-sm text-red-600" role="alert">@g.LoiVoucher</p>
+                    }
+                    else if (g.MaVoucher != null)
+                    {
+                        <p class="mt-2 text-sm text-green-700" role="status">Đã áp dụng mã giảm giá.</p>
+                    }
+                    else if (g.VoucherHopLeNhungThua)
+                    {
+                        <p class="mt-2 text-sm text-amber-800" role="status">Mã hợp lệ nhưng chưa được dùng: giảm theo ngưỡng đơn hàng có lợi hơn. Mã không bị trừ lượt.</p>
+                    }
                 }
             </div>
-            <div class="border-t border-gray-200 pt-4 space-y-3 text-sm font-medium">
-                <partial name="_TomTatGiamGia" model="g" />
-            </div>
-            <div class="flex justify-between items-end border-t border-gray-200 pt-6 mt-4">
-                <span class="font-bold uppercase tracking-wider text-sm">Tổng cộng</span>
-                <span class="text-2xl font-extrabold tracking-tight">@g.TongThanhToan.Dong()</span>
-            </div>
-        </div>
 
-        @* SV3: nhap ma giam gia ngay tai trang dat hang (form rieng, khong long trong form dat hang) *@
-        <div class="mt-6 border border-gray-200 p-6">
-            <partial name="_VoucherBox" model="g" view-data="@(new ViewDataDictionary(ViewData) { { "returnUrl", Url.Action("Index", "DatHang") } })" />
-        </div>
+            <dl class="space-y-3 border-t border-gray-200 py-4 text-sm tabular-nums">
+                <div class="flex justify-between gap-4"><dt class="text-gray-700">Tạm tính (@g.TongSoLuong sản phẩm)</dt><dd class="whitespace-nowrap font-semibold">@g.TienHangTruocGiam.Dong()</dd></div>
+                @if (g.TienGiamSanPham > 0)
+                {
+                    <div class="flex justify-between gap-4 font-semibold text-green-700"><dt>Giảm sản phẩm</dt><dd class="whitespace-nowrap">-@g.TienGiamSanPham.Dong()</dd></div>
+                }
+                @if (g.TienGiamHoaDon > 0)
+                {
+                    var nhanGiam = g.MaVoucher != null
+                        ? $"mã {g.MaVoucher}, {g.PhanTramGiamHoaDon:0.##}%"
+                        : "≥ " + g.NguongGiamHoaDon.Dong();
+                    <div class="flex justify-between gap-4 font-semibold text-green-700"><dt>Giảm hóa đơn (@nhanGiam)</dt><dd class="whitespace-nowrap">-@g.TienGiamHoaDon.Dong()</dd></div>
+                }
+            </dl>
+
+            <div class="flex items-baseline justify-between gap-4 border-t border-gray-200 py-5">
+                <span class="text-base font-bold">Tổng thanh toán</span>
+                <span class="whitespace-nowrap text-2xl font-extrabold tracking-tight tabular-nums">@g.TongThanhToan.Dong()</span>
+            </div>
+
+            <button type="submit" form="form-dat-hang" id="dh-dat" class="flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-black text-base font-bold text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50" disabled="@(!g.CoTheDatHang)">
+                @Icon("tui", 22) Đặt hàng
+            </button>
+            @if (!g.CoTheDatHang) { <p class="mt-2 text-center text-sm text-red-600">Hãy giảm số lượng sản phẩm không đủ hàng.</p> }
+            <p class="mt-4 flex items-center justify-center gap-2 text-center text-xs text-gray-600">@Icon("khien", 18) Thông tin của bạn được bảo mật an toàn.</p>
+        </aside>
     </div>
-</div>
 </div>
 
 @section Scripts {
-<script>
-    // Giu lai thong tin khach da go (ho ten, SDT, dia chi, ghi chu, hinh thuc TT) khi bam Ap dung / Bo ma giam gia
-    (function () {
-        var key = 'DatHang.NhapTam', form = document.getElementById('form-dat-hang');
-        if (!form) return;
-        var ten = ['hoTen', 'sdt', 'diaChi', 'ghiChu'];
-        document.querySelectorAll('form.giu-thong-tin').forEach(function (f) {
-            f.addEventListener('submit', function () {
-                var d = {};
-                ten.forEach(function (n) { var el = form.elements[n]; if (el) d[n] = el.value; });
-                var tt = form.querySelector('input[name="hinhThucTT"]:checked'); if (tt) d.hinhThucTT = tt.value;
-                try { sessionStorage.setItem(key, JSON.stringify(d)); } catch (e) { }
-            });
-        });
-        var luu = null;
-        try { luu = JSON.parse(sessionStorage.getItem(key) || 'null'); sessionStorage.removeItem(key); } catch (e) { }
-        if (!luu) return;
-        ten.forEach(function (n) { var el = form.elements[n]; if (el && luu[n]) el.value = luu[n]; });
-        if (luu.hinhThucTT) { var r = form.querySelector('input[name="hinhThucTT"][value="' + luu.hinhThucTT + '"]'); if (r) r.checked = true; }
-    })();
-</script>
+<script src="~/js/dat-hang.js" asp-append-version="true"></script>
 }

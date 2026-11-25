@@ -1,0 +1,3 @@
+vn-units.json: danh sach tinh/thanh va phuong/xa Viet Nam (2 cap).
+Nguon: https://github.com/thanglequoc/vietnamese-provinces-database (json/vn_only_simplified_json_generated_data_vn_units_minified.json)
+Giay phep: MIT, thuoc tac gia cua kho tren. Tai ngay 25/11/2026.
