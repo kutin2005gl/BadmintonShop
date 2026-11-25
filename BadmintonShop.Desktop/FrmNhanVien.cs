@@ -7,8 +7,9 @@ using BadmintonShop.Core.Services;
 
 namespace BadmintonShop.Desktop;
 
-/// <summary>Quan ly nhan vien (tab 1) va tai khoan dang nhap cua nhan vien (tab 2) - SV1, ROADMAP 2.4. Chi ADMIN.</summary>
-public partial class FrmNhanVien : Form
+/// <summary>Quan ly nhan vien va tai khoan dang nhap cua nhan vien - SV1, ROADMAP 2.4. Chi ADMIN.
+/// Bo cuc main-sub theo mau Don hang: danh sach nhan vien ben trai; ben phai la ho so va tai khoan cua nguoi dang chon.</summary>
+public class FrmNhanVien : Form
 {
     private static readonly string[] ChucVuGoiY = { "Quản lý", "Nhân viên bán hàng", "Kho" };
     private static readonly string[] DanhSachVaiTro = { VaiTro.Admin, VaiTro.QuanLy, VaiTro.NhanVien };
@@ -16,45 +17,153 @@ public partial class FrmNhanVien : Form
     private readonly NhanVienRepository _nvRepo = new();
     private readonly TaiKhoanRepository _tkRepo = new();
     private int _maNVDangChon;   // 0 = che do them moi
-    private int _maTKDangChon;   // 0 = chua chon tai khoan
+    private int _maTKDangChon;   // 0 = nhan vien dang chon chua co tai khoan
+    private Dictionary<int, DataRow> _taiKhoan = new();   // MaNV -> tai khoan
 
-    // TV1: khoi tao form, nap goi y chuc vu / vai tro (KHONG truy cap CSDL de VS Designer mo duoc)
+    private DataGridView dgvNV = null!;
+    private TextBox txtTimKiem = null!, txtHoTen = null!, txtSDT = null!, txtEmail = null!, txtDiaChi = null!, txtLuong = null!, txtTenDN = null!, txtMatKhau = null!;
+    private ComboBox cboChucVu = null!, cboVaiTroCap = null!, cboVaiTroDoi = null!;
+    private DateTimePicker dtpNgayVaoLam = null!, dtpNgaySinh = null!;
+    private Button btnThemNV = null!, btnSuaNV = null!, btnXoaNV = null!, btnKhoaMo = null!;
+    private Label maNV = null!, badge = null!, lblChuaLuu = null!, lblTenTK = null!;
+    private Panel panelRoot = null!, tkDaCo = null!, tkCapMoi = null!;
+
+    // TV1: khoi tao form (chi giao dien, KHONG truy cap CSDL de VS Designer mo duoc)
     public FrmNhanVien()
     {
         InitializeComponent();
-        cboChucVu.Items.AddRange(ChucVuGoiY);
-        cboVaiTroCap.Items.AddRange(DanhSachVaiTro);
-        cboVaiTroDoi.Items.AddRange(DanhSachVaiTro);
-        cboVaiTroCap.SelectedIndex = 2;
     }
 
-    // TV1: khi form hien len - kiem tra quyen (chi ADMIN) roi nap du lieu 2 tab
+    // TV1: dung thanh tim kiem, luoi nhan vien ben trai va panel chi tiet ben phai
+    private void InitializeComponent()
+    {
+        Text = "Nhân viên && tài khoản"; Size = new Size(1250, 800); MinimumSize = new Size(1000, 650); AutoScaleMode = AutoScaleMode.Font;
+        txtTimKiem = new TextBox { Width = 280, PlaceholderText = "Tên / SĐT / email" };
+        txtTimKiem.KeyDown += txtTimKiem_KeyDown;
+        var bar = Sv4Ui.ThanhCongCu();
+        bar.Controls.AddRange(new Control[]
+        {
+            Sv4Ui.Nhan("Tìm"), txtTimKiem, Sv4Ui.Nut("Tìm", Tim), Sv4Ui.Nut("+ Nhân viên mới", LamMoiNhanVien),
+        });
+
+        dgvNV = Sv4Ui.Luoi();
+        dgvNV.SelectionChanged += dgvNV_SelectionChanged;
+        dgvNV.CellFormatting += dgvNV_CellFormatting;
+        var split = KhungChiTiet.Chia(this, 0.60, 420, 460);
+        split.Panel1.Controls.Add(dgvNV);
+        XayChiTiet(split.Panel2);
+        Controls.Add(split); Controls.Add(bar);
+        ShopTheme.Apply(this);
+    }
+
+    // TV1: panel ben phai: ho so nhan vien (main) va tai khoan dang nhap (sub)
+    private void XayChiTiet(Control host)
+    {
+        panelRoot = new Panel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(14, 12, 14, 12), BackColor = ShopTheme.Surface };
+        var header = KhungChiTiet.TieuDe(out maNV, out badge);
+
+        txtHoTen = new TextBox { MaxLength = 100 };
+        txtSDT = new TextBox { MaxLength = 11 };
+        txtEmail = new TextBox { MaxLength = 100 };
+        txtDiaChi = new TextBox { MaxLength = 255 };
+        cboChucVu = new ComboBox { MaxLength = 50 };
+        cboChucVu.Items.AddRange(ChucVuGoiY);
+        txtLuong = new TextBox();
+        dtpNgaySinh = new DateTimePicker { Format = DateTimePickerFormat.Custom, CustomFormat = "dd/MM/yyyy", ShowCheckBox = true, Checked = false };
+        dtpNgayVaoLam = new DateTimePicker { Format = DateTimePickerFormat.Custom, CustomFormat = "dd/MM/yyyy" };
+        var hoSo = KhungChiTiet.BangThongTin();
+        KhungChiTiet.Dong(hoSo, "Họ tên (*)", txtHoTen);
+        KhungChiTiet.Dong(hoSo, "Điện thoại", txtSDT);
+        KhungChiTiet.Dong(hoSo, "Email", txtEmail);
+        KhungChiTiet.Dong(hoSo, "Địa chỉ", txtDiaChi);
+        KhungChiTiet.Dong(hoSo, "Chức vụ (*)", cboChucVu);
+        KhungChiTiet.Dong(hoSo, "Lương (đ)", txtLuong);
+        KhungChiTiet.Dong(hoSo, "Ngày sinh", dtpNgaySinh);
+        KhungChiTiet.Dong(hoSo, "Ngày vào làm", dtpNgayVaoLam);
+
+        btnThemNV = Sv4Ui.Nut("Thêm nhân viên", ThemNhanVien);
+        btnSuaNV = Sv4Ui.Nut("Lưu sửa", SuaNhanVien);
+        btnXoaNV = Sv4Ui.Nut("Xóa", XoaNhanVien);
+        var nutHoSo = KhungChiTiet.HangNut(btnThemNV, btnSuaNV, btnXoaNV);
+
+        // sub: chua luu nhan vien / da co tai khoan / cap tai khoan moi
+        lblChuaLuu = new Label { Dock = DockStyle.Top, AutoSize = true, ForeColor = ShopTheme.Muted, Padding = new Padding(0, 8, 0, 0), Text = "Lưu nhân viên trước rồi cấp tài khoản." };
+
+        lblTenTK = new Label { AutoSize = true, Margin = new Padding(0, 5, 0, 5), Font = new Font("Segoe UI", 10, FontStyle.Bold) };
+        cboVaiTroDoi = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
+        cboVaiTroDoi.Items.AddRange(DanhSachVaiTro);
+        var daCo = KhungChiTiet.BangThongTin();
+        KhungChiTiet.Dong(daCo, "Tên đăng nhập", lblTenTK);
+        KhungChiTiet.Dong(daCo, "Vai trò", cboVaiTroDoi);
+        btnKhoaMo = Sv4Ui.Nut("Khóa tài khoản", KhoaMo);
+        var nutTK = KhungChiTiet.HangNut(Sv4Ui.Nut("Đổi vai trò", DoiVaiTro), btnKhoaMo, Sv4Ui.Nut("Đặt lại mật khẩu", ResetMatKhau));
+        tkDaCo = new Panel { Dock = DockStyle.Top, AutoSize = true };
+        tkDaCo.Controls.Add(nutTK); tkDaCo.Controls.Add(daCo);
+
+        txtTenDN = new TextBox { MaxLength = 50 };
+        txtMatKhau = new TextBox { UseSystemPasswordChar = true };
+        cboVaiTroCap = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
+        cboVaiTroCap.Items.AddRange(DanhSachVaiTro);
+        cboVaiTroCap.SelectedIndex = 2;
+        var capMoi = KhungChiTiet.BangThongTin();
+        KhungChiTiet.Dong(capMoi, "Tên đăng nhập", txtTenDN);
+        KhungChiTiet.Dong(capMoi, "Mật khẩu", txtMatKhau);
+        KhungChiTiet.Dong(capMoi, "Vai trò", cboVaiTroCap);
+        var nutCap = KhungChiTiet.HangNut(Sv4Ui.Nut("Cấp tài khoản", CapTaiKhoan));
+        tkCapMoi = new Panel { Dock = DockStyle.Top, AutoSize = true };
+        tkCapMoi.Controls.Add(nutCap); tkCapMoi.Controls.Add(capMoi);
+
+        // Mọi mục đều Dock Top: thêm sau nằm cao hơn.
+        panelRoot.Controls.Add(tkCapMoi);
+        panelRoot.Controls.Add(tkDaCo);
+        panelRoot.Controls.Add(lblChuaLuu);
+        panelRoot.Controls.Add(KhungChiTiet.Muc("Tài khoản đăng nhập"));
+        panelRoot.Controls.Add(nutHoSo);
+        panelRoot.Controls.Add(hoSo);
+        panelRoot.Controls.Add(header);
+        host.Controls.Add(panelRoot);
+    }
+
+    // TV1: khi form hien len - kiem tra quyen (chi ADMIN) roi nap danh sach
     protected override void OnLoad(EventArgs e)
     {
         base.OnLoad(e);
         if (DesignMode || !QuyenForm.KiemTraKhiMo(this, ChucNang.NhanVienTaiKhoan)) return;
         NapLuoiNhanVien();
         LamMoiNhanVien();
-        NapLuoiTaiKhoan();
-        NapNhanVienChuaCoTaiKhoan();
     }
 
-    // ===================== TAB NHAN VIEN =====================
+    // ===================== NHAN VIEN =====================
 
-    // TV1: nap lai luoi nhan vien theo tu khoa tim kiem
+    // TV1: nap lai tai khoan va luoi nhan vien theo tu khoa tim kiem
     private void NapLuoiNhanVien()
     {
         try
         {
+            _taiKhoan = _tkRepo.LayDanhSachHienThi().AsEnumerable().ToDictionary(r => r.Field<int>("MaNV"));
             dgvNV.DataSource = _nvRepo.LayTatCa(txtTimKiem.Text.Trim());
-            DatTieuDe(dgvNV, ("MaNV", "Mã"), ("HoTen", "Họ tên"), ("SDT", "SĐT"), ("Email", "Email"),
-                      ("DiaChi", "Địa chỉ"), ("ChucVu", "Chức vụ"), ("Luong", "Lương"), ("NgaySinh", "Ngày sinh"), ("NgayVaoLam", "Ngày vào làm"));
-            dgvNV.Columns["Luong"]!.DefaultCellStyle.Format = "N0";
-            dgvNV.Columns["NgaySinh"]!.DefaultCellStyle.Format = "dd/MM/yyyy";
-            dgvNV.Columns["NgayVaoLam"]!.DefaultCellStyle.Format = "dd/MM/yyyy";
+            DatTieuDe(dgvNV, ("MaNV", "Mã"), ("HoTen", "Họ tên"), ("SDT", "SĐT"), ("ChucVu", "Chức vụ"));
+            // cac cot chi tiet da hien o panel ben phai
+            foreach (var cot in new[] { "Email", "DiaChi", "Luong", "NgaySinh", "NgayVaoLam" }) dgvNV.Columns[cot]!.Visible = false;
+            foreach (var (cot, tieuDe) in new[] { ("TenDangNhap", "Tài khoản"), ("VaiTro", "Vai trò") })
+                if (!dgvNV.Columns.Contains(cot))
+                    dgvNV.Columns.Add(new DataGridViewTextBoxColumn { Name = cot, HeaderText = tieuDe, ReadOnly = true });
+            dgvNV.Columns["TenDangNhap"]!.DisplayIndex = dgvNV.Columns.Count - 2;
+            dgvNV.Columns["VaiTro"]!.DisplayIndex = dgvNV.Columns.Count - 1;
+            KhungChiTiet.DoRong(dgvNV, ("MaNV", 40, 55), ("HoTen", 160, 150), ("SDT", 100, 120), ("ChucVu", 150, 140), ("TenDangNhap", 100, 110), ("VaiTro", 100, 110));
             dgvNV.ClearSelection();
         }
         catch (Exception ex) { BaoLoiHeThong(ex); }
+    }
+
+    // TV1: dien cot tai khoan / vai tro cua tung nhan vien tren luoi
+    private void dgvNV_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+    {
+        if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+        var cot = dgvNV.Columns[e.ColumnIndex].Name;
+        if (cot is not ("TenDangNhap" or "VaiTro") || dgvNV.Rows[e.RowIndex].DataBoundItem is not NhanVien nv) return;
+        e.Value = _taiKhoan.TryGetValue(nv.MaNV, out var tk) ? tk[cot] : "—";
+        e.FormattingApplied = true;
     }
 
     // TV1: xoa trang o nhap, quay ve che do them nhan vien moi
@@ -65,16 +174,19 @@ public partial class FrmNhanVien : Form
         cboChucVu.Text = "";
         dtpNgayVaoLam.Value = DateTime.Today;
         dtpNgaySinh.Value = new DateTime(2000, 1, 1); dtpNgaySinh.Checked = false;
-        btnThemNV.Enabled = true;
-        btnSuaNV.Enabled = btnXoaNV.Enabled = false;
+        maNV.Text = "Nhân viên mới";
+        btnThemNV.Visible = true;
+        btnSuaNV.Visible = btnXoaNV.Visible = false;
         dgvNV.ClearSelection();
+        HienTaiKhoan();
         txtHoTen.Focus();
     }
 
-    // TV1: chon 1 dong nhan vien thi do du lieu xuong o nhap
+    // TV1: chon 1 dong nhan vien thi do du lieu sang panel ben phai
     private void dgvNV_SelectionChanged(object? sender, EventArgs e)
     {
-        if (dgvNV.CurrentRow?.DataBoundItem is not NhanVien nv || !dgvNV.CurrentRow.Selected) return;
+        // doc dong dang duoc chon: CurrentRow co the chua doi kip khi su kien nay ban ra
+        if (dgvNV.SelectedRows.Count != 1 || dgvNV.SelectedRows[0].DataBoundItem is not NhanVien nv) return;
         _maNVDangChon = nv.MaNV;
         txtHoTen.Text = nv.HoTen;
         txtSDT.Text = nv.SDT ?? "";
@@ -84,19 +196,30 @@ public partial class FrmNhanVien : Form
         txtLuong.Text = nv.Luong?.ToString("0", CultureInfo.InvariantCulture) ?? "";
         dtpNgayVaoLam.Value = nv.NgayVaoLam;
         dtpNgaySinh.Value = nv.NgaySinh ?? new DateTime(2000, 1, 1); dtpNgaySinh.Checked = nv.NgaySinh.HasValue;
-        btnThemNV.Enabled = false;
-        btnSuaNV.Enabled = btnXoaNV.Enabled = true;
+        maNV.Text = $"Nhân viên {nv.MaNV}";
+        btnThemNV.Visible = false;
+        btnSuaNV.Visible = btnXoaNV.Visible = true;
+        HienTaiKhoan();
+    }
+
+    // TV1: chon lai nhan vien theo ma sau khi nap lai luoi
+    private void ChonNhanVien(int ma)
+    {
+        foreach (DataGridViewRow r in dgvNV.Rows)
+            if (r.DataBoundItem is NhanVien nv && nv.MaNV == ma)
+            { dgvNV.CurrentCell = r.Cells["MaNV"]; r.Selected = true; dgvNV_SelectionChanged(this, EventArgs.Empty); return; }
+        LamMoiNhanVien();
     }
 
     // TV1: tim nhan vien theo ten / SDT / email
-    private void btnTim_Click(object? sender, EventArgs e) { NapLuoiNhanVien(); LamMoiNhanVien(); }
+    private void Tim() { NapLuoiNhanVien(); LamMoiNhanVien(); }
 
     // TV1: Enter trong o tim kiem = bam Tim
     private void txtTimKiem_KeyDown(object? sender, KeyEventArgs e)
     {
         if (e.KeyCode != Keys.Enter) return;
         e.SuppressKeyPress = true;
-        btnTim_Click(sender, e);
+        Tim();
     }
 
     // TV1: doc o nhap va kiem tra, tra ve null (kem thong bao) neu khong hop le
@@ -136,35 +259,35 @@ public partial class FrmNhanVien : Form
     }
 
     // TV1: them nhan vien moi
-    private void btnThemNV_Click(object? sender, EventArgs e)
+    private void ThemNhanVien()
     {
         var nv = DocVaKiemTraNhanVien();
         if (nv == null) return;
         try
         {
-            _nvRepo.Them(nv);
-            NapLuoiNhanVien(); LamMoiNhanVien(); NapNhanVienChuaCoTaiKhoan();
+            var ma = _nvRepo.Them(nv);
+            NapLuoiNhanVien(); ChonNhanVien(ma);
             ThongBao("Đã thêm nhân viên.");
         }
         catch (Exception ex) { BaoLoiHeThong(ex); }
     }
 
     // TV1: luu thay doi nhan vien dang chon
-    private void btnSuaNV_Click(object? sender, EventArgs e)
+    private void SuaNhanVien()
     {
         var nv = DocVaKiemTraNhanVien();
         if (nv == null) return;
         try
         {
             _nvRepo.Sua(nv);
-            NapLuoiNhanVien(); LamMoiNhanVien(); NapLuoiTaiKhoan(); NapNhanVienChuaCoTaiKhoan();
+            NapLuoiNhanVien(); ChonNhanVien(nv.MaNV);
             ThongBao("Đã cập nhật nhân viên.");
         }
         catch (Exception ex) { BaoLoiHeThong(ex); }
     }
 
     // TV1: xoa nhan vien dang chon, chan neu da co tai khoan / phieu nhap / hoa don
-    private void btnXoaNV_Click(object? sender, EventArgs e)
+    private void XoaNhanVien()
     {
         if (_maNVDangChon == 0) return;
         try
@@ -179,70 +302,42 @@ public partial class FrmNhanVien : Form
             if (MessageBox.Show($"Xóa nhân viên \"{txtHoTen.Text}\"?", "Xác nhận xóa",
                                 MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
             _nvRepo.Xoa(_maNVDangChon);
-            NapLuoiNhanVien(); LamMoiNhanVien(); NapNhanVienChuaCoTaiKhoan();
+            NapLuoiNhanVien(); LamMoiNhanVien();
             ThongBao("Đã xóa nhân viên.");
         }
         catch (Exception ex) { BaoLoiHeThong(ex); }
     }
 
-    // TV1: bo chon, quay ve che do them moi
-    private void btnLamMoiNV_Click(object? sender, EventArgs e) => LamMoiNhanVien();
+    // ===================== TAI KHOAN CUA NHAN VIEN DANG CHON =====================
 
-    // ===================== TAB TAI KHOAN =====================
-
-    // TV1: nap lai luoi tai khoan (kem ho ten, chuc vu nhan vien)
-    private void NapLuoiTaiKhoan()
+    // TV1: hien dung phan tai khoan: chua luu / da co (doi quyen, khoa, reset) / cap moi; badge theo trang thai
+    private void HienTaiKhoan()
     {
-        try
+        DataRow? tk = null;
+        if (_maNVDangChon != 0) _taiKhoan.TryGetValue(_maNVDangChon, out tk);
+        _maTKDangChon = tk == null ? 0 : (int)tk["MaTK"];
+        panelRoot.SuspendLayout();
+        lblChuaLuu.Visible = _maNVDangChon == 0;
+        tkDaCo.Visible = tk != null;
+        tkCapMoi.Visible = _maNVDangChon != 0 && tk == null;
+        txtTenDN.Clear(); txtMatKhau.Clear();
+        if (tk != null)
         {
-            dgvTK.DataSource = _tkRepo.LayDanhSachHienThi();
-            DatTieuDe(dgvTK, ("MaTK", "Mã TK"), ("TenDangNhap", "Tên đăng nhập"), ("VaiTro", "Vai trò"),
-                      ("TrangThai", "Hoạt động"), ("HoTen", "Nhân viên"), ("ChucVu", "Chức vụ"));
-            dgvTK.Columns["MaNV"]!.Visible = false;
-            dgvTK.ClearSelection();
-            _maTKDangChon = 0;
-            CapNhatNutTaiKhoan();
+            var hoatDong = (bool)tk["TrangThai"];
+            lblTenTK.Text = (string)tk["TenDangNhap"];
+            cboVaiTroDoi.SelectedItem = (string)tk["VaiTro"];
+            btnKhoaMo.Text = hoatDong ? "Khóa tài khoản" : "Mở khóa";
+            KhungChiTiet.DatBadge(badge, hoatDong ? "Đang hoạt động" : "Đã khóa", ngung: !hoatDong);
         }
-        catch (Exception ex) { BaoLoiHeThong(ex); }
+        else KhungChiTiet.DatBadge(badge, _maNVDangChon == 0 ? "" : "Chưa có tài khoản", canhBao: true);
+        panelRoot.ResumeLayout(true);
     }
 
-    // TV1: nap ComboBox cac nhan vien chua co tai khoan
-    private void NapNhanVienChuaCoTaiKhoan()
+    // TV1: cap tai khoan moi cho nhan vien dang chon
+    private void CapTaiKhoan()
     {
-        try
-        {
-            cboNhanVien.DataSource = _nvRepo.LayChuaCoTaiKhoan()
-                .Select(n => new { n.MaNV, Ten = $"{n.HoTen} - {n.ChucVu}" }).ToList();
-            cboNhanVien.DisplayMember = "Ten";
-            cboNhanVien.ValueMember = "MaNV";
-        }
-        catch (Exception ex) { BaoLoiHeThong(ex); }
-    }
-
-    // TV1: chon 1 tai khoan tren luoi thi bat/tat cac nut thao tac
-    private void dgvTK_SelectionChanged(object? sender, EventArgs e)
-    {
-        if (dgvTK.CurrentRow?.DataBoundItem is not DataRowView r || !dgvTK.CurrentRow.Selected)
-        {
-            _maTKDangChon = 0;
-        }
-        else
-        {
-            _maTKDangChon = (int)r["MaTK"];
-            cboVaiTroDoi.Text = (string)r["VaiTro"];
-            btnKhoaMo.Text = (bool)r["TrangThai"] ? "Khóa tài khoản" : "Mở khóa";
-        }
-        CapNhatNutTaiKhoan();
-    }
-
-    // TV1: bat/tat nut theo viec co chon tai khoan hay khong
-    private void CapNhatNutTaiKhoan()
-        => btnDoiVaiTro.Enabled = btnKhoaMo.Enabled = btnResetMK.Enabled = cboVaiTroDoi.Enabled = _maTKDangChon != 0;
-
-    // TV1: cap tai khoan moi cho nhan vien dang chon trong ComboBox
-    private void btnCapTK_Click(object? sender, EventArgs e)
-    {
-        if (cboNhanVien.SelectedValue is not int maNV) { ThongBaoLoi("Không còn nhân viên nào chưa có tài khoản."); return; }
+        var maNhanVien = _maNVDangChon;
+        if (maNhanVien == 0) return;
         var ten = txtTenDN.Text.Trim();
         var mk = txtMatKhau.Text;
 
@@ -255,17 +350,16 @@ public partial class FrmNhanVien : Form
         try
         {
             if (_tkRepo.TenDangNhapDaTonTai(ten)) { BaoLoi("Tên đăng nhập đã được dùng.", txtTenDN); return; }
-            if (_tkRepo.LayTheoMaNV(maNV) != null) { ThongBaoLoi("Nhân viên này đã có tài khoản."); return; }
-            _tkRepo.Them(new TaiKhoan { TenDangNhap = ten, VaiTro = vaiTro, MaNV = maNV, TrangThai = true }, mk);
-            txtTenDN.Clear(); txtMatKhau.Clear();
-            NapLuoiTaiKhoan(); NapNhanVienChuaCoTaiKhoan();
+            if (_tkRepo.LayTheoMaNV(maNhanVien) != null) { ThongBaoLoi("Nhân viên này đã có tài khoản."); return; }
+            _tkRepo.Them(new TaiKhoan { TenDangNhap = ten, VaiTro = vaiTro, MaNV = maNhanVien, TrangThai = true }, mk);
+            NapLuoiNhanVien(); ChonNhanVien(maNhanVien);
             ThongBao($"Đã cấp tài khoản \"{ten}\" ({vaiTro}).");
         }
         catch (Exception ex) { BaoLoiHeThong(ex); }
     }
 
     // TV1: doi vai tro tai khoan dang chon (khong cho ADMIN ha quyen chinh minh)
-    private void btnDoiVaiTro_Click(object? sender, EventArgs e)
+    private void DoiVaiTro()
     {
         if (_maTKDangChon == 0 || cboVaiTroDoi.SelectedItem is not string vaiTro) return;
         if (_maTKDangChon == PhienDangNhap.MaTK && vaiTro != PhienDangNhap.VaiTro)
@@ -275,18 +369,19 @@ public partial class FrmNhanVien : Form
         }
         try
         {
+            var ma = _maNVDangChon;
             _tkRepo.DoiVaiTro(_maTKDangChon, vaiTro);
-            NapLuoiTaiKhoan();
+            NapLuoiNhanVien(); ChonNhanVien(ma);
             ThongBao("Đã đổi vai trò. Người dùng cần đăng nhập lại để quyền mới có hiệu lực.");
         }
         catch (Exception ex) { BaoLoiHeThong(ex); }
     }
 
     // TV1: khoa / mo khoa tai khoan dang chon (khong cho ADMIN tu khoa chinh minh)
-    private void btnKhoaMo_Click(object? sender, EventArgs e)
+    private void KhoaMo()
     {
-        if (dgvTK.CurrentRow?.DataBoundItem is not DataRowView r) return;
-        var dangHoatDong = (bool)r["TrangThai"];
+        if (!_taiKhoan.TryGetValue(_maNVDangChon, out var tk)) return;
+        var dangHoatDong = (bool)tk["TrangThai"];
         if (dangHoatDong && _maTKDangChon == PhienDangNhap.MaTK)
         {
             ThongBaoLoi("Bạn không thể tự khóa tài khoản của chính mình.");
@@ -294,18 +389,19 @@ public partial class FrmNhanVien : Form
         }
         try
         {
+            var ma = _maNVDangChon;
             _tkRepo.DoiTrangThai(_maTKDangChon, !dangHoatDong);
-            NapLuoiTaiKhoan();
+            NapLuoiNhanVien(); ChonNhanVien(ma);
             ThongBao(dangHoatDong ? "Đã khóa tài khoản." : "Đã mở khóa tài khoản.");
         }
         catch (Exception ex) { BaoLoiHeThong(ex); }
     }
 
     // TV1: reset mat khau tai khoan dang chon bang mat khau ngau nhien, hien 1 lan cho ADMIN
-    private void btnResetMK_Click(object? sender, EventArgs e)
+    private void ResetMatKhau()
     {
-        if (dgvTK.CurrentRow?.DataBoundItem is not DataRowView r) return;
-        var ten = (string)r["TenDangNhap"];
+        if (!_taiKhoan.TryGetValue(_maNVDangChon, out var tk)) return;
+        var ten = (string)tk["TenDangNhap"];
         if (MessageBox.Show($"Đặt lại mật khẩu cho \"{ten}\"?", "Xác nhận",
                             MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
         try

@@ -58,11 +58,11 @@ public class FrmPOS : Form, IUnsavedWork
         var actions=Sv4Ui.ThanhCongCu();actions.Dock=DockStyle.Fill;
         actions.AutoScroll=true;
         actions.Controls.AddRange([Sv4Ui.Nhan("Khách đưa (VNĐ)"),tien,luu,Sv4Ui.Nut("Xuất lại PDF",()=>Chay(Xuat)),Sv4Ui.Nut("Giỏ mới",()=>Chay(Moi))]);
-        var payment=new Panel { Dock=DockStyle.Bottom,Height=300,Padding=new Padding(6),BackColor=Color.White };
+        var payment=new Panel { Dock=DockStyle.Bottom,Height=300,Padding=new Padding(6),BackColor=ShopTheme.Surface };
         payment.Controls.Add(actions);payment.Controls.Add(tong);payment.Controls.Add(chiPhi);
-        var left=new Panel { Dock=DockStyle.Fill,Padding=new Padding(8),BackColor=Color.White };
+        var left=new Panel { Dock=DockStyle.Fill,Padding=new Padding(8),BackColor=ShopTheme.Surface };
         left.Controls.Add(sanPham);left.Controls.Add(bar);
-        var right=new Panel { Dock=DockStyle.Fill,Padding=new Padding(8),BackColor=Color.White,Margin=new Padding(10,0,0,0) };
+        var right=new Panel { Dock=DockStyle.Fill,Padding=new Padding(8),BackColor=ShopTheme.Surface,Margin=new Padding(10,0,0,0) };
         right.Controls.Add(gioLuoi);right.Controls.Add(payment);right.Controls.Add(codes);
         right.Controls.Add(new Label { Text="GIỎ HÀNG / KHUYẾN MÃI",Dock=DockStyle.Top,Height=32,ForeColor=ShopTheme.Green,Font=new Font("Segoe UI",11,FontStyle.Bold) });
         var split=new TableLayoutPanel { Dock=DockStyle.Fill,ColumnCount=2,Padding=new Padding(12) };
@@ -133,7 +133,7 @@ public class FrmPOS : Form, IUnsavedWork
         finally { binding=false; }
         voucherInfo.Text=result.LoiVoucher??(result.MaVoucher!=null?$"Đã áp dụng {result.MaVoucher}":result.VoucherYeuCau!=null?"Mã hợp lệ nhưng đang áp dụng giảm theo ngưỡng vì có lợi hơn; mã không bị trừ lượt.":"Tự động áp dụng ưu đãi hiện có.");
         if(result.CanhBao.Count>0)voucherInfo.Text+="\n"+string.Join(" ",result.CanhBao);
-        voucherInfo.ForeColor=result.LoiVoucher==null?ShopTheme.Green:Color.Firebrick;HienTong();
+        voucherInfo.ForeColor=result.LoiVoucher==null?ShopTheme.Green:ShopTheme.Danger;HienTong();
     }
     private void HienTong()
     {

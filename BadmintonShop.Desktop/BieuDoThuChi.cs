@@ -9,7 +9,7 @@ internal sealed class BieuDoThuChi : Panel
     public BieuDoThuChi(DataTable bang)
     {
         Dock = DockStyle.Fill;
-        BackColor = Color.White;
+        BackColor = ShopTheme.Surface;
         var scroll = new Panel { AutoScroll = true, Dock = DockStyle.Fill };
         var cot = new CacCot(bang);
         scroll.Controls.Add(cot);

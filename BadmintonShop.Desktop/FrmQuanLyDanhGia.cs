@@ -30,7 +30,7 @@ namespace BadmintonShop.Desktop
         {
             Text = "Quản lý đánh giá sản phẩm";
             MinimumSize = new Size(800, 500);
-            BackColor = Color.White;
+            BackColor = ShopTheme.Surface;
 
             var panelChinh = new TableLayoutPanel
             {
@@ -38,7 +38,7 @@ namespace BadmintonShop.Desktop
                 ColumnCount = 1,
                 RowCount = 4,
                 Padding = new Padding(20),
-                BackColor = Color.White
+                BackColor = ShopTheme.Surface
             };
 
             panelChinh.RowStyles.Add(
@@ -54,7 +54,7 @@ namespace BadmintonShop.Desktop
             {
                 Text = "QUẢN LÝ ĐÁNH GIÁ SẢN PHẨM",
                 Font = new Font("Segoe UI", 18, FontStyle.Bold),
-                ForeColor = Color.FromArgb(35, 100, 75),
+                ForeColor = ShopTheme.Green,
                 Dock = DockStyle.Fill,
                 TextAlign = ContentAlignment.MiddleLeft
             };
@@ -122,7 +122,7 @@ namespace BadmintonShop.Desktop
             dgvDanhGia.AutoSizeColumnsMode =
                 DataGridViewAutoSizeColumnsMode.Fill;
 
-            dgvDanhGia.BackgroundColor = Color.White;
+            dgvDanhGia.BackgroundColor = ShopTheme.Surface;
             dgvDanhGia.RowHeadersVisible = false;
             dgvDanhGia.AutoGenerateColumns = false;
 

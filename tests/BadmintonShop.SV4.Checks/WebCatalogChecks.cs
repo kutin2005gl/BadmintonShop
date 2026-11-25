@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 internal static partial class Program
 {
-    private static void WebCatalogChecks()=>Test("DB-C03 HTTP catalog across requests / refresh / local mutation",()=>WebCatalogAsync().GetAwaiter().GetResult());
+    private static void WebCatalogChecks()=>Test("DB-C03 HTTP catalog across requests / refresh / local mutation",()=>Task.Run(WebCatalogAsync).GetAwaiter().GetResult());
     private static async Task WebCatalogAsync()
     {
         var builder=WebApplication.CreateBuilder(new WebApplicationOptions { ApplicationName=typeof(SanPhamController).Assembly.GetName().Name,

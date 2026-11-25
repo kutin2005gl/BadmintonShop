@@ -8,73 +8,187 @@ internal interface IUnsavedWork { bool HasUnsavedWork { get; } }
 
 internal static class ShopTheme
 {
-    public static readonly Color Green = Color.FromArgb(19, 83, 63);
-    public static readonly Color Background = Color.FromArgb(244, 247, 246);
-    public static readonly Color Ink = Color.FromArgb(32, 49, 44);
-    public static readonly Color Muted = Color.FromArgb(100, 117, 110);
-    public static readonly Color Line = Color.FromArgb(224, 233, 228);
+    // TV1: giao diện của app; các thuộc tính màu (Green, Background...) đọc từ đây nên form không phải sửa.
+    public static ThemeDef Current => ThemeCatalog.Giay;
+    public static Color Green => Current.Accent;
+    public static Color Background => Current.Bg;
+    public static Color Ink => Current.Ink;
+    public static Color Muted => Current.Muted;
+    public static Color Line => Current.Line;
+    public static Color Surface => Current.Surface;
+    public static Color SurfaceAlt => Current.SurfaceAlt;
+    public static Color Danger => Current.Danger;
+    public static Color DangerBg => Current.DangerBg;
+    public static Color Warn => Current.Warn;
+    public static Color WarnBg => Current.WarnBg;
+    public static Color AccentSoft => Current.AccentSoft;
+    public static readonly Brush InkBrush = new SolidBrush(ThemeCatalog.Giay.Ink);
+    public static readonly Brush MutedBrush = new SolidBrush(ThemeCatalog.Giay.Muted);
     public static readonly CultureInfo Vietnamese = CultureInfo.GetCultureInfo("vi-VN");
     private sealed class LoadState { public bool Busy; public bool Closed; public Label? Status; }
     private static readonly ConditionalWeakTable<Form, LoadState> States = new();
     public static bool IsBusy(Form form) => States.TryGetValue(form, out var state) && state.Busy;
 
+    private static readonly Dictionary<string, Font> fonts = new();
+    // TV1: phông dùng chung, cache để không rò GDI
+    public static Font Face(string family, float size, FontStyle style = FontStyle.Regular)
+    {
+        var key = $"{family}|{size}|{(int)style}";
+        if (!fonts.TryGetValue(key, out var f)) fonts[key] = f = new Font(family, size, style);
+        return f;
+    }
+    public static Font TitleFace(float size) => Face(Current.TitleFont, size, FontStyle.Bold);
+
+    // ---- Nhận vai trò màu của một control rồi gán lại theo giao diện ----
+    private enum Role { None, Bg, Surface, SurfaceAlt, Line, Accent, AccentSoft, Ink, Muted, Danger, Warn, OnAccent, DangerBg, WarnBg }
+    private static readonly Dictionary<int, Role> backRoles = BuildBackRoles(), foreRoles = BuildForeRoles();
+    // TV1: bảng nhận vai trò màu nền (màu giao diện + màu cũ trong code)
+    private static Dictionary<int, Role> BuildBackRoles()
+    {
+        var d = new Dictionary<int, Role> { [Color.White.ToArgb()] = Role.Surface, [Color.FromArgb(240, 240, 240).ToArgb()] = Role.Bg, [Color.FromArgb(248, 251, 249).ToArgb()] = Role.SurfaceAlt };
+        var t = Current;
+        d[t.Bg.ToArgb()] = Role.Bg; d[t.Surface.ToArgb()] = Role.Surface; d[t.SurfaceAlt.ToArgb()] = Role.SurfaceAlt; d[t.Line.ToArgb()] = Role.Line;
+        d[t.Accent.ToArgb()] = Role.Accent; d[t.AccentSoft.ToArgb()] = Role.AccentSoft; d[t.DangerBg.ToArgb()] = Role.DangerBg; d[t.WarnBg.ToArgb()] = Role.WarnBg;
+        return d;
+    }
+    // TV1: bảng nhận vai trò màu chữ (màu giao diện + màu cũ trong code)
+    private static Dictionary<int, Role> BuildForeRoles()
+    {
+        var d = new Dictionary<int, Role>
+        {
+            [Color.Black.ToArgb()] = Role.Ink, [Color.DimGray.ToArgb()] = Role.Muted, [Color.Gray.ToArgb()] = Role.Muted,
+            [Color.Firebrick.ToArgb()] = Role.Danger, [Color.DarkRed.ToArgb()] = Role.Danger, [Color.SeaGreen.ToArgb()] = Role.Accent,
+            [Color.FromArgb(35, 100, 75).ToArgb()] = Role.Accent, [Color.White.ToArgb()] = Role.OnAccent, [Color.FromArgb(155, 96, 10).ToArgb()] = Role.Warn,
+        };
+        var t = Current;
+        d[t.Ink.ToArgb()] = Role.Ink; d[t.Muted.ToArgb()] = Role.Muted; d[t.Accent.ToArgb()] = Role.Accent;
+        d[t.Danger.ToArgb()] = Role.Danger; d[t.Warn.ToArgb()] = Role.Warn; d[t.OnAccent.ToArgb()] = Role.OnAccent;
+        return d;
+    }
+    // TV1: đổi vai trò màu thành màu của giao diện
+    private static Color Of(Role r) => r switch
+    {
+        Role.Bg => Current.Bg, Role.Surface => Current.Surface, Role.SurfaceAlt => Current.SurfaceAlt, Role.Line => Current.Line,
+        Role.Accent => Current.Accent, Role.AccentSoft => Current.AccentSoft, Role.Ink => Current.Ink, Role.Muted => Current.Muted,
+        Role.Danger => Current.Danger, Role.Warn => Current.Warn, Role.OnAccent => Current.OnAccent, Role.DangerBg => Current.DangerBg, Role.WarnBg => Current.WarnBg, _ => Color.Empty
+    };
+
+    // TV1: áp giao diện lên form/control và toàn bộ con; gọi lại được nhiều lần
     public static void Apply(Control root)
     {
-        if(root is Form tracked)LifecycleDiagnostics.Track(tracked);
-        if (root is Form) root.Font = new Font("Segoe UI", 10);
-        root.ForeColor = Ink;
+        if (root is Form tracked) LifecycleDiagnostics.Track(tracked);
         if (root is Form f)
         {
-            f.BackColor = Background;
+            if (f.Font.Name != "Segoe UI" || f.Font.Size != 10) f.Font = new Font("Segoe UI", 10);
+            f.BackColor = Current.Bg; f.ForeColor = Current.Ink;
             f.StartPosition = FormStartPosition.CenterParent;
             f.AutoScaleMode = AutoScaleMode.Font;
         }
-        foreach (Control c in root.Controls)
-        {
-            if (c is Button b) StyleButton(b);
-            else if (c is DataGridView grid) StyleGrid(grid);
-            else if (c is TextBoxBase t) { t.BorderStyle = BorderStyle.FixedSingle; t.BackColor = Color.White; }
-            else if (c is ComboBox combo) { combo.FlatStyle = FlatStyle.Flat; combo.BackColor = Color.White; }
-            if (c.HasChildren) ApplyChildren(c);
-        }
+        else Paint(root);
+        Walk(root);
     }
-    private static void ApplyChildren(Control parent)
+    // TV1: duyệt cây control để tô lại từng phần tử
+    private static void Walk(Control parent)
     {
         foreach (Control c in parent.Controls)
         {
-            if (c is Button b) StyleButton(b);
-            if (c is DataGridView g) { StyleGrid(g); continue; }
-            if (c.HasChildren) ApplyChildren(c);
+            Paint(c);
+            if (c is DataGridView) continue;
+            if (c.HasChildren) Walk(c);
         }
     }
+    // TV1: tô một control theo loại và vai trò màu hiện có
+    private static void Paint(Control c)
+    {
+        switch (c)
+        {
+            case Button b: StyleButton(b); return;
+            case DataGridView g: StyleGrid(g); return;
+            case TextBoxBase t: t.BorderStyle = BorderStyle.FixedSingle; t.BackColor = Current.Field; t.ForeColor = Current.Ink; return;
+            case ComboBox cb: StyleCombo(cb); return;
+            case TabControl tab: StyleTabs(tab); break;
+            case TabPage tp: tp.UseVisualStyleBackColor = false; tp.BackColor = Current.Surface; return;
+            case NumericUpDown n: n.BackColor = Current.Field; n.ForeColor = Current.Ink; return;
+            case DateTimePicker d: d.CalendarMonthBackground = Current.Field; d.CalendarForeColor = Current.Ink; d.CalendarTitleBackColor = Current.Accent; d.CalendarTitleForeColor = Current.OnAccent; return;
+            case ListBox or ListView or TreeView: c.BackColor = Current.Field; c.ForeColor = Current.Ink; return;
+            case BieuDoCot or BieuDoThuChi: c.BackColor = Current.Surface; c.Invalidate(); return;
+        }
+        var back = backRoles.GetValueOrDefault(c.BackColor.ToArgb());
+        if (back != Role.None) c.BackColor = Of(back);
+        var fore = foreRoles.GetValueOrDefault(c.ForeColor.ToArgb());
+        if (fore == Role.OnAccent) { if (back == Role.Accent) c.ForeColor = Current.OnAccent; }
+        else if (fore != Role.None) c.ForeColor = Of(fore);
+    }
+
+    private static readonly ConditionalWeakTable<ComboBox, object> combos = new();
+    // TV1: ô chọn tự vẽ để hộp và danh sách thả xuống theo màu giao diện (ô nhập tay giữ kiểu hệ thống)
+    private static void StyleCombo(ComboBox cb)
+    {
+        cb.FlatStyle = cb.DropDownStyle == ComboBoxStyle.DropDownList ? FlatStyle.Flat : FlatStyle.Standard; cb.BackColor = Current.Field; cb.ForeColor = Current.Ink;
+        if (cb.DropDownStyle != ComboBoxStyle.DropDownList || combos.TryGetValue(cb, out _)) { cb.Invalidate(); return; }
+        combos.Add(cb, new object());
+        cb.DrawMode = DrawMode.OwnerDrawFixed;
+        cb.DrawItem += (_, e) =>
+        {
+            if (e.Index < 0) return;
+            var t = Current; bool hot = (e.State & DrawItemState.Selected) != 0 && (e.State & DrawItemState.ComboBoxEdit) == 0;
+            using (var bg = new SolidBrush(hot ? t.AccentSoft : t.Field)) e.Graphics.FillRectangle(bg, e.Bounds);
+            TextRenderer.DrawText(e.Graphics, cb.GetItemText(cb.Items[e.Index]), cb.Font, new Rectangle(e.Bounds.X + 2, e.Bounds.Y, e.Bounds.Width - 2, e.Bounds.Height), hot ? t.Accent : t.Ink,
+                TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
+        };
+    }
+
+    private static readonly ConditionalWeakTable<TabControl, object> tabbed = new();
+    // TV1: tab tự vẽ theo màu giao diện
+    private static void StyleTabs(TabControl tab)
+    {
+        if (tabbed.TryGetValue(tab, out _)) { tab.Invalidate(); return; }
+        tabbed.Add(tab, new object());
+        tab.DrawMode = TabDrawMode.OwnerDrawFixed; tab.Appearance = TabAppearance.FlatButtons;
+        tab.DrawItem += (_, e) =>
+        {
+            var t = Current; bool sel = e.Index == tab.SelectedIndex;
+            using (var bg = new SolidBrush(sel ? t.Surface : t.Bg)) e.Graphics.FillRectangle(bg, e.Bounds);
+            TextRenderer.DrawText(e.Graphics, tab.TabPages[e.Index].Text, tab.Font, e.Bounds, sel ? t.Accent : t.Muted,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.NoPadding);
+            if (sel) { using var line = new SolidBrush(t.Accent); e.Graphics.FillRectangle(line, e.Bounds.X, e.Bounds.Y, e.Bounds.Width, 3); }
+        };
+    }
+
+    // TV1: kiểu nút theo ý nghĩa (chính / nguy hiểm / phụ) lấy theo chữ trên nút
     public static void StyleButton(Button b)
     {
         bool primary = b.Text.StartsWith("Thêm") || b.Text.StartsWith("Lưu") || b.Text.StartsWith("Thanh toán") || b.Text.StartsWith("Xem báo cáo") || b.Text == "Xác nhận";
         bool danger = b.Text.StartsWith("Xóa") || b.Text.StartsWith("Hủy") || b.Text.StartsWith("Ngừng");
+        var t = Current;
         b.FlatStyle = FlatStyle.Flat; b.FlatAppearance.BorderSize = primary ? 0 : 1;
-        b.FlatAppearance.BorderColor = Line;
-        b.BackColor = primary ? Green : danger ? Color.FromArgb(255, 241, 239) : Color.White;
-        b.ForeColor = primary ? Color.White : danger ? Color.Firebrick : Green; b.Cursor = Cursors.Hand;
+        b.FlatAppearance.BorderColor = danger ? t.Danger : t.Line;
+        b.BackColor = primary ? t.Accent : danger ? t.DangerBg : t.Surface;
+        b.ForeColor = primary ? t.OnAccent : danger ? t.Danger : t.Accent; b.Cursor = Cursors.Hand;
         b.Padding = new Padding(10, 5, 10, 5); b.MinimumSize = new Size(0, 38);
-        b.FlatAppearance.MouseOverBackColor = primary ? Color.FromArgb(35, 112, 83) : Color.FromArgb(225, 240, 231);
-        b.FlatAppearance.MouseDownBackColor = primary ? Color.FromArgb(10, 61, 44) : Line;
+        b.FlatAppearance.MouseOverBackColor = primary ? t.AccentHover : t.AccentSoft;
+        b.FlatAppearance.MouseDownBackColor = primary ? t.AccentDown : t.Line;
     }
+    // TV1: kiểu bảng dữ liệu; chỉnh tại chỗ nên không mất định dạng cột của form
     public static void StyleGrid(DataGridView g)
     {
-        g.BorderStyle = BorderStyle.None; g.BackgroundColor = Color.White;
-        g.EnableHeadersVisualStyles = false; g.GridColor = Line;
+        var t = Current;
+        g.BorderStyle = BorderStyle.None; g.BackgroundColor = t.Surface;
+        g.EnableHeadersVisualStyles = false; g.GridColor = t.Line;
         g.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
         g.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
-        g.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle { BackColor = Green, ForeColor = Color.White, SelectionBackColor = Green, SelectionForeColor = Color.White, WrapMode = DataGridViewTriState.True, Font = new Font("Segoe UI", 10, FontStyle.Bold), Padding = new Padding(6) };
-        g.DefaultCellStyle = new DataGridViewCellStyle { BackColor = Color.White, ForeColor = Ink, SelectionBackColor = Color.FromArgb(219, 239, 228), SelectionForeColor = Green, Padding = new Padding(5), FormatProvider = Vietnamese };
-        g.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(248, 251, 249);
-        g.RowTemplate.Height = 42;
-        g.RowTemplate.MinimumHeight = 40;
+        var h = g.ColumnHeadersDefaultCellStyle;
+        h.BackColor = t.HeadBg; h.ForeColor = t.HeadInk; h.SelectionBackColor = t.HeadBg; h.SelectionForeColor = t.HeadInk;
+        h.WrapMode = DataGridViewTriState.True; h.Font = Face("Segoe UI", 10, FontStyle.Bold); h.Padding = new Padding(6);
+        var d = g.DefaultCellStyle;
+        d.BackColor = t.Surface; d.ForeColor = t.Ink; d.SelectionBackColor = t.AccentSoft; d.SelectionForeColor = t.Accent;
+        d.Padding = new Padding(5); d.FormatProvider = Vietnamese; d.WrapMode = DataGridViewTriState.True;
+        g.AlternatingRowsDefaultCellStyle.BackColor = t.SurfaceAlt;
+        g.RowTemplate.Height = t.RowHeight; g.RowTemplate.MinimumHeight = t.RowHeight - 2;
         g.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
         g.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-        g.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
     }
-    public static Label Title(string text, int size = 17) => new() { Text = text, AutoSize = true, Font = new Font("Segoe UI", size, FontStyle.Bold), ForeColor = Green, Margin = new Padding(4, 8, 4, 8) };
+    public static Label Title(string text, int size = 17) => new() { Text = text, AutoSize = true, Font = TitleFace(size), ForeColor = Current.Accent, Margin = new Padding(4, 8, 4, 8) };
 
     // Use the destination control's thread, even if a caller has no WinForms SynchronizationContext.
     public static bool OnUi(Form form, Action action)
@@ -104,7 +218,7 @@ internal static class ShopTheme
             LifecycleDiagnostics.Track(form);
             form.FormClosed+=(_,_)=>state.Closed=true;
             form.Disposed+=(_,_)=>state.Closed=true;
-            state.Status = new Label { Dock = DockStyle.Bottom, Height = 34, Padding = new Padding(8), BackColor = Background, ForeColor = Muted };
+            state.Status = new Label { Dock = DockStyle.Bottom, Height = form.Font.Height + 14, Padding = new Padding(8, 4, 8, 4), BackColor = Background, ForeColor = Muted };
             form.Controls.Add(state.Status);
         }
         var controls = form.Controls.Cast<Control>().Where(c => c != state.Status).Select(c => (Control:c, c.Enabled)).ToArray();

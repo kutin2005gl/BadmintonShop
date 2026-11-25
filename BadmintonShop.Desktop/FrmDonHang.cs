@@ -40,7 +40,7 @@ public class FrmDonHang : Form
         grid.AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.AllCells;grid.ScrollBars=ScrollBars.Both;
         grid.DataBindingComplete+=(_,_)=>grid.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
         split=new SplitContainer { Dock=DockStyle.Fill,Orientation=Orientation.Vertical,FixedPanel=FixedPanel.None,SplitterWidth=6,BackColor=ShopTheme.Line };
-        split.Panel1.Controls.Add(grid);split.Panel1.BackColor=Color.White;split.Panel2.BackColor=Color.White;
+        split.Panel1.Controls.Add(grid);split.Panel1.BackColor=ShopTheme.Surface;split.Panel2.BackColor=ShopTheme.Surface;
         XayChiTiet(split.Panel2);
         Controls.Add(split);Controls.Add(bar);ShopTheme.Apply(this);grid.CurrentCellChanged+=(_,_)=> { if(!binding)ChiTiet(); };
         HienTrong("Chọn một đơn hàng ở danh sách bên trái để xem chi tiết.");
@@ -62,7 +62,7 @@ public class FrmDonHang : Form
     private void XayChiTiet(Control host)
     {
         var small=new Font("Segoe UI",9);
-        detailRoot=new Panel { Dock=DockStyle.Fill,AutoScroll=true,AutoScrollMinSize=new Size(0,560),Padding=new Padding(14,12,14,12),BackColor=Color.White };
+        detailRoot=new Panel { Dock=DockStyle.Fill,AutoScroll=true,AutoScrollMinSize=new Size(0,560),Padding=new Padding(14,12,14,12),BackColor=ShopTheme.Surface };
         emptyState=new Label { Dock=DockStyle.Fill,TextAlign=ContentAlignment.MiddleCenter,ForeColor=ShopTheme.Muted,Padding=new Padding(20) };
         detailBody=new Panel { Dock=DockStyle.Fill,Visible=false };
 
@@ -96,7 +96,7 @@ public class FrmDonHang : Form
 
         cardsTitle=new Label { Dock=DockStyle.Top,Text="Sản phẩm trong đơn",AutoSize=false,Height=30,TextAlign=ContentAlignment.BottomLeft,
             Font=new Font("Segoe UI",11,FontStyle.Bold),ForeColor=ShopTheme.Green };
-        cards=new FlowLayoutPanel { Dock=DockStyle.Fill,FlowDirection=FlowDirection.TopDown,WrapContents=false,AutoScroll=true,BackColor=Color.White,Padding=new Padding(0,6,0,0) };
+        cards=new FlowLayoutPanel { Dock=DockStyle.Fill,FlowDirection=FlowDirection.TopDown,WrapContents=false,AutoScroll=true,BackColor=ShopTheme.Surface,Padding=new Padding(0,6,0,0) };
         cards.SizeChanged+=(_,_)=>XepThe();
 
         // Thứ tự thêm: Fill trước, các Top sau (Top thêm sau nằm cao hơn).
@@ -120,8 +120,8 @@ public class FrmDonHang : Form
     private void DatBadge(string status)
     {
         badge.Text=status;
-        var (back,fore)=status.Contains("hủy")?(Color.FromArgb(255,235,232),Color.Firebrick):
-            status.Contains("Chờ")?(Color.FromArgb(255,243,214),Color.FromArgb(135,82,6)):(Color.FromArgb(219,239,228),ShopTheme.Green);
+        var (back,fore)=status.Contains("hủy")?(ShopTheme.DangerBg,ShopTheme.Danger):
+            status.Contains("Chờ")?(ShopTheme.WarnBg,ShopTheme.Warn):(ShopTheme.AccentSoft,ShopTheme.Green);
         badge.BackColor=back;badge.ForeColor=fore;
     }
     private void XoaThe()
@@ -141,12 +141,12 @@ public class FrmDonHang : Form
             table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));table.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
             var name=new Label { Text=Convert.ToString(row["TenSP"]),AutoSize=true,Font=new Font("Segoe UI",10,FontStyle.Bold),Margin=new Padding(0,0,0,2),Name="TenSP" };
             var line=new Label { Text=$"Mã {row["MaSP"]}  ·  SL {row["SoLuong"]} × {Convert.ToDecimal(row["DonGia"]):#,##0} đ",AutoSize=true,ForeColor=ShopTheme.Muted,Font=new Font("Segoe UI",9),Margin=new Padding(0,0,0,4) };
-            var disc=new Label { Text=discount>0?$"Giảm {discount:0.##}%":"Không giảm",AutoSize=true,ForeColor=discount>0?Color.FromArgb(135,82,6):ShopTheme.Muted,Font=new Font("Segoe UI",9),Anchor=AnchorStyles.Left,Margin=new Padding(0,6,8,0) };
+            var disc=new Label { Text=discount>0?$"Giảm {discount:0.##}%":"Không giảm",AutoSize=true,ForeColor=discount>0?ShopTheme.Warn:ShopTheme.Muted,Font=new Font("Segoe UI",9),Anchor=AnchorStyles.Left,Margin=new Padding(0,6,8,0) };
             var money=new Label { Text=$"{Convert.ToDecimal(row["ThanhTien"]):#,##0} đ",AutoSize=true,Font=new Font("Segoe UI",11,FontStyle.Bold),ForeColor=ShopTheme.Green,Anchor=AnchorStyles.Right,Margin=new Padding(0) };
             table.Controls.Add(name,0,0);table.SetColumnSpan(name,2);
             table.Controls.Add(line,0,1);table.SetColumnSpan(line,2);
             table.Controls.Add(disc,0,2);table.Controls.Add(money,1,2);
-            var card=new Panel { Name="TheSanPham",Tag=row,BorderStyle=BorderStyle.FixedSingle,BackColor=Color.FromArgb(248,251,249),Padding=new Padding(10,8,10,8),Margin=new Padding(0,0,0,8) };
+            var card=new Panel { Name="TheSanPham",Tag=row,BorderStyle=BorderStyle.FixedSingle,BackColor=ShopTheme.SurfaceAlt,Padding=new Padding(10,8,10,8),Margin=new Padding(0,0,0,8) };
             card.Controls.Add(table);cards.Controls.Add(card);
         }
         cards.ResumeLayout();XepThe();

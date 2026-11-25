@@ -33,6 +33,8 @@ internal static partial class Program
         SynchronizationContext.SetSynchronizationContext(new WindowsFormsSynchronizationContext());
         if(args.Contains("--acceptance-desktop-review"))return AcceptanceDesktopReview();
         if(args.Contains("--acceptance") || args.Contains("--acceptance-ui-setup"))return Acceptance(args);
+        // DoEvents trong WaitUi tự gỡ ngữ cảnh khi thoát vòng thông điệp, làm phần sau await chạy sai luồng; từ đây giữ nguyên ngữ cảnh đã đặt.
+        WindowsFormsSynchronizationContext.AutoInstall=false;
         Unit();
         ReportProgressChecks();
         CacheChecks();
