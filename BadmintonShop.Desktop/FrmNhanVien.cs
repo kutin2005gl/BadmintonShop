@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using System.Globalization;
 using System.Security.Cryptography;
 using BadmintonShop.Core.DataAccess;
@@ -59,7 +59,8 @@ public class FrmNhanVien : Form
     // TV1: panel ben phai: ho so nhan vien (main) va tai khoan dang nhap (sub)
     private void XayChiTiet(Control host)
     {
-        panelRoot = new Panel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(14, 12, 14, 12), BackColor = ShopTheme.Surface };
+        panelRoot = KhungChiTiet.NenChiTiet(); panelRoot.AutoScroll = true;
+        host.BackColor = ShopTheme.SurfaceAlt;
         var header = KhungChiTiet.TieuDe(out maNV, out badge);
 
         txtHoTen = new TextBox { MaxLength = 100 };
@@ -71,15 +72,12 @@ public class FrmNhanVien : Form
         txtLuong = new TextBox();
         dtpNgaySinh = new DateTimePicker { Format = DateTimePickerFormat.Custom, CustomFormat = "dd/MM/yyyy", ShowCheckBox = true, Checked = false };
         dtpNgayVaoLam = new DateTimePicker { Format = DateTimePickerFormat.Custom, CustomFormat = "dd/MM/yyyy" };
-        var hoSo = KhungChiTiet.BangThongTin();
-        KhungChiTiet.Dong(hoSo, "Họ tên (*)", txtHoTen);
-        KhungChiTiet.Dong(hoSo, "Điện thoại", txtSDT);
-        KhungChiTiet.Dong(hoSo, "Email", txtEmail);
-        KhungChiTiet.Dong(hoSo, "Địa chỉ", txtDiaChi);
-        KhungChiTiet.Dong(hoSo, "Chức vụ (*)", cboChucVu);
-        KhungChiTiet.Dong(hoSo, "Lương (đ)", txtLuong);
-        KhungChiTiet.Dong(hoSo, "Ngày sinh", dtpNgaySinh);
-        KhungChiTiet.Dong(hoSo, "Ngày vào làm", dtpNgayVaoLam);
+        var hoSo = KhungChiTiet.LuoiO(
+            ("Họ tên (*)", txtHoTen, true),
+            ("Điện thoại", txtSDT, false), ("Email", txtEmail, false),
+            ("Địa chỉ", txtDiaChi, true),
+            ("Chức vụ (*)", cboChucVu, false), ("Lương (đ)", txtLuong, false),
+            ("Ngày sinh", dtpNgaySinh, false), ("Ngày vào làm", dtpNgayVaoLam, false));
 
         btnThemNV = Sv4Ui.Nut("Thêm nhân viên", ThemNhanVien);
         btnSuaNV = Sv4Ui.Nut("Lưu sửa", SuaNhanVien);
@@ -87,17 +85,15 @@ public class FrmNhanVien : Form
         var nutHoSo = KhungChiTiet.HangNut(btnThemNV, btnSuaNV, btnXoaNV);
 
         // sub: chua luu nhan vien / da co tai khoan / cap tai khoan moi
-        lblChuaLuu = new Label { Dock = DockStyle.Top, AutoSize = true, ForeColor = ShopTheme.Muted, Padding = new Padding(0, 8, 0, 0), Text = "Lưu nhân viên trước rồi cấp tài khoản." };
+        lblChuaLuu = new Label { Dock = DockStyle.Top, AutoSize = true, ForeColor = ShopTheme.Muted, Padding = new Padding(0, 2, 0, 10), Text = "Lưu nhân viên trước rồi cấp tài khoản." };
 
         lblTenTK = new Label { AutoSize = true, Margin = new Padding(0, 5, 0, 5), Font = new Font("Segoe UI", 10, FontStyle.Bold) };
         cboVaiTroDoi = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
         cboVaiTroDoi.Items.AddRange(DanhSachVaiTro);
-        var daCo = KhungChiTiet.BangThongTin();
-        KhungChiTiet.Dong(daCo, "Tên đăng nhập", lblTenTK);
-        KhungChiTiet.Dong(daCo, "Vai trò", cboVaiTroDoi);
+        var daCo = KhungChiTiet.LuoiO(("Tên đăng nhập", lblTenTK, false), ("Vai trò", cboVaiTroDoi, false));
         btnKhoaMo = Sv4Ui.Nut("Khóa tài khoản", KhoaMo);
         var nutTK = KhungChiTiet.HangNut(Sv4Ui.Nut("Đổi vai trò", DoiVaiTro), btnKhoaMo, Sv4Ui.Nut("Đặt lại mật khẩu", ResetMatKhau));
-        tkDaCo = new Panel { Dock = DockStyle.Top, AutoSize = true };
+        tkDaCo = new Panel { Dock = DockStyle.Top, AutoSize = true, BackColor = ShopTheme.Surface };
         tkDaCo.Controls.Add(nutTK); tkDaCo.Controls.Add(daCo);
 
         txtTenDN = new TextBox { MaxLength = 50 };
@@ -105,21 +101,17 @@ public class FrmNhanVien : Form
         cboVaiTroCap = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
         cboVaiTroCap.Items.AddRange(DanhSachVaiTro);
         cboVaiTroCap.SelectedIndex = 2;
-        var capMoi = KhungChiTiet.BangThongTin();
-        KhungChiTiet.Dong(capMoi, "Tên đăng nhập", txtTenDN);
-        KhungChiTiet.Dong(capMoi, "Mật khẩu", txtMatKhau);
-        KhungChiTiet.Dong(capMoi, "Vai trò", cboVaiTroCap);
+        var capMoi = KhungChiTiet.LuoiO(("Tên đăng nhập", txtTenDN, false), ("Mật khẩu", txtMatKhau, false), ("Vai trò", cboVaiTroCap, false));
         var nutCap = KhungChiTiet.HangNut(Sv4Ui.Nut("Cấp tài khoản", CapTaiKhoan));
-        tkCapMoi = new Panel { Dock = DockStyle.Top, AutoSize = true };
+        tkCapMoi = new Panel { Dock = DockStyle.Top, AutoSize = true, BackColor = ShopTheme.Surface };
         tkCapMoi.Controls.Add(nutCap); tkCapMoi.Controls.Add(capMoi);
 
         // Mọi mục đều Dock Top: thêm sau nằm cao hơn.
-        panelRoot.Controls.Add(tkCapMoi);
-        panelRoot.Controls.Add(tkDaCo);
-        panelRoot.Controls.Add(lblChuaLuu);
-        panelRoot.Controls.Add(KhungChiTiet.Muc("Tài khoản đăng nhập"));
+        panelRoot.Controls.Add(KhungChiTiet.The("Tài khoản đăng nhập", lblChuaLuu, tkDaCo, tkCapMoi));
+        panelRoot.Controls.Add(KhungChiTiet.Cach(16));
         panelRoot.Controls.Add(nutHoSo);
-        panelRoot.Controls.Add(hoSo);
+        panelRoot.Controls.Add(KhungChiTiet.Cach(12));
+        panelRoot.Controls.Add(KhungChiTiet.The("Hồ sơ nhân viên", hoSo));
         panelRoot.Controls.Add(header);
         host.Controls.Add(panelRoot);
     }

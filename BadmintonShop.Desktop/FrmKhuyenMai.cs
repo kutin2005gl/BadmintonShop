@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
@@ -51,7 +51,7 @@ public class FrmKhuyenMai : Form, IUnsavedWork
 
         luoi = Sv4Ui.Luoi();
 
-        tabs = new TabControl { Dock = DockStyle.Fill };
+        tabs = new TabControl { Dock = DockStyle.Fill, Font = new Font("Segoe UI", 10), SizeMode = TabSizeMode.Fixed, ItemSize = new Size(150, 36) };
         foreach (var nhom in CacNhom)
         {
             var g = Sv4Ui.Luoi();
@@ -67,6 +67,9 @@ public class FrmKhuyenMai : Form, IUnsavedWork
                     "Dữ liệu chưa hợp lệ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             };
             luoiCT[nhom] = g;
+            // Cột số (giảm %, ngưỡng tiền, số lượt, đã dùng) canh giữa, ngay dưới tiêu đề; chạy sau định dạng chung của Sv4Ui
+            g.DataBindingComplete += (_, _) => CanGiuaCotSo(g);
+            g.ColumnAdded += (_, _) => CanGiuaCotSo(g);
             var trang = new TabPage(KhuyenMaiQuanLyRepository.TenNhom(nhom)) { Name = nhom };
             trang.Controls.Add(g);
             tabs.TabPages.Add(trang);
@@ -113,17 +116,18 @@ public class FrmKhuyenMai : Form, IUnsavedWork
         var root = new Panel { Dock = DockStyle.Fill, Padding = new Padding(14, 12, 14, 12), BackColor = ShopTheme.Surface };
         var header = KhungChiTiet.TieuDe(out nhanMa, out badge);
 
-        ten = new TextBox { MaxLength = 150 };
-        tuNgay = new DateTimePicker { Format = DateTimePickerFormat.Custom, CustomFormat = "dd/MM/yyyy", Width = 150 };
-        denNgay = new DateTimePicker { Format = DateTimePickerFormat.Custom, CustomFormat = "dd/MM/yyyy", Width = 150 };
-        bat = new CheckBox { Text = "Đang áp dụng", AutoSize = true, Checked = true };
+        var chu = new Font("Segoe UI", 10);
+        ten = new TextBox { MaxLength = 150, Font = chu };
+        tuNgay = new DateTimePicker { Format = DateTimePickerFormat.Custom, CustomFormat = "dd/MM/yyyy", Width = 160, Font = chu };
+        denNgay = new DateTimePicker { Format = DateTimePickerFormat.Custom, CustomFormat = "dd/MM/yyyy", Width = 160, Font = chu };
+        bat = new CheckBox { Text = "Đang áp dụng", AutoSize = true, Checked = true, Font = chu };
         var thongTin = KhungChiTiet.BangThongTin();
         KhungChiTiet.Dong(thongTin, "Tên chương trình", ten);
         KhungChiTiet.Dong(thongTin, "Từ ngày", tuNgay);
         KhungChiTiet.Dong(thongTin, "Đến ngày", denNgay);
         KhungChiTiet.Dong(thongTin, "Trạng thái", bat);
 
-        nhanChiTiet = new Label { Dock = DockStyle.Top, AutoSize = true, ForeColor = ShopTheme.Muted, Font = new Font("Segoe UI", 9), Padding = new Padding(0, 4, 0, 4) };
+        nhanChiTiet = new Label { Dock = DockStyle.Top, AutoSize = true, ForeColor = ShopTheme.Muted, Font = new Font("Segoe UI", 10), Padding = new Padding(0, 4, 0, 4) };
         btnSinh = Sv4Ui.Nut("Sinh voucher hàng loạt", () => Chay(SinhVoucher));
         var hangSinh = KhungChiTiet.HangNut(btnSinh);
         root.SizeChanged += (_, _) => nhanChiTiet.MaximumSize = new Size(Math.Max(120, root.ClientSize.Width - root.Padding.Horizontal), 0);
@@ -187,7 +191,7 @@ public class FrmKhuyenMai : Form, IUnsavedWork
         try
         {
             ma = k.MaCTKM;
-            nhanMa.Text = $"CTKM {ma}";
+            nhanMa.Text = $"Chương trình khuyến mãi {ma}";
             var trangThai = Convert.ToString(luoi.CurrentRow?.Cells["TrangThai"].Value) ?? "";
             KhungChiTiet.DatBadge(badge, trangThai, trangThai.Contains("Sắp"), trangThai.Contains("Ngừng"));
             ten.Text = k.TenCTKM;
@@ -287,6 +291,16 @@ public class FrmKhuyenMai : Form, IUnsavedWork
         }
         CapNhatTieuDeTab();
         CapNhatNhanTab();
+    }
+
+    private static void CanGiuaCotSo(DataGridView g)
+    {
+        foreach (DataGridViewColumn c in g.Columns)
+        {
+            if (c is DataGridViewComboBoxColumn || c.Name == "MaVoucher") continue;
+            c.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            c.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
+        }
     }
 
     private static DataGridViewTextBoxColumn Cot(string tenCot, string thuocTinh, string tieuDe, Type kieu,

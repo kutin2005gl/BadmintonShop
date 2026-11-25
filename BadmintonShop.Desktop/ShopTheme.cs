@@ -83,6 +83,7 @@ internal static class ShopTheme
             f.BackColor = Current.Bg; f.ForeColor = Current.Ink;
             f.StartPosition = FormStartPosition.CenterParent;
             f.AutoScaleMode = AutoScaleMode.Font;
+            ChuONhap.Gan(f);
         }
         else Paint(root);
         Walk(root);
@@ -95,11 +96,30 @@ internal static class ShopTheme
             Paint(c);
             if (c is DataGridView) continue;
             if (c.HasChildren) Walk(c);
+            if (c is FlowLayoutPanel flow) CanDeuHangNut(flow);
+        }
+    }
+
+    public const int CaoNut = 38, RongNutToiThieu = 112;
+    // Thanh công cụ có nút: mọi nút cùng cỡ, ô nhập/nhãn cùng font và canh giữa theo chiều dọc với nút
+    private static void CanDeuHangNut(FlowLayoutPanel flow)
+    {
+        if (!flow.Controls.OfType<Button>().Any()) return;
+        foreach (Control c in flow.Controls)
+        {
+            if (c is Button b) { b.Margin = new Padding(4); b.Height = Math.Max(b.Height, CaoNut); continue; }
+            bool field = c is TextBox { Multiline: false } or NumericUpDown or DateTimePicker or ComboBox;
+            if (!field && c is not Label { AutoSize: true }) continue;
+                        int h = c.PreferredSize.Height;
+            c.Margin = new Padding(4, 4 + Math.Max(0, (CaoNut - h) / 2), 4, 4);
         }
     }
     // TV1: tô một control theo loại và vai trò màu hiện có
     private static void Paint(Control c)
     {
+        // Mọi chữ tối thiểu cỡ 10 (giữ nguyên kiểu đậm/nghiêng và các tiêu đề cỡ lớn hơn)
+        if (c is not DataGridView && c.Font.Size < 10)
+            c.Font = new Font("Segoe UI", 10, c.Font.Style);
         switch (c)
         {
             case Button b: StyleButton(b); return;
@@ -165,9 +185,24 @@ internal static class ShopTheme
         b.FlatAppearance.BorderColor = danger ? t.Danger : t.Line;
         b.BackColor = primary ? t.Accent : danger ? t.DangerBg : t.Surface;
         b.ForeColor = primary ? t.OnAccent : danger ? t.Danger : t.Accent; b.Cursor = Cursors.Hand;
-        b.Padding = new Padding(10, 5, 10, 5); b.MinimumSize = new Size(0, 38);
+        b.Font = new Font("Segoe UI", 10); b.Padding = new Padding(10, 5, 10, 5);
+        b.AutoSize = true; b.AutoSizeMode = AutoSizeMode.GrowOnly;
+        b.MinimumSize = new Size(b.Parent is FlowLayoutPanel || b.Parent == null ? RongNutToiThieu : 0, CaoNut);
         b.FlatAppearance.MouseOverBackColor = primary ? t.AccentHover : t.AccentSoft;
         b.FlatAppearance.MouseDownBackColor = primary ? t.AccentDown : t.Line;
+        if (primary && vedNutChinh.Add(b)) b.Paint += VeChuNutChinhKhiTat;
+    }
+
+    private static readonly HashSet<Button> vedNutChinh = new();
+
+    // Nút chính bị vô hiệu: WinForms tự vẽ chữ xám khó đọc trên nền đậm -> vẽ lại chữ trắng
+    private static void VeChuNutChinhKhiTat(object? sender, PaintEventArgs e)
+    {
+        if (sender is not Button b || b.Enabled) return;
+        var t = Current;
+        using (var br = new SolidBrush(b.BackColor)) e.Graphics.FillRectangle(br, b.ClientRectangle);
+        TextRenderer.DrawText(e.Graphics, b.Text, b.Font, b.ClientRectangle, t.OnAccent,
+            TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.NoPadding);
     }
     // TV1: kiểu bảng dữ liệu; chỉnh tại chỗ nên không mất định dạng cột của form
     public static void StyleGrid(DataGridView g)

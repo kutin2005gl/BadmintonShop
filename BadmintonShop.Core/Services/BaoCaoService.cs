@@ -142,8 +142,8 @@ public static class BaoCaoService
         foreach(var tt in QuyTacBanHang.TrangThaiDon) trangThai.Rows.Add(tt,hoaDon.Count(x=>x.First().Field<string>("TrangThai")==tt));
         bang.Add("Trạng thái đơn",trangThai);
         foreach(var (maCot,tenCot,tenBang,nhomRong) in new[]
-            {("MaNV","TenNhanVien","Nhân viên × năm","Chưa gán nhân viên"),
-             ("MaKH","TenKhachHang","Khách hàng × năm","Khách vãng lai")})
+            {("MaNV","TenNhanVien","Theo nhân viên","Chưa gán nhân viên"),
+             ("MaKH","TenKhachHang","Theo khách hàng","Khách vãng lai")})
         {
             var dt=Bang("Mã",typeof(int),"Tên",typeof(string));
             for(int nam=tu.Year;nam<=den.Year;nam++)dt.Columns.Add(nam.ToString(CultureInfo.InvariantCulture),typeof(decimal));
@@ -181,7 +181,8 @@ public static class BaoCaoService
                 for(int q=0;q<4;q++)tongQuy[q]+=quy[q];
             }
             dt.Rows.Add(DBNull.Value,"Tất cả",tongQuy[0],tongQuy[1],tongQuy[2],tongQuy[3],tongQuy.Sum());
-            bang.Add($"Sản phẩm × quý {nam}",dt);
+            // Một năm: tên gọn "Theo sản phẩm"; nhiều năm: mỗi năm một bảng, thêm số năm để không trùng tên.
+            bang.Add(tu.Year==den.Year?"Theo sản phẩm":$"Theo sản phẩm {nam}",dt);
         }
         return new KetQuaBaoCao(tu.Date,den.Date,loai??"Tất cả",tong,bang);
     }
