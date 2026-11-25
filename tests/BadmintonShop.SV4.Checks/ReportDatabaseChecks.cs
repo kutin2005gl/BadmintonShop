@@ -46,13 +46,13 @@ internal static partial class Program
             var raw=repo.LayDuLieuBaoCao(from,to,null);
             Eq(10,raw.BanHang.Rows.Count);Eq(3,raw.NhapHang.Rows.Count);
             var k=BaoCaoService.Tao(raw,from,to,null);Eq(511m,k.TongDoanhThu);
-            Eq(411m,k.Bang["Sản phẩm × quý 2025"].Rows[^1].Field<decimal>("Tổng"));
-            Eq(100m,k.Bang["Sản phẩm × quý 2026"].Rows[^1].Field<decimal>("Tổng"));
-            foreach(var name in new[]{"Nhân viên × năm","Khách hàng × năm"})Eq(511m,k.Bang[name].Rows[^1].Field<decimal>("Tổng"));
+            Eq(411m,k.Bang["Theo sản phẩm 2025"].Rows[^1].Field<decimal>("Tổng"));
+            Eq(100m,k.Bang["Theo sản phẩm 2026"].Rows[^1].Field<decimal>("Tổng"));
+            foreach(var name in new[]{"Theo nhân viên","Theo khách hàng"})Eq(511m,k.Bang[name].Rows[^1].Field<decimal>("Tổng"));
             Eq(-89m,k.Bang["Thu–chi 2025"].Rows[2].Field<decimal>("Tổng"));
             Eq(-50m,k.Bang["Thu–chi 2026"].Rows[2].Field<decimal>("Tổng"));
-            Eq(120m,k.Bang["Nhân viên × năm"].AsEnumerable().Single(r=>r.Field<string>("Tên")=="Chưa gán nhân viên").Field<decimal>("Tổng"));
-            Eq(90m,k.Bang["Khách hàng × năm"].AsEnumerable().Single(r=>r.Field<string>("Tên")=="Khách vãng lai").Field<decimal>("Tổng"));
+            Eq(120m,k.Bang["Theo nhân viên"].AsEnumerable().Single(r=>r.Field<string>("Tên")=="Chưa gán nhân viên").Field<decimal>("Tổng"));
+            Eq(90m,k.Bang["Theo khách hàng"].AsEnumerable().Single(r=>r.Field<string>("Tên")=="Khách vãng lai").Field<decimal>("Tổng"));
             XuatTaiLieu.Excel(Path.Combine(output,"demo-report.xlsx"),k);XuatTaiLieu.BaoCaoPdf(Path.Combine(output,"demo-report.pdf"),k);
             ExportExpected("demo-report",k);
         });

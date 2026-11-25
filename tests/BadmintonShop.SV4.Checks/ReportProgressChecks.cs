@@ -42,7 +42,7 @@ internal static partial class Program
         Test("R01 product quarters / two years / empty quarters / end date / canceled",()=>
         {
             var k=BaoCaoService.Tao(ReportProgressFixture(),tu,den,null);Eq(511m,k.TongDoanhThu);
-            var a=k.Bang["Sản phẩm × quý 2025"];var b=k.Bang["Sản phẩm × quý 2026"];
+            var a=k.Bang["Theo sản phẩm 2025"];var b=k.Bang["Theo sản phẩm 2026"];
             Eq(511m,k.Bang["Theo quý"].AsEnumerable().Sum(r=>r.Field<decimal>("Doanh thu")));
             var sp1=a.AsEnumerable().Single(r=>r.Field<int?>("Mã SP")==1);
             Eq(111m,sp1.Field<decimal>("Q1"));Eq(0m,sp1.Field<decimal>("Q2"));Eq(120m,sp1.Field<decimal>("Q3"));Eq(231m,sp1.Field<decimal>("Tổng"));
@@ -56,7 +56,7 @@ internal static partial class Program
         Test("R02 employee / customer years / unassigned groups / no duplicated invoice",()=>
         {
             var k=BaoCaoService.Tao(ReportProgressFixture(),tu,den,null);
-            var nv=k.Bang["Nhân viên × năm"];var kh=k.Bang["Khách hàng × năm"];
+            var nv=k.Bang["Theo nhân viên"];var kh=k.Bang["Theo khách hàng"];
             Eq(231m,nv.AsEnumerable().Single(r=>r.Field<int?>("Mã")==1).Field<decimal>("Tổng"));
             Eq(120m,nv.AsEnumerable().Single(r=>r.Field<string>("Tên")=="Chưa gán nhân viên").Field<decimal>("Tổng"));
             Eq(90m,kh.AsEnumerable().Single(r=>r.Field<string>("Tên")=="Khách vãng lai").Field<decimal>("Tổng"));
@@ -77,10 +77,10 @@ internal static partial class Program
         {
             var source=ReportProgressFixture();var from=new DateTime(2025,4,1);var to=new DateTime(2025,6,30);
             var k=BaoCaoService.Tao(source,from,to,null);Eq(90m,k.TongDoanhThu);
-            var a=k.Bang["Sản phẩm × quý 2025"];Eq(0m,a.Rows[^1].Field<decimal>("Q1"));Eq(90m,a.Rows[^1].Field<decimal>("Q2"));
+            var a=k.Bang["Theo sản phẩm"];Eq(0m,a.Rows[^1].Field<decimal>("Q1"));Eq(90m,a.Rows[^1].Field<decimal>("Q2"));
             Reject(()=>BaoCaoService.Tao(source,to,from,null));
             var empty=BaoCaoService.Tao(source,new DateTime(2024,1,1),new DateTime(2024,12,31),null);
-            Eq(0m,empty.TongDoanhThu);Eq(0m,empty.Bang["Sản phẩm × quý 2024"].Rows[^1].Field<decimal>("Tổng"));
+            Eq(0m,empty.TongDoanhThu);Eq(0m,empty.Bang["Theo sản phẩm"].Rows[^1].Field<decimal>("Tổng"));
             Eq(0m,empty.Bang["Thu–chi 2024"].Rows[1].Field<decimal>("Tổng"));
             var chiOnly=BaoCaoService.Tao(source,new DateTime(2026,12,1),new DateTime(2026,12,31),null);
             Eq(0m,chiOnly.TongDoanhThu);Eq(-150m,chiOnly.Bang["Thu–chi 2026"].Rows[2].Field<decimal>("Tổng"));
@@ -92,7 +92,7 @@ internal static partial class Program
             for(int sp=1;sp<=3;sp++)t.Rows.Add(1,tu,"Online","Hoàn thành",1m,sp,$"SP{sp}",sp==1?1:2,$"DM{(sp==1?1:2)}",1,1m);
             var k=BaoCaoService.Tao(t,tu,tu,null);
             Eq(1m,k.Bang["Theo danh mục"].AsEnumerable().Single(r=>r.Field<int>("Mã DM")==1).Field<decimal>("Doanh thu"));
-            Eq(1m,k.Bang["Sản phẩm × quý 2025"].AsEnumerable().Single(r=>r.Field<int?>("Mã SP")==1).Field<decimal>("Q1"));
+            Eq(1m,k.Bang["Theo sản phẩm"].AsEnumerable().Single(r=>r.Field<int?>("Mã SP")==1).Field<decimal>("Q1"));
         });
         Test("R06 new reports XLSX numeric values and PDF reopen",()=>
         {
@@ -112,10 +112,10 @@ internal static partial class Program
         Test("R07 chart includes unassigned group and handles empty total row",()=>
         {
             var k=BaoCaoService.Tao(ReportProgressFixture(),tu,den,null);
-            foreach(var name in new[]{"Nhân viên × năm","Khách hàng × năm","Sản phẩm × quý 2025"})
+            foreach(var name in new[]{"Theo nhân viên","Theo khách hàng","Theo sản phẩm 2025"})
             { using var chart=new BieuDoCot { DuLieu=k.Bang[name],Size=new Size(1000,300) };using var bitmap=new Bitmap(1000,300);chart.DrawToBitmap(bitmap,chart.ClientRectangle); }
             var empty=BaoCaoService.Tao(Source(),tu,tu,null);
-            using var c=new BieuDoCot { DuLieu=empty.Bang["Sản phẩm × quý 2025"],Size=new Size(1000,300) };
+            using var c=new BieuDoCot { DuLieu=empty.Bang["Theo sản phẩm"],Size=new Size(1000,300) };
             using var b=new Bitmap(1000,300);c.DrawToBitmap(b,c.ClientRectangle);
         });
     }

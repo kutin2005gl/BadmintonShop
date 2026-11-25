@@ -42,7 +42,7 @@ namespace BadmintonShop.Desktop
             };
 
             panelChinh.RowStyles.Add(
-                new RowStyle(SizeType.Absolute, 55));
+                new RowStyle(SizeType.Absolute, 0));   // tiêu đề đã có ở thanh trên của cửa sổ chính
             panelChinh.RowStyles.Add(
                 new RowStyle(SizeType.Absolute, 60));
             panelChinh.RowStyles.Add(
@@ -50,16 +50,6 @@ namespace BadmintonShop.Desktop
             panelChinh.RowStyles.Add(
                 new RowStyle(SizeType.Absolute, 65));
 
-            var lblTieuDe = new Label
-            {
-                Text = "QUẢN LÝ ĐÁNH GIÁ SẢN PHẨM",
-                Font = new Font("Segoe UI", 18, FontStyle.Bold),
-                ForeColor = ShopTheme.Green,
-                Dock = DockStyle.Fill,
-                TextAlign = ContentAlignment.MiddleLeft
-            };
-
-            panelChinh.Controls.Add(lblTieuDe, 0, 0);
 
             var panelLoc = new FlowLayoutPanel
             {

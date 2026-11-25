@@ -15,7 +15,7 @@ internal static class ThemeCatalog
     private static Color C(int r, int g, int b) => Color.FromArgb(r, g, b);
 
     // Giấy: nền giấy ấm, mực xanh navy, thoáng như sổ sách; thanh bên sáng.
-    public static readonly ThemeDef Giay = new("Georgia", 46,
+    public static readonly ThemeDef Giay = new("Segoe UI", 46,
         Bg: C(245,241,233), Surface: C(255,253,248), SurfaceAlt: C(250,246,238), Field: C(255,253,248),
         Ink: C(28,34,51), Muted: C(94,92,102), Line: C(226,219,205),
         Accent: C(30,50,92), OnAccent: C(255,253,248), AccentHover: C(48,74,128), AccentDown: C(18,32,66), AccentSoft: C(226,231,242),

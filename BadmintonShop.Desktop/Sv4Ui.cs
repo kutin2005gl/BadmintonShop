@@ -28,6 +28,8 @@ internal static class Sv4Ui
                 e.CellStyle!.ForeColor=color;e.CellStyle.SelectionForeColor=color;
             }
         };
+        // Ô sửa trong bảng (ô chọn sản phẩm, ô số) là control Windows tạo lúc bấm sửa: phóng chữ cho bằng chữ trong bảng
+        grid.EditingControlShowing+=(_,e)=> { if(e.Control!=null) ChuONhap.Can(e.Control); };
         grid.DataBindingComplete+=(_,_)=>DinhDangLuoi(grid);return grid;
     }
     // SV4: nhãn nghiệp vụ tiếng Việt và định dạng đồng nguyên trên mọi bảng desktop.

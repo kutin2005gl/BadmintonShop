@@ -125,7 +125,7 @@ internal static partial class Program
           using var doc=SpreadsheetDocument.Open(path,false);var errors=new OpenXmlValidator().Validate(doc).ToList();True(errors.Count==0); });
         Test("U11b CO-06 chọn sản phẩm → doanh số Q1–Q4 đúng dòng / dòng Tất cả / bảng rỗng",()=>
         {
-            var k=Fixture();var bang=k.Bang.First(b=>b.Key.StartsWith("Sản phẩm × quý ",StringComparison.Ordinal)).Value;
+            var k=Fixture();var bang=k.Bang.First(b=>b.Key.StartsWith("Theo sản phẩm",StringComparison.Ordinal)).Value;
             foreach(DataRow r in bang.Rows)
             {
                 var quy=FrmThongKe.QuyCuaDong(bang,null,r);Eq(4,quy.Rows.Count);

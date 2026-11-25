@@ -1,4 +1,4 @@
-using BadmintonShop.Core.DataAccess;
+﻿using BadmintonShop.Core.DataAccess;
 using BadmintonShop.Core.Models;
 using BadmintonShop.Core.Services;
 
@@ -9,11 +9,49 @@ public partial class FrmNhaCungCap : Form
 {
     private readonly NhaCungCapRepository _repo = new();
     private int _maDangChon;   // 0 = dang o che do them moi
+    private Label nhanMa = null!;
 
     // TV1: khoi tao form (chi giao dien, KHONG truy cap CSDL de VS Designer mo duoc)
     public FrmNhaCungCap()
     {
         InitializeComponent();
+        DungBoCuc();
+    }
+
+    // Dựng bố cục main-sub giống Phiếu nhập: thanh tìm kiếm trên, danh sách trái, form nhập phải
+    private void DungBoCuc()
+    {
+        var bar = Sv4Ui.ThanhCongCu();
+        lblTim.AutoSize = true; lblTim.Margin = new Padding(5, 9, 5, 3);
+        txtTimKiem.Width = 280; txtTimKiem.Margin = new Padding(4, 6, 4, 4);
+        btnTim.AutoSize = true; btnTim.Margin = new Padding(4); ShopTheme.StyleButton(btnTim);
+        bar.Controls.AddRange(new Control[] { lblTim, txtTimKiem, btnTim });
+
+        dgvNCC.Dock = DockStyle.Fill;
+        ShopTheme.StyleGrid(dgvNCC);
+        var split = KhungChiTiet.Chia(this, 0.6, 420, 360);
+        split.Panel1.Controls.Add(dgvNCC);
+
+        var info = KhungChiTiet.LuoiO(
+            ("Tên nhà cung cấp (*)", txtTen, true),
+            ("Số điện thoại", txtSDT, false),
+            ("Email", txtEmail, false),
+            ("Địa chỉ", txtDiaChi, true));
+        foreach (var b in new[] { btnThem, btnSua, btnXoa, btnLamMoi })
+        { b.AutoSize = true; b.Margin = new Padding(0, 0, 8, 6); ShopTheme.StyleButton(b); }
+        var root = KhungChiTiet.NenChiTiet();
+        split.Panel2.BackColor = ShopTheme.SurfaceAlt;
+        var header = KhungChiTiet.TieuDe(out nhanMa, out var badge);
+        badge.Visible = false;
+        // Thứ tự thêm: Top thêm sau nằm cao hơn
+        root.Controls.Add(KhungChiTiet.HangNut(btnThem, btnSua, btnXoa, btnLamMoi));
+        root.Controls.Add(KhungChiTiet.Cach(12));
+        root.Controls.Add(KhungChiTiet.The("Thông tin nhà cung cấp", info));
+        root.Controls.Add(header);
+        split.Panel2.Controls.Add(root);
+
+        Controls.Add(split); Controls.Add(bar);
+        ShopTheme.Apply(this);
     }
 
     // TV1: khi form hien len - kiem tra quyen roi nap danh sach nha cung cap
@@ -45,6 +83,7 @@ public partial class FrmNhaCungCap : Form
     private void LamMoiForm()
     {
         _maDangChon = 0;
+        nhanMa.Text = "Nhà cung cấp mới";
         txtTen.Clear(); txtDiaChi.Clear(); txtSDT.Clear(); txtEmail.Clear();
         btnThem.Enabled = true;
         btnSua.Enabled = btnXoa.Enabled = false;
@@ -57,6 +96,7 @@ public partial class FrmNhaCungCap : Form
     {
         if (dgvNCC.CurrentRow?.DataBoundItem is not NhaCungCap n || !dgvNCC.CurrentRow.Selected) return;
         _maDangChon = n.MaNCC;
+        nhanMa.Text = $"Nhà cung cấp {n.MaNCC}";
         txtTen.Text = n.TenNCC;
         txtDiaChi.Text = n.DiaChi ?? "";
         txtSDT.Text = n.SDT ?? "";

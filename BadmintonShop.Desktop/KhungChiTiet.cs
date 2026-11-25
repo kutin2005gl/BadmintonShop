@@ -1,4 +1,4 @@
-namespace BadmintonShop.Desktop;
+﻿namespace BadmintonShop.Desktop;
 
 // TV1: các mảnh dựng màn hình main-sub theo mẫu Đơn hàng: danh sách bên trái, panel chi tiết bên phải.
 internal static class KhungChiTiet
@@ -59,12 +59,76 @@ internal static class KhungChiTiet
     // TV1: thêm một dòng nhãn + điều khiển vào bảng thông tin
     public static void Dong(TableLayoutPanel bang, string nhan, Control giaTri)
     {
-        var name = new Label { Text = nhan, AutoSize = true, ForeColor = ShopTheme.Muted, Font = new Font("Segoe UI", 9), Anchor = AnchorStyles.Left, Margin = new Padding(0, 5, 12, 5) };
+        var name = new Label { Text = nhan, AutoSize = true, ForeColor = ShopTheme.Muted, Font = new Font("Segoe UI", 10), Anchor = AnchorStyles.Left, Margin = new Padding(0, 5, 12, 5) };
         int row = bang.RowCount++; bang.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         if (giaTri is Label) giaTri.Anchor = AnchorStyles.Left;
-        else { giaTri.Anchor = AnchorStyles.Left | AnchorStyles.Right; giaTri.Margin = new Padding(0, 4, 2, 4); }
+        else { giaTri.Anchor = AnchorStyles.Left | AnchorStyles.Right; giaTri.Margin = new Padding(0, 4, 2, 4); giaTri.Font = new Font("Segoe UI", 10); }
         bang.Controls.Add(name, 0, row); bang.Controls.Add(giaTri, 1, row);
     }
+
+    // Nền kem của panel chi tiết (giống mẫu Đơn hàng / Phiếu nhập: nền kem, nội dung nằm trong thẻ sáng có viền)
+    public static Panel NenChiTiet() => new() { Dock = DockStyle.Fill, Padding = new Padding(14, 12, 14, 12), BackColor = ShopTheme.SurfaceAlt };
+
+    // Thẻ có viền bao quanh một nhóm nội dung (bảng thông tin, hàng nút...); các phần tử bên trong Dock Top
+    public static Panel The(params Control[] noiDung)
+    {
+        var the = new Panel { Dock = DockStyle.Top, AutoSize = true, BackColor = ShopTheme.Surface, Padding = new Padding(12, 8, 12, 8) };
+        the.Paint += (_, e) => { using var p = new Pen(ShopTheme.Line); e.Graphics.DrawRectangle(p, 0, 0, the.Width - 1, the.Height - 1); };
+        the.Resize += (_, _) => the.Invalidate();
+        // Dock Top: thêm sau nằm cao hơn, nên thêm ngược thứ tự
+        for (int i = noiDung.Length - 1; i >= 0; i--) { noiDung[i].Dock = DockStyle.Top; the.Controls.Add(noiDung[i]); }
+        return the;
+    }
+
+    // Thẻ có tiêu đề: tên nhóm + đường kẻ mảnh, rồi nội dung; nhiều thẻ xếp chồng tạo thành form gọn gàng
+    public static Panel The(string tieuDe, params Control[] noiDung)
+    {
+        var tde = new Label { Text = tieuDe, AutoSize = false, Height = 30, TextAlign = ContentAlignment.MiddleLeft,
+            Font = new Font("Segoe UI", 11, FontStyle.Bold), ForeColor = ShopTheme.Green };
+        var ke = new Panel { Height = 1, BackColor = ShopTheme.Line, Margin = Padding.Empty };
+        var dem = new Panel { Height = 10, BackColor = ShopTheme.Surface };
+        var ds = new List<Control> { tde, ke, dem }; ds.AddRange(noiDung);
+        var the = The(ds.ToArray());
+        the.Padding = new Padding(16, 10, 16, 6);
+        return the;
+    }
+
+    // Lưới ô nhập: nhãn nằm trên ô, hai ô một hàng; ô "rộng" chiếm cả hàng.
+    // Nhãn và ô nằm thẳng trong một bảng (không lồng bảng tự co giãn, tránh vòng lặp dàn trang).
+    public static TableLayoutPanel LuoiO(params (string Nhan, Control O, bool Rong)[] ds)
+    {
+        var t = new TableLayoutPanel { Dock = DockStyle.Top, AutoSize = true, ColumnCount = 2, BackColor = ShopTheme.Surface, Margin = Padding.Empty };
+        t.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50)); t.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        // gom thành các hàng: mỗi hàng 1 ô rộng hoặc tối đa 2 ô hẹp
+        var hang = new List<List<(string Nhan, Control O, bool Rong)>>();
+        foreach (var o in ds)
+        {
+            if (o.Rong) { hang.Add(new() { o }); continue; }
+            if (hang.Count == 0 || hang[^1].Count == 2 || hang[^1][0].Rong) hang.Add(new());
+            hang[^1].Add(o);
+        }
+        int row = 0;
+        foreach (var h in hang)
+        {
+            t.RowStyles.Add(new RowStyle(SizeType.AutoSize)); t.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            for (int col = 0; col < h.Count; col++)
+            {
+                var (nhan, o, rong) = h[col];
+                int trai = col == 0 ? 0 : 8, phai = col == 0 && !rong ? 8 : 0;
+                var lb = new Label { Text = nhan, AutoSize = true, ForeColor = ShopTheme.Muted, Anchor = AnchorStyles.Left, Margin = new Padding(trai, 0, phai, 4) };
+                o.Margin = new Padding(trai, 0, phai, 14);
+                o.Anchor = o is Label ? AnchorStyles.Left : AnchorStyles.Left | AnchorStyles.Right;
+                t.Controls.Add(lb, col, row); t.Controls.Add(o, col, row + 1);
+                if (rong) { t.SetColumnSpan(lb, 2); t.SetColumnSpan(o, 2); }
+            }
+            row += 2;
+        }
+        t.RowCount = row;
+        return t;
+    }
+
+    // Khoảng cách giữa các thẻ
+    public static Control Cach(int cao = 10) => new Panel { Dock = DockStyle.Top, Height = cao, BackColor = ShopTheme.SurfaceAlt };
 
     // TV1: tiêu đề một mục trong panel chi tiết
     public static Label Muc(string text) => new()

@@ -13,6 +13,8 @@ public class FrmThongKe : Form
     private readonly ComboBox loai = Sv4Ui.Chon("Tất cả loại bán", "Online", "Tại quầy");
     private readonly Label tong = new() { Dock = DockStyle.Top, Height = 34, Padding = new Padding(14, 8, 0, 0), ForeColor = ShopTheme.Muted };
     private readonly TabControl tabs = new() { Dock = DockStyle.Fill };
+    // Thanh chọn báo cáo dạng "chip" thay cho dải tab: tự xuống hàng, mỗi chip rộng vừa chữ
+    private readonly FlowLayoutPanel chips = new() { Dock = DockStyle.Top, AutoSize = true, WrapContents = true, Padding = new Padding(10, 6, 10, 6) };
     private readonly Label tongThu = ShopTheme.Title("—", 20);
     private readonly Label tongChi = ShopTheme.Title("—", 20);
     private int soThang;
@@ -50,6 +52,7 @@ public class FrmThongKe : Form
         cards.Controls.Add(TaoThe("Tổng thu", tongThu), 0, 0);
         cards.Controls.Add(TaoThe("Tổng chi", tongChi), 1, 0);
         Controls.Add(tabs);
+        Controls.Add(chips);
         Controls.Add(tong);
         Controls.Add(cards);
         Controls.Add(bar);
@@ -191,21 +194,64 @@ public class FrmThongKe : Form
             }
             else
             {
-                var split = new SplitContainer { Dock = DockStyle.Fill, Orientation = Orientation.Horizontal, Size = new Size(1100, 600), SplitterDistance = 290 };
-                var chart = new BieuDoCot { DuLieu = dt };
-                if (ten.StartsWith("Sản phẩm × quý ", StringComparison.Ordinal))
+                // Bảng bên trái, biểu đồ bên phải (giống Thu–chi toàn cửa hàng)
+                var chia = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, BackColor = ShopTheme.Surface, Padding = new Padding(8) };
+                chia.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+                chia.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+                var chart = new BieuDoCot { DuLieu = dt, Dock = DockStyle.Fill };
+                if (ten.StartsWith("Theo sản phẩm", StringComparison.Ordinal))
                 {
                     chart.DuLieu = QuyCuaDong(dt, null);
                     grid.CurrentCellChanged += (_, _) => { chart.DuLieu = QuyCuaDong(dt, grid); chart.Invalidate(); };
                 }
                 grid.DataSource = dt;
-                split.Panel1.Controls.Add(grid);
-                split.Panel2.Controls.Add(chart);
-                page.Controls.Add(split);
+                grid.Dock = DockStyle.Fill;
+                chia.Controls.Add(grid, 0, 0);
+                chia.Controls.Add(chart, 1, 0);
+                page.Controls.Add(chia);
             }
             tabs.TabPages.Add(page);
         }
+        // Ẩn dải tab gốc; chọn báo cáo bằng các chip ở trên
+        tabs.Appearance = TabAppearance.FlatButtons; tabs.SizeMode = TabSizeMode.Fixed; tabs.Multiline = false; tabs.ItemSize = new Size(0, 1);
+        DungChip();
         tabs.SelectedTab = tabs.TabPages.Cast<TabPage>().FirstOrDefault(p => p.Text == tabDangXem) ?? tabs.TabPages[0];
+        ToChip();
+    }
+
+    // Tạo lại các chip theo danh sách báo cáo hiện có
+    private void DungChip()
+    {
+        chips.SuspendLayout();
+        while (chips.Controls.Count > 0) { var c = chips.Controls[0]; chips.Controls.RemoveAt(0); c.Dispose(); }
+        chips.BackColor = ShopTheme.Background;
+        foreach (TabPage page in tabs.TabPages)
+        {
+            var b = new Button { Text = page.Text, Tag = page, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, FlatStyle = FlatStyle.Flat,
+                Padding = new Padding(10, 3, 10, 3), Margin = new Padding(0, 0, 8, 8), MinimumSize = new Size(0, 34), Cursor = Cursors.Hand, UseVisualStyleBackColor = false };
+            b.Click += (_, _) => { tabs.SelectedTab = page; ToChip(); };
+            chips.Controls.Add(b);
+        }
+        chips.ResumeLayout();
+        if (!chipDaGan) { chipDaGan = true; tabs.SelectedIndexChanged += (_, _) => ToChip(); }
+    }
+    private bool chipDaGan;
+
+    // Chip đang chọn: nền xanh đậm chữ trắng; còn lại: nền sáng viền mảnh
+    private void ToChip()
+    {
+        var t = ShopTheme.Current;
+        foreach (Button b in chips.Controls)
+        {
+            bool chon = ReferenceEquals(b.Tag, tabs.SelectedTab);
+            b.BackColor = chon ? t.Accent : t.Surface;
+            b.ForeColor = chon ? t.OnAccent : t.Ink;
+            b.Font = new Font(b.Font, chon ? FontStyle.Bold : FontStyle.Regular);
+            b.FlatAppearance.BorderSize = chon ? 0 : 1;
+            b.FlatAppearance.BorderColor = t.Line;
+            b.FlatAppearance.MouseOverBackColor = chon ? t.AccentHover : t.AccentSoft;
+            b.FlatAppearance.MouseDownBackColor = chon ? t.AccentDown : t.Line;
+        }
     }
 
     // TV1: mo danh sach day du san pham da ban trong ky
