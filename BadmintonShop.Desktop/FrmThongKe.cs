@@ -163,6 +163,7 @@ public class FrmThongKe : Form
         {
             var page = new TabPage(ten);
             var grid = Sv4Ui.Luoi();
+            grid.DataBindingComplete += (_, _) => CanGiuaSo(grid);
             if (ten == BaoCaoService.BangThuChi)
             {
                 grid.DataBindingComplete += (_, _) =>
@@ -219,6 +220,18 @@ public class FrmThongKe : Form
         ToChip();
     }
 
+    // Cột số (tiền, số lượng, số đơn, mã) canh giữa cùng tiêu đề; chạy sau định dạng chung (vốn canh phải số)
+    private static void CanGiuaSo(DataGridView grid)
+    {
+        foreach (DataGridViewColumn c in grid.Columns)
+        {
+            var t = Nullable.GetUnderlyingType(c.ValueType ?? typeof(string)) ?? c.ValueType;
+            if (t != typeof(decimal) && t != typeof(int) && t != typeof(long) && t != typeof(double)) continue;
+            c.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            c.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
+        }
+    }
+
     // Tạo lại các chip theo danh sách báo cáo hiện có
     private void DungChip()
     {
@@ -259,6 +272,7 @@ public class FrmThongKe : Form
     {
         using var form = new Form { Text = "Tất cả sản phẩm đã bán", Size = new Size(760, 570), MinimumSize = new Size(520, 360) };
         var grid = Sv4Ui.Luoi();
+        grid.DataBindingComplete += (_, _) => CanGiuaSo(grid);
         grid.DataSource = dt;
         form.Controls.Add(grid);
         form.Controls.Add(new Label

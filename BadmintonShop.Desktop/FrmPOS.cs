@@ -105,7 +105,14 @@ public class FrmPOS : Form, IUnsavedWork
         if(gioLuoi.CurrentRow?.DataBoundItem is not DongPOS d)throw new ArgumentException("Chọn sản phẩm trong giỏ bên phải.");
         d.SoLuong=(int)sl.Value;gio.ResetBindings();
     }
-    private void Bo() { if(gioLuoi.CurrentRow?.DataBoundItem is DongPOS d)gio.Remove(d); }
+    private void Bo()
+    {
+        if(gioLuoi.CurrentRow?.DataBoundItem is not DongPOS d)return;
+        // Rời ô đang chọn trước khi xóa: nếu xóa đúng dòng hiện hành, lưới còn kiểm tra dòng đó sau khi nó đã mất
+        // và báo IndexOutOfRangeException ("Index 1 does not have a value").
+        gioLuoi.EndEdit();gioLuoi.CurrentCell=null;
+        gio.Remove(d);
+    }
     private async void TinhLai()
     {
         if(IsDisposed || Disposing || binding || dangLuu)return;
