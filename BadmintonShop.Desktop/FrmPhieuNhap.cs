@@ -15,6 +15,7 @@ public partial class FrmPhieuNhap : Form
     /// <summary>1 dong tren luoi chi tiet (chua luu CSDL).</summary>
     private sealed class DongNhap
     {
+        public bool Chon { get; set; }
         public int MaSP { get; init; }
         public string TenSP { get; init; } = "";
         public string DonViTinh { get; init; } = "";
@@ -26,14 +27,22 @@ public partial class FrmPhieuNhap : Form
     private readonly PhieuNhapRepository _pnRepo = new();
     private readonly BindingList<DongNhap> _dong = new();
     private List<SanPham> _sanPham = new();
+    private readonly Dictionary<int, Image?> _anhNho = new();
+    private const string CotXoa = "Xoa";
 
     /// <summary>Ma phieu vua luu (0 = chua luu) - FrmDanhSachPhieuNhap dung de chon lai dong moi.</summary>
     public int MaPNVuaLuu { get; private set; }
 
-    // TV1: khoi tao form (chi giao dien, KHONG truy cap CSDL de VS Designer mo duoc)
+    /// <summary>Ma san pham chon san trong o san pham khi mo form (0 = khong chon).</summary>
+    [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+    public int MaSPChonSan { get; set; }
+
+    // TV1: khoi tao form (chi giao dien, KHONG truy cap CSDL)
     public FrmPhieuNhap()
     {
         InitializeComponent();
+        TaoCot();
+        GanGoiY();
     }
 
     // TV1: khi form hien len - kiem tra quyen, nguoi lap = nhan vien dang dang nhap, nap NCC + san pham
@@ -43,9 +52,10 @@ public partial class FrmPhieuNhap : Form
         if (DesignMode || !QuyenForm.KiemTraKhiMo(this, ChucNang.NhaCungCapPhieuNhap)) return;
         lblNguoiLap.Text = $"Người lập: {PhienDangNhap.HoTen}";
         dtpNgayNhap.Value = DateTime.Now;
-        dgvChiTiet.DataSource = _dong;
         DinhDangLuoi();
+        dgvChiTiet.DataSource = _dong;
         NapDanhMucChon();
+        if (MaSPChonSan > 0) { cboSanPham.SelectedValue = MaSPChonSan; cboSanPham_SelectionChangeCommitted(cboSanPham, EventArgs.Empty); }
         CapNhatTongTien();
     }
 
@@ -68,24 +78,117 @@ public partial class FrmPhieuNhap : Form
         catch (Exception ex) { BaoLoiHeThong(ex); }
     }
 
-    // TV1: dat tieu de, dinh dang so tien cho luoi chi tiet
+    // TV1: khai bao cac cot cua bang chi tiet: o chon, thong tin dong va nut xoa
+    private void TaoCot()
+    {
+        dgvChiTiet.Columns.Add(new DataGridViewCheckBoxColumn { Name = nameof(DongNhap.Chon), DataPropertyName = nameof(DongNhap.Chon), HeaderText = "", FillWeight = 28, MinimumWidth = S(44) });
+        foreach (var (ten, tieuDe, rong, toiThieu) in new[]
+        {
+            (nameof(DongNhap.MaSP), "Mã SP", 55, 64), (nameof(DongNhap.TenSP), "Sản phẩm", 210, 160), (nameof(DongNhap.DonViTinh), "ĐVT", 50, 56),
+            (nameof(DongNhap.SoLuong), "Số lượng", 70, 84), (nameof(DongNhap.DonGia), "Đơn giá nhập", 95, 112), (nameof(DongNhap.ThanhTien), "Thành tiền", 100, 112),
+        })
+            dgvChiTiet.Columns.Add(new DataGridViewTextBoxColumn { Name = ten, DataPropertyName = ten, HeaderText = tieuDe, FillWeight = rong, MinimumWidth = S(toiThieu) });
+        dgvChiTiet.Columns.Add(new DataGridViewTextBoxColumn { Name = CotXoa, HeaderText = "", FillWeight = 28, MinimumWidth = S(44) });
+    }
+
+    // TV1: chinh kieu bang (dong gon, can le, ve anh san pham va thung rac) va gan thao tac chuot
     private void DinhDangLuoi()
     {
-        dgvChiTiet.Columns[nameof(DongNhap.MaSP)]!.HeaderText = "Mã SP";
-        dgvChiTiet.Columns[nameof(DongNhap.TenSP)]!.HeaderText = "Sản phẩm";
-        dgvChiTiet.Columns[nameof(DongNhap.DonViTinh)]!.HeaderText = "ĐVT";
-        dgvChiTiet.Columns[nameof(DongNhap.SoLuong)]!.HeaderText = "Số lượng";
-        dgvChiTiet.Columns[nameof(DongNhap.DonGia)]!.HeaderText = "Đơn giá nhập";
-        dgvChiTiet.Columns[nameof(DongNhap.ThanhTien)]!.HeaderText = "Thành tiền";
-        dgvChiTiet.Columns[nameof(DongNhap.TenSP)]!.FillWeight = 250;
-        foreach (DataGridViewColumn c in dgvChiTiet.Columns)   // chi cho sua truc tiep so luong + don gia
-            c.ReadOnly = c.DataPropertyName is not (nameof(DongNhap.SoLuong) or nameof(DongNhap.DonGia));
+        var t = ShopTheme.Current;
+        dgvChiTiet.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None; dgvChiTiet.AllowUserToResizeRows = false;
+        dgvChiTiet.RowTemplate.MinimumHeight = S(30); dgvChiTiet.RowTemplate.Height = S(46);
+        dgvChiTiet.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing; dgvChiTiet.ColumnHeadersHeight = S(40);
+        dgvChiTiet.ColumnHeadersDefaultCellStyle.WrapMode = DataGridViewTriState.False;
+        dgvChiTiet.DefaultCellStyle.WrapMode = DataGridViewTriState.False;
+        dgvChiTiet.AlternatingRowsDefaultCellStyle.BackColor = t.Surface;
+        foreach (DataGridViewColumn c in dgvChiTiet.Columns)   // chi cho tich chon va sua truc tiep so luong + don gia
+        {
+            c.SortMode = DataGridViewColumnSortMode.NotSortable;
+            c.ReadOnly = c.Name is not (nameof(DongNhap.Chon) or nameof(DongNhap.SoLuong) or nameof(DongNhap.DonGia));
+        }
         foreach (var c in new[] { nameof(DongNhap.DonGia), nameof(DongNhap.ThanhTien) })
         {
-            dgvChiTiet.Columns[c]!.DefaultCellStyle.Format = "N0";
+            dgvChiTiet.Columns[c]!.DefaultCellStyle.Format = "#,##0 'đ'";
             dgvChiTiet.Columns[c]!.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            dgvChiTiet.Columns[c]!.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleRight;
         }
+        foreach (var c in new[] { nameof(DongNhap.DonViTinh), nameof(DongNhap.SoLuong) })
+        {
+            dgvChiTiet.Columns[c]!.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            dgvChiTiet.Columns[c]!.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
+        }
+        dgvChiTiet.Columns[nameof(DongNhap.ThanhTien)]!.DefaultCellStyle.Font = ShopTheme.Face("Segoe UI", 10, FontStyle.Bold);
+        // Tich o chon thi ghi ngay vao dong, khong cho roi o
+        dgvChiTiet.CurrentCellDirtyStateChanged += (_, _) => { if (dgvChiTiet.CurrentCell is DataGridViewCheckBoxCell) dgvChiTiet.CommitEdit(DataGridViewDataErrorContexts.Commit); };
+        dgvChiTiet.CellPainting += VeO;
+        dgvChiTiet.CellClick += (_, e) =>
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0 || dgvChiTiet.Columns[e.ColumnIndex].Name != CotXoa || !dgvChiTiet.EndEdit()) return;
+            _dong.RemoveAt(e.RowIndex); CapNhatTongTien();
+        };
+        dgvChiTiet.CellMouseEnter += (_, e) => dgvChiTiet.Cursor = e.RowIndex >= 0 && e.ColumnIndex >= 0 && dgvChiTiet.Columns[e.ColumnIndex].Name == CotXoa ? Cursors.Hand : Cursors.Default;
+        dgvChiTiet.Paint += (_, e) =>
+        {
+            if (dgvChiTiet.Rows.Count > 0) return;
+            TextRenderer.DrawText(e.Graphics, "Chưa có sản phẩm. Chọn sản phẩm rồi bấm Thêm vào phiếu.", dgvChiTiet.Font,
+                new Rectangle(0, dgvChiTiet.ColumnHeadersHeight, dgvChiTiet.Width, dgvChiTiet.Height - dgvChiTiet.ColumnHeadersHeight), ShopTheme.Muted,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak);
+        };
     }
+
+    // TV1: ve anh nho canh ten san pham va bieu tuong thung rac o cot xoa
+    private void VeO(object? sender, DataGridViewCellPaintingEventArgs e)
+    {
+        if (e.RowIndex < 0 || e.ColumnIndex < 0 || e.Graphics == null) return;
+        var cot = dgvChiTiet.Columns[e.ColumnIndex].Name;
+        if (cot != CotXoa && cot != nameof(DongNhap.TenSP)) return;
+        e.Paint(e.CellBounds, DataGridViewPaintParts.Background | DataGridViewPaintParts.SelectionBackground | DataGridViewPaintParts.Border);
+        if (cot == CotXoa) Ve.BieuTuong(e.Graphics, "\uE74D", 12, e.CellBounds, ShopTheme.Muted);
+        else if (dgvChiTiet.Rows[e.RowIndex].DataBoundItem is DongNhap d)
+        {
+            int co = e.CellBounds.Height - S(10), x = e.CellBounds.X + S(6);
+            var khung = new Rectangle(x, e.CellBounds.Y + S(5), co, co);
+            e.Graphics.FillRectangle(Brushes.White, khung);
+            if (AnhNho(d.MaSP) is { } anh)
+            {
+                float tiLe = Math.Min((float)co / anh.Width, (float)co / anh.Height);
+                e.Graphics.DrawImage(anh, khung.X + (co - anh.Width * tiLe) / 2, khung.Y + (co - anh.Height * tiLe) / 2, anh.Width * tiLe, anh.Height * tiLe);
+            }
+            using (var vien = new Pen(ShopTheme.Line)) e.Graphics.DrawRectangle(vien, khung);
+            var chon = (e.State & DataGridViewElementStates.Selected) != 0;
+            Ve.Chu(e.Graphics, d.TenSP, dgvChiTiet.Font, new Rectangle(khung.Right + S(8), e.CellBounds.Y, e.CellBounds.Right - khung.Right - S(12), e.CellBounds.Height),
+                chon ? ShopTheme.Green : ShopTheme.Ink);
+        }
+        e.Handled = true;
+    }
+
+    // TV1: doc anh san pham mot lan roi giu lai; thieu hoac hong anh thi tra ve null
+    private Image? AnhNho(int maSP)
+    {
+        if (_anhNho.TryGetValue(maSP, out var anh)) return anh;
+        try
+        {
+            var path = KhoAnhSanPham.DuongDanDayDu(_sanPham.FirstOrDefault(s => s.MaSP == maSP)?.HinhAnh);
+            if (path != null && File.Exists(path)) anh = AnhSanPham.Doc(path);
+        }
+        catch (Exception ex) when (ex is ArgumentException or IOException or UnauthorizedAccessException) { anh = null; }
+        return _anhNho[maSP] = anh;
+    }
+
+    // TV1: chu goi y khi chua chon nha cung cap / san pham
+    private void GanGoiY()
+    {
+        cboNCC.DrawItem += (_, e) =>
+        {
+            if (e.Index >= 0) return;
+            using (var nen = new SolidBrush(ShopTheme.Current.Field)) e.Graphics.FillRectangle(nen, e.Bounds);
+            Ve.Chu(e.Graphics, "Chọn nhà cung cấp", cboNCC.Font, e.Bounds, ShopTheme.Muted);
+        };
+        cboSanPham.HandleCreated += (_, _) => SendMessage(cboSanPham.Handle, 0x1703 /* CB_SETCUEBANNER */, IntPtr.Zero, "Gõ hoặc chọn sản phẩm");
+    }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+    private static extern IntPtr SendMessage(IntPtr h, int msg, IntPtr w, string l);
 
     // TV1: chon san pham thi goi y don gia nhap lan gan nhat
     private void cboSanPham_SelectionChangeCommitted(object? sender, EventArgs e)
@@ -123,17 +226,20 @@ public partial class FrmPhieuNhap : Form
             _dong.Add(new DongNhap { MaSP = sp.MaSP, TenSP = sp.TenSP, DonViTinh = sp.DonViTinh, SoLuong = soLuong, DonGia = donGia });
         }
         CapNhatTongTien();
-        cboSanPham.SelectedIndex = -1;
+        // O chon gan du lieu phai dat -1 hai lan moi trong, neu khong no tu nhay sang san pham dau danh sach
+        cboSanPham.SelectedIndex = -1; cboSanPham.SelectedIndex = -1;
         numSoLuong.Value = 1;
         numDonGia.Value = 0;
         cboSanPham.Focus();
     }
 
-    // TV1: xoa dong dang chon khoi phieu
+    // TV1: xoa cac dong da tich chon; khong tich dong nao thi xoa dong dang chon
     private void btnXoaDong_Click(object? sender, EventArgs e)
     {
-        if (dgvChiTiet.CurrentRow?.DataBoundItem is not DongNhap d) return;
-        _dong.Remove(d);
+        if (!dgvChiTiet.EndEdit()) return;
+        var xoa = _dong.Where(d => d.Chon).ToList();
+        if (xoa.Count == 0 && dgvChiTiet.CurrentRow?.DataBoundItem is DongNhap dangChon) xoa.Add(dangChon);
+        foreach (var d in xoa) _dong.Remove(d);
         CapNhatTongTien();
     }
 
@@ -159,8 +265,9 @@ public partial class FrmPhieuNhap : Form
     // TV1: tinh lai tong tien phieu tren form
     private void CapNhatTongTien()
     {
-        lblTongTien.Text = $"Tổng tiền: {_dong.Sum(d => d.ThanhTien):N0} đ   ({_dong.Count} sản phẩm)";
-        btnLuu.Enabled = _dong.Count > 0;
+        lblTongTien.Text = $"Tổng tiền: {_dong.Sum(d => d.ThanhTien):N0} đ";
+        lblSoDong.Text = $"({_dong.Count} sản phẩm)";
+        btnLuu.Enabled = btnXoaDong.Enabled = _dong.Count > 0;
     }
 
     // TV1: kiem tra va luu phieu nhap (1 transaction), trigger tu tang ton kho + tinh TongTien

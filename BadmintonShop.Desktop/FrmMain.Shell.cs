@@ -62,6 +62,12 @@ public partial class FrmMain
         DungKhung();
     }
 
+    // TV1: mo trang don hang tu lien ket tren trang tong quan
+    internal void MoTrangDonHang() => mnuDonHang_Click(this, EventArgs.Empty);
+
+    // TV1: mo trang san pham tu lien ket tren trang tong quan
+    internal void MoTrangSanPham() => mnuDsSanPham_Click(this, EventArgs.Empty);
+
     // TV1: dựng khung chính: thanh điều hướng bên trái và thanh trên
     private void DungKhung()
     {
@@ -96,8 +102,7 @@ public partial class FrmMain
         void SizeLinks() => links.SetBounds(0, 0, clip.Width + SystemInformation.VerticalScrollBarWidth + 2, clip.Height);
         clip.Resize += (_, _) => SizeLinks(); clip.Controls.Add(links); SizeLinks();
         links.MouseEnter += (_, _) => links.Focus();
-        var brand = new Label { Dock = DockStyle.Top, Height = 84, BackColor = t.NavBg, ForeColor = t.NavInk, Font = ShopTheme.TitleFace(14),
-            Padding = new Padding(20, 20, 8, 8), TextAlign = ContentAlignment.TopLeft, Text = "BADMINTON\nSHOP" };
+        var brand = new ChuThuongHieu { Dock = DockStyle.Top };
         string? last = null;
         foreach (var item in navItems)
         {
@@ -166,6 +171,11 @@ public partial class FrmMain
         if (IsDisposed || Disposing || currentPage == null || currentPage.IsDisposed || currentPage.Disposing) return;
         workspace.AutoScrollPosition = Point.Empty;
         var min = currentPage.MinimumSize;
-        currentPage.Bounds = new Rectangle(0, 0, Math.Max(workspace.ClientSize.Width - 2, Math.Max(780, min.Width)), Math.Max(workspace.ClientSize.Height - 2, Math.Max(540, min.Height)));
+        // Tinh theo kich thuoc ca vung (khong theo ClientSize) de thanh cuon cu khong bi ket lai khi thu nho cua so
+        int canRong = Math.Max(780, min.Width), canCao = Math.Max(540, min.Height);
+        int truDoc = canCao > workspace.Height - 2 ? SystemInformation.VerticalScrollBarWidth : 0;
+        int truNgang = canRong > workspace.Width - 2 ? SystemInformation.HorizontalScrollBarHeight : 0;
+        currentPage.Bounds = new Rectangle(0, 0, Math.Max(workspace.Width - 2 - truDoc, canRong), Math.Max(workspace.Height - 2 - truNgang, canCao));
+        workspace.PerformLayout();
     }
 }
