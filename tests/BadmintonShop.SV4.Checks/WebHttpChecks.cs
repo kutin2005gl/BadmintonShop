@@ -24,7 +24,7 @@ internal static partial class Program
         var builder=WebApplication.CreateBuilder(new WebApplicationOptions { ApplicationName=assembly.GetName().Name,ContentRootPath=Path.Combine(root,"BadmintonShop.Web"),EnvironmentName="Development" });
         builder.Logging.ClearProviders();builder.WebHost.UseUrls("http://127.0.0.1:0");
         builder.Services.AddControllersWithViews().AddApplicationPart(assembly);
-        builder.Services.AddSingleton<DanhMucCongKhai>();
+        builder.Services.AddSingleton<DanhMucCongKhai>();builder.Services.AddSingleton<OtpService>();
         builder.Services.AddXacThucKhachHang();builder.Services.AddDistributedMemoryCache();builder.Services.AddSession();
         await using var app=builder.Build();app.UseRouting();app.UseSession();app.UseAuthentication();app.UseAuthorization();
         // Test-host-only fixtures. None of these endpoints exists in BadmintonShop.Web's startup.
