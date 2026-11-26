@@ -16,15 +16,17 @@ internal static partial class Program
                 .Single(x => (string?)x.Attribute("name") == "BadmintonShop").Attribute("connectionString")!.Value;
         var builder = new SqlConnectionStringBuilder(connection) { ConnectTimeout = 5 };
         DbHelper.ConnectionString = builder.ConnectionString;
+        // Chỉ bỏ qua test GUI khi chính kết nối SQL hỏng, không phụ thuộc lỗi của test khác chạy trước
+        var failedBefore = failed;
         Test("GUI read-only SQL connection", () => { using var c = DbHelper.TaoKetNoi(); c.Open(); });
-        if (failed > 0) return;
+        if (failed > failedBefore) return;
         PhienDangNhap.BatDau(1,1,"ui-readonly","Kiểm tra giao diện",VaiTro.Admin);
         using var main = new FrmMain();
         main.WindowState = FormWindowState.Normal; main.Size = new Size(1366, 768); main.Show(); Pump(main);
         var screens = new[] { ("Tổng quan",typeof(FrmTongQuan)),("Sản phẩm",typeof(FrmSanPham)),("Danh mục",typeof(FrmDanhMuc)),("Đơn hàng",typeof(FrmDonHang)),("Bán tại quầy",typeof(FrmPOS)),("Thống kê",typeof(FrmThongKe)) };
         foreach (var (title,type) in screens) Test("GUI open/read " + title, () =>
         {
-            Controls(main).OfType<Button>().Single(b => b.Text.Trim().EndsWith(title)).PerformClick(); Pump(main);
+            ClickNav(NavLink(main, title)); Pump(main);
             var page = Controls(main).OfType<Form>().Single(f => f.GetType()==type);
             True(page.Visible);
             var error=Controls(page).OfType<Label>().FirstOrDefault(l => l.Text.StartsWith("Lỗi:"));
@@ -42,8 +44,8 @@ internal static partial class Program
         });
         Test("GUI single instance / POS cart survives navigation",()=>
         {
-            Button Link(string name)=>Controls(main).OfType<Button>().Single(b=>b.Text.Trim().EndsWith(name));
-            Link("Bán tại quầy").PerformClick();Pump(main);
+            Control Link(string name)=>NavLink(main,name);
+            ClickNav(Link("Bán tại quầy"));Pump(main);
             var pos=Controls(main).OfType<FrmPOS>().Single();
             var grids=Controls(pos).OfType<DataGridView>().ToList();
             var product=grids.Single(g=>g.DataSource is not BindingList<DongPOS>);
@@ -54,17 +56,17 @@ internal static partial class Program
             Controls(pos).OfType<Button>().Single(b=>b.Text=="Thêm vào giỏ").PerformClick();
             Pump(main);
             var cart=(BindingList<DongPOS>)grids.Single(g=>g.DataSource is BindingList<DongPOS>).DataSource!;
-            Eq(1,cart.Count);Link("Sản phẩm").PerformClick();Link("Bán tại quầy").PerformClick();Eq(1,cart.Count);
+            Eq(1,cart.Count);ClickNav(Link("Sản phẩm"));ClickNav(Link("Bán tại quầy"));Eq(1,cart.Count);
             Eq(1,Controls(main).OfType<FrmPOS>().Count());
             Controls(pos).OfType<Button>().Single(b=>b.Text=="Bỏ dòng giỏ").PerformClick();Pump(main);Eq(0,cart.Count);
         });
         Test("GUI category draft survives navigation",()=>
         {
-            var link=Controls(main).OfType<Button>().Single(b=>b.Text.Trim().EndsWith("Danh mục"));link.PerformClick();Pump(main);
+            var link=NavLink(main,"Danh mục");ClickNav(link);Pump(main);
             var category=Controls(main).OfType<FrmDanhMuc>().Single();
             var name=Controls(category).OfType<TextBox>().Single(t=>t.MaxLength==100);
             var previous=name.Text;name.Text="Bản nháp kiểm tra - không lưu";
-            Controls(main).OfType<Button>().Single(b=>b.Text.Trim().EndsWith("Tổng quan")).PerformClick();link.PerformClick();
+            ClickNav(NavLink(main,"Tổng quan"));ClickNav(link);
             Eq("Bản nháp kiểm tra - không lưu",name.Text);name.Text=previous;
         });
         Test("GUI product editor read-only",()=>
@@ -78,7 +80,7 @@ internal static partial class Program
         {
             PhienDangNhap.BatDau(1,1,"ui-manager","Kiểm tra quản lý",VaiTro.QuanLy);
             using var manager=new FrmMain();manager.WindowState=FormWindowState.Normal;manager.Show();Pump(manager);
-            var buttons=Controls(manager).OfType<Button>().Select(b=>b.Text.Trim()).ToList();
+            var buttons=NavTexts(manager);
             foreach(var name in new[]{"Sản phẩm","Danh mục","Đơn hàng","Bán tại quầy","Thống kê","Phiếu nhập"})True(buttons.Any(t=>t.EndsWith(name)));
             True(!buttons.Any(t=>t.EndsWith("Nhân viên, tài khoản") || t.EndsWith("Sao lưu, phục hồi")));
             manager.Close();PhienDangNhap.BatDau(1,1,"ui-readonly","Kiểm tra giao diện",VaiTro.Admin);
@@ -99,12 +101,21 @@ internal static partial class Program
         {
             PhienDangNhap.BatDau(1,1,"ui-readonly","Kiểm tra phân quyền",VaiTro.NhanVien);
             using var employee=new FrmMain();employee.WindowState=FormWindowState.Normal;employee.Show();Pump(employee);
-            var buttons=Controls(employee).OfType<Button>().Select(b=>b.Text.Trim()).ToList();
+            var buttons=NavTexts(employee);
             True(buttons.Any(t=>t.EndsWith("Bán tại quầy")));True(buttons.Any(t=>t.EndsWith("Đơn hàng")));
             True(!buttons.Any(t=>t.EndsWith("Sản phẩm") || t.EndsWith("Thống kê") || t.EndsWith("Nhân viên, tài khoản")));
             employee.Close();PhienDangNhap.DangXuat();
         });
     }
+    // TV1: lấy các nút điều hướng thanh bên (NavButton là lớp internal của Desktop nên nhận theo tên kiểu)
+    private static IEnumerable<Control> NavButtons(Form main) => Controls(main).Where(c => c.GetType().Name == "NavButton");
+    // TV1: tìm đúng một nút điều hướng theo chữ hiển thị
+    private static Control NavLink(Form main, string title) => NavButtons(main).Single(b => b.Text.Trim().EndsWith(title));
+    // TV1: liệt kê chữ của mọi nút điều hướng để kiểm tra phân quyền
+    private static List<string> NavTexts(Form main) => NavButtons(main).Select(b => b.Text.Trim()).ToList();
+    // TV1: bấm nút điều hướng qua OnClick vì NavButton không có PerformClick
+    private static void ClickNav(Control button) =>
+        typeof(Control).GetMethod("OnClick", BindingFlags.NonPublic | BindingFlags.Instance)!.Invoke(button, [EventArgs.Empty]);
     private static void Pump(Form main)
     {
         var until=DateTime.UtcNow.AddSeconds(40);
