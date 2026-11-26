@@ -24,6 +24,20 @@ public class FrmNhanVien : Form
     private TextBox txtTimKiem = null!, txtHoTen = null!, txtSDT = null!, txtEmail = null!, txtDiaChi = null!, txtLuong = null!, txtTenDN = null!, txtMatKhau = null!;
     private ComboBox cboChucVu = null!, cboVaiTroCap = null!, cboVaiTroDoi = null!;
     private DateTimePicker dtpNgayVaoLam = null!, dtpNgaySinh = null!;
+    private bool coNgaySinh, dangDatNgaySinh;
+
+    // Đặt ngày sinh: null = chưa có (ô trống), có ngày = hiện dd/MM/yyyy
+    private void DatNgaySinh(DateTime? ngay)
+    {
+        dangDatNgaySinh = true;
+        try
+        {
+            coNgaySinh = ngay.HasValue;
+            dtpNgaySinh.Value = ngay ?? new DateTime(2000, 1, 1);
+            dtpNgaySinh.CustomFormat = coNgaySinh ? "dd/MM/yyyy" : " ";
+        }
+        finally { dangDatNgaySinh = false; }
+    }
     private Button btnThemNV = null!, btnSuaNV = null!, btnXoaNV = null!, btnKhoaMo = null!;
     private Label maNV = null!, badge = null!, lblChuaLuu = null!, lblTenTK = null!;
     private Panel panelRoot = null!, tkDaCo = null!, tkCapMoi = null!;
@@ -70,7 +84,11 @@ public class FrmNhanVien : Form
         cboChucVu = new ComboBox { MaxLength = 50 };
         cboChucVu.Items.AddRange(ChucVuGoiY);
         txtLuong = new TextBox();
-        dtpNgaySinh = new DateTimePicker { Format = DateTimePickerFormat.Custom, CustomFormat = "dd/MM/yyyy", ShowCheckBox = true, Checked = false };
+        // Ngày sinh không bắt buộc: không dùng dấu tích; chưa có thì ô để trống, chọn ngày thì hiện, phím Delete xóa về trống
+        dtpNgaySinh = new DateTimePicker { Format = DateTimePickerFormat.Custom, CustomFormat = " " };
+        dtpNgaySinh.ValueChanged += (_, _) => { if (!dangDatNgaySinh) DatNgaySinh(dtpNgaySinh.Value); };
+        dtpNgaySinh.CloseUp += (_, _) => DatNgaySinh(dtpNgaySinh.Value);
+        dtpNgaySinh.KeyDown += (_, e) => { if (e.KeyCode is Keys.Delete or Keys.Back) { DatNgaySinh(null); e.SuppressKeyPress = true; } };
         dtpNgayVaoLam = new DateTimePicker { Format = DateTimePickerFormat.Custom, CustomFormat = "dd/MM/yyyy" };
         var hoSo = KhungChiTiet.LuoiO(
             ("Họ tên (*)", txtHoTen, true),
@@ -165,7 +183,7 @@ public class FrmNhanVien : Form
         txtHoTen.Clear(); txtSDT.Clear(); txtEmail.Clear(); txtDiaChi.Clear(); txtLuong.Clear();
         cboChucVu.Text = "";
         dtpNgayVaoLam.Value = DateTime.Today;
-        dtpNgaySinh.Value = new DateTime(2000, 1, 1); dtpNgaySinh.Checked = false;
+        DatNgaySinh(null);
         maNV.Text = "Nhân viên mới";
         btnThemNV.Visible = true;
         btnSuaNV.Visible = btnXoaNV.Visible = false;
@@ -187,7 +205,7 @@ public class FrmNhanVien : Form
         cboChucVu.Text = nv.ChucVu;
         txtLuong.Text = nv.Luong?.ToString("0", CultureInfo.InvariantCulture) ?? "";
         dtpNgayVaoLam.Value = nv.NgayVaoLam;
-        dtpNgaySinh.Value = nv.NgaySinh ?? new DateTime(2000, 1, 1); dtpNgaySinh.Checked = nv.NgaySinh.HasValue;
+        DatNgaySinh(nv.NgaySinh);
         maNV.Text = $"Nhân viên {nv.MaNV}";
         btnThemNV.Visible = false;
         btnSuaNV.Visible = btnXoaNV.Visible = true;
@@ -235,7 +253,7 @@ public class FrmNhanVien : Form
         }
         if (dtpNgayVaoLam.Value.Date > DateTime.Today) { BaoLoi("Ngày vào làm không được ở tương lai.", dtpNgayVaoLam); return null; }
 
-        DateTime? ngaySinh = dtpNgaySinh.Checked ? dtpNgaySinh.Value.Date : null;
+        DateTime? ngaySinh = coNgaySinh ? dtpNgaySinh.Value.Date : null;
         if (ngaySinh.HasValue)
         {
             if (ngaySinh.Value > DateTime.Today.AddYears(-16)) { BaoLoi("Nhân viên phải đủ 16 tuổi.", dtpNgaySinh); return null; }

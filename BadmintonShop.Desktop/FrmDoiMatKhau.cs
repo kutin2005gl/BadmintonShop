@@ -1,4 +1,4 @@
-using BadmintonShop.Core.DataAccess;
+﻿using BadmintonShop.Core.DataAccess;
 using BadmintonShop.Core.Services;
 
 namespace BadmintonShop.Desktop;
@@ -12,6 +12,31 @@ public partial class FrmDoiMatKhau : Form
     public FrmDoiMatKhau()
     {
         InitializeComponent();
+        DungBoCuc();
+    }
+
+    // Nhãn nằm trên ô nhập (không đặt cạnh nhau theo tọa độ cố định nữa) để nhãn dài như
+    // "Nhập lại mật khẩu mới" không đè lên ô, và dòng gợi ý tự xuống hàng thay vì bị cắt.
+    private void DungBoCuc()
+    {
+        const int rong = 360;
+        var bang = new TableLayoutPanel { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, ColumnCount = 1, Location = new Point(0, 0), Padding = new Padding(24, 18, 24, 16) };
+        bang.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, rong));
+        Controls.Clear();
+        foreach (var (nhan, o) in new[] { (lblMatKhauCu, txtMatKhauCu), (lblMatKhauMoi, txtMatKhauMoi), (lblXacNhan, txtXacNhan) })
+        {
+            nhan.AutoSize = true; nhan.Margin = new Padding(0, 0, 0, 4);
+            o.Dock = DockStyle.Fill; o.Margin = new Padding(0, 0, 0, 12);
+            bang.Controls.Add(nhan); bang.Controls.Add(o);
+        }
+        lblGoiY.AutoSize = true; lblGoiY.MaximumSize = new Size(rong, 0); lblGoiY.Margin = new Padding(0, 0, 0, 16);
+        bang.Controls.Add(lblGoiY);
+        var nut = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.RightToLeft, Dock = DockStyle.Fill, Margin = Padding.Empty, WrapContents = false };
+        btnHuy.Margin = new Padding(8, 0, 0, 0); btnLuu.Margin = Padding.Empty;
+        nut.Controls.Add(btnHuy); nut.Controls.Add(btnLuu);
+        bang.Controls.Add(nut);
+        Controls.Add(bang);
+        AutoSize = true; AutoSizeMode = AutoSizeMode.GrowAndShrink;
     }
 
     // TV1: kiem tra du lieu nhap roi luu mat khau moi (da bam BCrypt)
