@@ -12,7 +12,7 @@ namespace BadmintonShop.Desktop;
 public class FrmNhanVien : Form
 {
     private static readonly string[] ChucVuGoiY = { "Quản lý", "Nhân viên bán hàng", "Kho" };
-    private static readonly string[] DanhSachVaiTro = { VaiTro.Admin, VaiTro.QuanLy, VaiTro.NhanVien };
+    private static readonly string[] DanhSachVaiTro = { VaiTro.Admin, VaiTro.QuanLy, VaiTro.NhanVien, VaiTro.Kho };
 
     private readonly NhanVienRepository _nvRepo = new();
     private readonly TaiKhoanRepository _tkRepo = new();

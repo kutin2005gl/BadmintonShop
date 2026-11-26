@@ -106,7 +106,8 @@ internal static partial class Program
           foreach(var a in QuyTacBanHang.TrangThaiDon)foreach(var b in QuyTacBanHang.TrangThaiDon)Eq(valid.Contains((a,b)),QuyTacBanHang.DuocChuyen(a,b)); });
         Test("U04 role matrix and session",()=>
         { PhienDangNhap.DangXuat();True(!PhienDangNhap.CoQuyen(ChucNang.DonHangPOS));
-          foreach(var q in Enum.GetValues<ChucNang>()) { True(PhanQuyen.CoQuyen(VaiTro.Admin,q));Eq(q==ChucNang.DonHangPOS,PhanQuyen.CoQuyen(VaiTro.NhanVien,q)); }
+          foreach(var q in Enum.GetValues<ChucNang>()) { True(PhanQuyen.CoQuyen(VaiTro.Admin,q));Eq(q==ChucNang.DonHangPOS,PhanQuyen.CoQuyen(VaiTro.NhanVien,q));Eq(q==ChucNang.NhaCungCapPhieuNhap,PhanQuyen.CoQuyen(VaiTro.Kho,q)); }
+          Eq("Thủ kho",PhanQuyen.TenVaiTro(VaiTro.Kho));
           True(!PhanQuyen.CoQuyen("INVALID",ChucNang.DonHangPOS));True(!PhanQuyen.CoQuyen(VaiTro.QuanLy,ChucNang.SaoLuuPhucHoi)); });
         Test("U05 relative image safety",()=>
         { True(KhoAnhSanPham.DuongDanDayDu("products/test.jpg")!.StartsWith(KhoAnhSanPham.ThuMucGoc));
@@ -165,7 +166,7 @@ internal static partial class Program
         using(var c=new SqlConnection(b.ConnectionString)) { c.Open();using var cmd=new SqlCommand($"CREATE DATABASE [{name}]",c) { CommandTimeout=120 };cmd.ExecuteNonQuery(); }
         b.InitialCatalog=name;DbHelper.ConnectionString=b.ConnectionString;Ghi("Isolated test database: "+name);
         var schema=File.ReadAllText(Path.Combine(root,"database/01_CreateDatabase.sql"));schema=schema[schema.IndexOf("-- ====== DANH MUC",StringComparison.Ordinal)..];Batches(schema);
-        foreach(var file in new[]{"02_Triggers.sql","04_SV4_Migration.sql","04_SV4_Migration.sql","06_SV4_POS_Request.sql","06_SV4_POS_Request.sql","12_SV3_KhuyenMaiNhieuLoai.sql","12_SV3_KhuyenMaiNhieuLoai.sql"})Batches(File.ReadAllText(Path.Combine(root,"database",file)).Replace("USE BadmintonShop;",$"USE [{name}];",StringComparison.Ordinal));
+        foreach(var file in new[]{"02_Triggers.sql","04_SV4_Migration.sql","04_SV4_Migration.sql","06_SV4_POS_Request.sql","06_SV4_POS_Request.sql","12_SV3_KhuyenMaiNhieuLoai.sql","12_SV3_KhuyenMaiNhieuLoai.sql","13_VaiTroKho.sql","13_VaiTroKho.sql"})Batches(File.ReadAllText(Path.Combine(root,"database",file)).Replace("USE BadmintonShop;",$"USE [{name}];",StringComparison.Ordinal));
         nv=ScalarInt("INSERT NhanVien(HoTen,ChucVu) VALUES(N'SV4 TEST',N'Nhân viên bán hàng');SELECT CAST(SCOPE_IDENTITY() AS int)");
         DbHelper.ExecuteNonQuery("INSERT TaiKhoan(TenDangNhap,MatKhau,VaiTro,MaNV) VALUES('sv4test',@hash,'ADMIN',@nv)",new SqlParameter("@hash",MatKhauHelper.BamMatKhau("TestOnly@123")),new SqlParameter("@nv",nv));
         ncc=ScalarInt("INSERT NhaCungCap(TenNCC) VALUES(N'SV4 TEST');SELECT CAST(SCOPE_IDENTITY() AS int)");

@@ -102,14 +102,14 @@ Khi mở ứng dụng desktop, `FrmDangNhap` kiểm tra kết nối CSDL trướ
 
 Bảng 3.3
 
-| Chức năng | ADMIN | QUANLY | NHANVIEN |
-|---|:-:|:-:|:-:|
-| Nhân viên và tài khoản | ✔ | | |
-| Nhà cung cấp, phiếu nhập | ✔ | ✔ | |
-| Sản phẩm, danh mục, khuyến mãi | ✔ | ✔ | |
-| Đơn hàng, bán tại quầy (POS) | ✔ | ✔ | ✔ |
-| Thống kê – báo cáo, duyệt bình luận | ✔ | ✔ | |
-| Sao lưu – phục hồi CSDL | ✔ | | |
+| Chức năng | ADMIN | QUANLY | NHANVIEN | KHO |
+|---|:-:|:-:|:-:|:-:|
+| Nhân viên và tài khoản | ✔ | | | |
+| Nhà cung cấp, phiếu nhập | ✔ | ✔ | | ✔ |
+| Sản phẩm, danh mục, khuyến mãi | ✔ | ✔ | | |
+| Đơn hàng, bán tại quầy (POS) | ✔ | ✔ | ✔ | |
+| Thống kê – báo cáo, duyệt bình luận | ✔ | ✔ | | |
+| Sao lưu – phục hồi CSDL | ✔ | | | |
 
 ![Hình 3.2. Luồng đăng nhập và phân quyền trên ứng dụng desktop](../diagrams/png/05-dang-nhap.png)
 
@@ -127,7 +127,7 @@ Luồng bán hàng làm theo cách tương tự nhưng theo chiều ngược l�
 
 - **Mật khẩu không lưu dạng thô.** Mật khẩu nhân viên và khách hàng được băm bằng BCrypt (work factor 11) trước khi lưu. Hệ thống yêu cầu mật khẩu mạnh: tối thiểu 8 ký tự, có chữ hoa, chữ thường và chữ số. Khi quản trị viên đặt lại mật khẩu, hệ thống sinh ngẫu nhiên một mật khẩu mới và chỉ hiển thị một lần.
 - **Chống SQL Injection.** Mọi câu lệnh đều dùng tham số (`SqlParameter`), không ghép chuỗi dữ liệu người dùng vào câu SQL.
-- **Phân quyền theo vai trò.** Có 3 vai trò ADMIN, QUANLY, NHANVIEN. Quản trị viên không thể tự khóa hoặc tự hạ quyền của chính mình, để hệ thống luôn còn người quản trị.
+- **Phân quyền theo vai trò.** Có 4 vai trò ADMIN, QUANLY, NHANVIEN, KHO (thủ kho, chỉ nhập hàng). Quản trị viên không thể tự khóa hoặc tự hạ quyền của chính mình, để hệ thống luôn còn người quản trị.
 - **Giao tác.** Các nghiệp vụ ghi nhiều bảng (phiếu nhập và chi tiết, hóa đơn và chi tiết) chạy trong một giao tác.
 - **Ràng buộc ở CSDL.** Khóa ngoại chặn xóa dữ liệu đang được tham chiếu, ví dụ không xóa được nhà cung cấp đã có phiếu nhập. CHECK chặn số lượng âm và trạng thái đơn không hợp lệ. Cột thành tiền là cột tính toán nên không thể ghi sai.
 - **Sao lưu – phục hồi.** Quản trị viên sao lưu CSDL ra file `.bak` và phục hồi khi cần ngay từ ứng dụng desktop.
@@ -241,7 +241,7 @@ Bảng 4.2
 | 1 | MaTK | INT | PK, IDENTITY | Mã tài khoản |
 | 2 | TenDangNhap | VARCHAR(50) | NOT NULL, UNIQUE | Tên đăng nhập |
 | 3 | MatKhau | VARCHAR(255) | NOT NULL | Chuỗi băm BCrypt của mật khẩu (không lưu mật khẩu thô) |
-| 4 | VaiTro | VARCHAR(20) | NOT NULL, CHECK ∈ {ADMIN, QUANLY, NHANVIEN} | Vai trò, quyết định menu được dùng |
+| 4 | VaiTro | VARCHAR(20) | NOT NULL, CHECK ∈ {ADMIN, QUANLY, NHANVIEN, KHO} | Vai trò, quyết định menu được dùng |
 | 5 | MaNV | INT | FK → NhanVien, NOT NULL, UNIQUE | Nhân viên sở hữu tài khoản; mỗi nhân viên có tối đa 1 tài khoản |
 | 6 | TrangThai | BIT | NOT NULL, DEFAULT 1 | 1 = đang hoạt động, 0 = bị khóa |
 
@@ -534,14 +534,14 @@ Mật khẩu được so bằng **BCrypt** với chuỗi băm trong CSDL; mật 
 
 Bảng 5.1
 
-| Nhóm chức năng (menu) | ADMIN | QUANLY | NHANVIEN |
-|---|:-:|:-:|:-:|
-| Nhân viên & tài khoản | ✔ | | |
-| Nhà cung cấp, phiếu nhập | ✔ | ✔ | |
-| Sản phẩm, danh mục, khuyến mãi | ✔ | ✔ | |
-| Đơn hàng, POS | ✔ | ✔ | ✔ |
-| Thống kê – báo cáo, duyệt bình luận | ✔ | ✔ | |
-| Sao lưu – phục hồi CSDL | ✔ | | |
+| Nhóm chức năng (menu) | ADMIN | QUANLY | NHANVIEN | KHO |
+|---|:-:|:-:|:-:|:-:|
+| Nhân viên & tài khoản | ✔ | | | |
+| Nhà cung cấp, phiếu nhập | ✔ | ✔ | | ✔ |
+| Sản phẩm, danh mục, khuyến mãi | ✔ | ✔ | | |
+| Đơn hàng, POS | ✔ | ✔ | ✔ | |
+| Thống kê – báo cáo, duyệt bình luận | ✔ | ✔ | | |
+| Sao lưu – phục hồi CSDL | ✔ | | | |
 
 ## 6. Cài đặt
 
@@ -1096,12 +1096,12 @@ Cài đặt theo `huong-dan-cai-dat.md`. Hai ứng dụng dùng cùng CSDL SQL S
 
 Bảng 8.1
 
-| Chức năng | ADMIN | QUANLY | NHANVIEN |
-|---|---|---|---|
-| Đăng nhập, đổi mật khẩu, đăng xuất | Có | Có | Có |
-| Nhà cung cấp, phiếu nhập | Có | Có | |
-| Nhân viên, tài khoản | Có | | |
-| Sao lưu, phục hồi | Có | | |
+| Chức năng | ADMIN | QUANLY | NHANVIEN | KHO |
+|---|---|---|---|---|
+| Đăng nhập, đổi mật khẩu, đăng xuất | Có | Có | Có | Có |
+| Nhà cung cấp, phiếu nhập | Có | Có | | Có |
+| Nhân viên, tài khoản | Có | | | |
+| Sao lưu, phục hồi | Có | | | |
 
 Giao diện hiện tại dùng thanh điều hướng bên trái. Các nhãn thao tác bên dưới lấy từ `FrmMain.Shell.cs` và các form SV1.
 
@@ -1140,7 +1140,7 @@ Nhập sai mật khẩu hiện tại hiện “Mật khẩu hiện tại không 
 
 #### 8.1.6. Nhà cung cấp
 
-1. Với tài khoản ADMIN hoặc QUANLY, chọn **Nhà cung cấp** trong nhóm **NHẬP HÀNG**.
+1. Với tài khoản ADMIN, QUANLY hoặc KHO, chọn **Nhà cung cấp** trong nhóm **NHẬP HÀNG**.
 2. Tìm dữ liệu bằng ô **Tìm (tên / SĐT)**, bấm **Tìm** hoặc Enter.
 3. Để thêm, bấm **Làm mới**, nhập **Tên NCC (*)**, **SĐT**, **Địa chỉ**, **Email**, rồi bấm **Thêm**. Thành công hiện “Đã thêm nhà cung cấp.”.
 4. Để sửa, chọn một dòng, chỉnh thông tin rồi bấm **Lưu sửa**. Thành công hiện “Đã cập nhật nhà cung cấp.”.
@@ -1168,7 +1168,7 @@ Họ tên và chức vụ là bắt buộc. Lương cần là số không âm, n
 #### 8.1.9. Cấp tài khoản
 
 1. Mở tab **Tài khoản đăng nhập**, khu vực **Cấp tài khoản mới**.
-2. Chọn **Nhân viên** chưa có tài khoản, nhập **Tên đăng nhập**, **Mật khẩu**, chọn **Vai trò** là ADMIN, QUANLY hoặc NHANVIEN.
+2. Chọn **Nhân viên** chưa có tài khoản, nhập **Tên đăng nhập**, **Mật khẩu**, chọn **Vai trò** là ADMIN, QUANLY, NHANVIEN hoặc KHO.
 3. Tên đăng nhập dài 3–50 ký tự, gồm chữ không dấu, số, dấu gạch dưới hoặc dấu chấm. Mật khẩu tối thiểu 8 ký tự, có chữ hoa, chữ thường và chữ số.
 4. Bấm **Cấp tài khoản**. Thông báo có dạng “Đã cấp tài khoản "tên" (vai trò).”.
 

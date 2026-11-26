@@ -20,7 +20,7 @@ erDiagram
         int MaTK PK "IDENTITY"
         varchar(50) TenDangNhap UK
         varchar(255) MatKhau "chuỗi băm BCrypt"
-        varchar(20) VaiTro "ADMIN / QUANLY / NHANVIEN"
+        varchar(20) VaiTro "ADMIN / QUANLY / NHANVIEN / KHO"
         int MaNV FK, UK "1 NV tối đa 1 TK"
         bit TrangThai "1 hoạt động, 0 bị khóa"
     }

@@ -23,6 +23,8 @@ public static class PhanQuyen
         VaiTro.Admin    => true,
         VaiTro.QuanLy   => chucNang is not (ChucNang.NhanVienTaiKhoan or ChucNang.SaoLuuPhucHoi),
         VaiTro.NhanVien => chucNang == ChucNang.DonHangPOS,
+        // Thu kho: chi nhap hang (nha cung cap, phieu nhap); khong ban hang, khong sua gia/khuyen mai, khong xem bao cao
+        VaiTro.Kho      => chucNang == ChucNang.NhaCungCapPhieuNhap,
         _               => false,
     };
 
@@ -32,6 +34,7 @@ public static class PhanQuyen
         VaiTro.Admin    => "Quản trị viên",
         VaiTro.QuanLy   => "Quản lý",
         VaiTro.NhanVien => "Nhân viên",
+        VaiTro.Kho      => "Thủ kho",
         _               => "Không xác định",
     };
 }

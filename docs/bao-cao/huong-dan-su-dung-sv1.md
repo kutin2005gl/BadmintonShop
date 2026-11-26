@@ -4,12 +4,12 @@
 
 Cài đặt theo `huong-dan-cai-dat.md`. Hai ứng dụng dùng cùng CSDL SQL Server. Tài khoản mẫu nằm trong `readme.txt` và mục 6.3 của hướng dẫn cài đặt.
 
-| Chức năng | ADMIN | QUANLY | NHANVIEN |
-|---|---|---|---|
-| Đăng nhập, đổi mật khẩu, đăng xuất | Có | Có | Có |
-| Nhà cung cấp, phiếu nhập | Có | Có | |
-| Nhân viên, tài khoản | Có | | |
-| Sao lưu, phục hồi | Có | | |
+| Chức năng | ADMIN | QUANLY | NHANVIEN | KHO |
+|---|---|---|---|---|
+| Đăng nhập, đổi mật khẩu, đăng xuất | Có | Có | Có | Có |
+| Nhà cung cấp, phiếu nhập | Có | Có | | Có |
+| Nhân viên, tài khoản | Có | | | |
+| Sao lưu, phục hồi | Có | | | |
 
 Giao diện hiện tại dùng thanh điều hướng bên trái. Các nhãn thao tác bên dưới lấy từ `FrmMain.Shell.cs` và các form SV1.
 
@@ -48,7 +48,7 @@ Nhập sai mật khẩu hiện tại hiện “Mật khẩu hiện tại không 
 
 ## 4. Nhà cung cấp
 
-1. Với tài khoản ADMIN hoặc QUANLY, chọn **Nhà cung cấp** trong nhóm **NHẬP HÀNG**.
+1. Với tài khoản ADMIN, QUANLY hoặc KHO, chọn **Nhà cung cấp** trong nhóm **NHẬP HÀNG**.
 2. Tìm dữ liệu bằng ô **Tìm (tên / SĐT)**, bấm **Tìm** hoặc Enter.
 3. Để thêm, bấm **Làm mới**, nhập **Tên NCC (*)**, **SĐT**, **Địa chỉ**, **Email**, rồi bấm **Thêm**. Thành công hiện “Đã thêm nhà cung cấp.”.
 4. Để sửa, chọn một dòng, chỉnh thông tin rồi bấm **Lưu sửa**. Thành công hiện “Đã cập nhật nhà cung cấp.”.
@@ -76,7 +76,7 @@ Họ tên và chức vụ là bắt buộc. Lương cần là số không âm, n
 ### 5.2. Cấp tài khoản
 
 1. Mở tab **Tài khoản đăng nhập**, khu vực **Cấp tài khoản mới**.
-2. Chọn **Nhân viên** chưa có tài khoản, nhập **Tên đăng nhập**, **Mật khẩu**, chọn **Vai trò** là ADMIN, QUANLY hoặc NHANVIEN.
+2. Chọn **Nhân viên** chưa có tài khoản, nhập **Tên đăng nhập**, **Mật khẩu**, chọn **Vai trò** là ADMIN, QUANLY, NHANVIEN hoặc KHO.
 3. Tên đăng nhập dài 3–50 ký tự, gồm chữ không dấu, số, dấu gạch dưới hoặc dấu chấm. Mật khẩu tối thiểu 8 ký tự, có chữ hoa, chữ thường và chữ số.
 4. Bấm **Cấp tài khoản**. Thông báo có dạng “Đã cấp tài khoản "tên" (vai trò).”.
 

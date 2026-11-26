@@ -20,7 +20,7 @@ Giao diện đăng ký/đăng nhập trên web do SV2 làm; SV1 làm phần cơ 
 
 | Mục | Nội dung |
 |---|---|
-| Tác nhân | Quản trị viên (ADMIN), Quản lý (QUANLY), Nhân viên (NHANVIEN) |
+| Tác nhân | Quản trị viên (ADMIN), Quản lý (QUANLY), Nhân viên (NHANVIEN), Thủ kho (KHO) |
 | Mô tả | Nhân viên đăng nhập ứng dụng desktop bằng tài khoản được cấp; hệ thống hiển thị menu theo vai trò |
 | Tiền điều kiện | Tài khoản đã được quản trị viên cấp; SQL Server đang chạy |
 | Hậu điều kiện | Đăng nhập thành công: thông tin người dùng lưu trong phiên, form chính hiện đúng các menu được phép |
@@ -45,9 +45,9 @@ Giao diện đăng ký/đăng nhập trên web do SV2 làm; SV1 làm phần cơ 
 
 | Mục | Nội dung |
 |---|---|
-| Tác nhân | Quản trị viên, Quản lý |
+| Tác nhân | Quản trị viên, Quản lý, Thủ kho |
 | Mô tả | Xem, tìm kiếm, thêm, sửa, xóa nhà cung cấp |
-| Tiền điều kiện | Đã đăng nhập với vai trò ADMIN hoặc QUANLY |
+| Tiền điều kiện | Đã đăng nhập với vai trò ADMIN, QUANLY hoặc KHO |
 | Hậu điều kiện | Danh sách nhà cung cấp trong CSDL được cập nhật |
 
 **Luồng sự kiện chính**
@@ -91,9 +91,9 @@ Giao diện đăng ký/đăng nhập trên web do SV2 làm; SV1 làm phần cơ 
 
 | Mục | Nội dung |
 |---|---|
-| Tác nhân | Quản trị viên, Quản lý |
+| Tác nhân | Quản trị viên, Quản lý, Thủ kho |
 | Mô tả | Lập phiếu nhập hàng từ nhà cung cấp, cập nhật tồn kho; xem danh sách phiếu nhập |
-| Tiền điều kiện | Đã đăng nhập với vai trò ADMIN hoặc QUANLY; đã có nhà cung cấp và sản phẩm |
+| Tiền điều kiện | Đã đăng nhập với vai trò ADMIN, QUANLY hoặc KHO; đã có nhà cung cấp và sản phẩm |
 | Hậu điều kiện | Phiếu nhập và chi tiết được lưu; tồn kho các sản phẩm tăng đúng số lượng nhập; tổng tiền phiếu được tính |
 
 **Luồng sự kiện chính**
