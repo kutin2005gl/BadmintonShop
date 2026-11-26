@@ -57,7 +57,7 @@ public class TaiKhoanRepository
             new SqlParameter("@tt",  tk.TrangThai))!;
     }
 
-    // TV1: doi vai tro (ADMIN / QUANLY / NHANVIEN) cua tai khoan
+    // TV1: doi vai tro (ADMIN / QUANLY / NHANVIEN / KHO) cua tai khoan
     public bool DoiVaiTro(int maTK, string vaiTro)
         => DbHelper.ExecuteNonQuery("UPDATE TaiKhoan SET VaiTro = @vt WHERE MaTK = @ma",
                                     new SqlParameter("@vt", vaiTro), new SqlParameter("@ma", maTK)) > 0;

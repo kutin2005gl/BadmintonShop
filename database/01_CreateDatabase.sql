@@ -50,7 +50,7 @@ CREATE TABLE TaiKhoan (
     TenDangNhap VARCHAR(50)  NOT NULL UNIQUE,
     MatKhau     VARCHAR(255) NOT NULL,              -- chuoi da bam BCrypt, KHONG luu tho
     VaiTro      VARCHAR(20)  NOT NULL
-                CONSTRAINT CK_TaiKhoan_VaiTro CHECK (VaiTro IN ('ADMIN','QUANLY','NHANVIEN')),
+                CONSTRAINT CK_TaiKhoan_VaiTro CHECK (VaiTro IN ('ADMIN','QUANLY','NHANVIEN','KHO')),
     MaNV        INT NOT NULL UNIQUE,                -- 1 nhan vien co toi da 1 tai khoan (1 - 0..1)
     TrangThai   BIT NOT NULL DEFAULT 1,             -- 0 = bi khoa
     CONSTRAINT FK_TaiKhoan_NhanVien FOREIGN KEY (MaNV) REFERENCES NhanVien(MaNV)

@@ -30,7 +30,7 @@ public partial class FrmMain : Form
         TaoKhungMoi();
     }
 
-    // TV1: an/hien menu theo bang phan quyen (ADMIN / QUANLY / NHANVIEN)
+    // TV1: an/hien menu theo bang phan quyen (ADMIN / QUANLY / NHANVIEN / KHO)
     private void ApDungPhanQuyen()
     {
         mnuNhanSu.Visible = PhienDangNhap.CoQuyen(ChucNang.NhanVienTaiKhoan);

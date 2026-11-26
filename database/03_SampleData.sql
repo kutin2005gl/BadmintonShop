@@ -50,7 +50,7 @@ INSERT INTO TaiKhoan (TenDangNhap, MatKhau, VaiTro, MaNV, TrangThai) VALUES
  ('admin',     @HashAdmin,    'ADMIN',    1, 1),
  ('quanly',    @HashQuanLy,   'QUANLY',   2, 1),
  ('nhanvien',  @HashNhanVien, 'NHANVIEN', 3, 1),
- ('kho',       @HashQuanLy,   'QUANLY',   4, 1),
+ ('kho',       @HashQuanLy,   'KHO',      4, 1),
  ('nhanvien2', @HashNhanVien, 'NHANVIEN', 5, 0);   -- tai khoan bi khoa de demo
 
 -- San pham khoi dau (12) - ton kho = 0, phieu nhap ben duoi se tang ton.

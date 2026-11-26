@@ -61,14 +61,14 @@ Quy ước bắt buộc của nhóm: **không viết câu lệnh SQL trong Contr
 
 Khi mở ứng dụng desktop, `FrmDangNhap` kiểm tra kết nối CSDL trước (`DbHelper.ThuKetNoi`) để báo lỗi rõ ràng nếu máy chủ chưa chạy. Sau đó `TaiKhoanRepository.DangNhap` tìm tài khoản theo tên đăng nhập, so mật khẩu bằng BCrypt và chặn tài khoản đã bị khóa. Đăng nhập thành công thì thông tin người dùng được lưu vào `PhienDangNhap`. `FrmMain` dựa vào vai trò để ẩn hoặc hiện từng nhóm menu theo bảng dưới đây. Khi người dùng đăng xuất, phiên bị xóa và ứng dụng quay về màn hình đăng nhập.
 
-| Chức năng | ADMIN | QUANLY | NHANVIEN |
-|---|:-:|:-:|:-:|
-| Nhân viên và tài khoản | ✔ | | |
-| Nhà cung cấp, phiếu nhập | ✔ | ✔ | |
-| Sản phẩm, danh mục, khuyến mãi | ✔ | ✔ | |
-| Đơn hàng, bán tại quầy (POS) | ✔ | ✔ | ✔ |
-| Thống kê – báo cáo, duyệt bình luận | ✔ | ✔ | |
-| Sao lưu – phục hồi CSDL | ✔ | | |
+| Chức năng | ADMIN | QUANLY | NHANVIEN | KHO |
+|---|:-:|:-:|:-:|:-:|
+| Nhân viên và tài khoản | ✔ | | | |
+| Nhà cung cấp, phiếu nhập | ✔ | ✔ | | ✔ |
+| Sản phẩm, danh mục, khuyến mãi | ✔ | ✔ | | |
+| Đơn hàng, bán tại quầy (POS) | ✔ | ✔ | ✔ | |
+| Thống kê – báo cáo, duyệt bình luận | ✔ | ✔ | | |
+| Sao lưu – phục hồi CSDL | ✔ | | | |
 
 ![Luồng đăng nhập và phân quyền trên ứng dụng desktop](../diagrams/png/05-dang-nhap.png)
 
@@ -86,7 +86,7 @@ Luồng bán hàng làm theo cách tương tự nhưng theo chiều ngược l�
 
 - **Mật khẩu không lưu dạng thô.** Mật khẩu nhân viên và khách hàng được băm bằng BCrypt (work factor 11) trước khi lưu. Hệ thống yêu cầu mật khẩu mạnh: tối thiểu 8 ký tự, có chữ hoa, chữ thường và chữ số. Khi quản trị viên đặt lại mật khẩu, hệ thống sinh ngẫu nhiên một mật khẩu mới và chỉ hiển thị một lần.
 - **Chống SQL Injection.** Mọi câu lệnh đều dùng tham số (`SqlParameter`), không ghép chuỗi dữ liệu người dùng vào câu SQL.
-- **Phân quyền theo vai trò.** Có 3 vai trò ADMIN, QUANLY, NHANVIEN. Quản trị viên không thể tự khóa hoặc tự hạ quyền của chính mình, để hệ thống luôn còn người quản trị.
+- **Phân quyền theo vai trò.** Có 4 vai trò ADMIN, QUANLY, NHANVIEN, KHO (thủ kho, chỉ nhập hàng). Quản trị viên không thể tự khóa hoặc tự hạ quyền của chính mình, để hệ thống luôn còn người quản trị.
 - **Giao tác.** Các nghiệp vụ ghi nhiều bảng (phiếu nhập và chi tiết, hóa đơn và chi tiết) chạy trong một giao tác.
 - **Ràng buộc ở CSDL.** Khóa ngoại chặn xóa dữ liệu đang được tham chiếu, ví dụ không xóa được nhà cung cấp đã có phiếu nhập. CHECK chặn số lượng âm và trạng thái đơn không hợp lệ. Cột thành tiền là cột tính toán nên không thể ghi sai.
 - **Sao lưu – phục hồi.** Quản trị viên sao lưu CSDL ra file `.bak` và phục hồi khi cần ngay từ ứng dụng desktop.
